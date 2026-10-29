@@ -849,8 +849,10 @@
       introduction.style.transform =
         `translateY(${35 - introProgress * 35}px)`;
 
-      if (signatureAnimationComplete && progress >= 0.18) {
+      if (progress > 0) {
         siteNav.classList.add("is-visible");
+      } else {
+        siteNav.classList.remove("is-visible");
       }
 
       scrollIndicator.style.opacity = String(

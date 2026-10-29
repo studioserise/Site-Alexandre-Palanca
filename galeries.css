@@ -72,7 +72,13 @@ button {
 }
 
 .gallery-landing .gallery-entry-card {
-  transform: translateY(200px);
+  transform: translateY(300px);
+}
+
+@media (min-width: 621px) and (max-width: 1100px) {
+  .gallery-landing .gallery-entry-card {
+    transform: translateY(100px);
+  }
 }
 
 .gallery-entry-card,
