@@ -71,16 +71,6 @@ button {
   padding-bottom: 28px;
 }
 
-.gallery-landing .gallery-entry-card {
-  transform: translateY(150px);
-}
-
-@media (min-width: 621px) and (max-width: 1100px) {
-  .gallery-landing .gallery-entry-card {
-    transform: translateY(50px);
-  }
-}
-
 .gallery-entry-card,
 .gallery-message-card {
   width: min(100%, 520px);
@@ -732,10 +722,6 @@ button {
 @media (max-width: 620px) {
   .gallery-landing {
     padding: 24px 22px 56px;
-  }
-
-  .gallery-landing .gallery-entry-card {
-    transform: translateY(100px);
   }
 
   .gallery-primary-button {
