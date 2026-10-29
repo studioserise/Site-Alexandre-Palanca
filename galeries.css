@@ -734,6 +734,10 @@ button {
     padding: 24px 22px 56px;
   }
 
+  .gallery-landing .gallery-entry-card {
+    transform: translateY(200px);
+  }
+
   .gallery-primary-button {
     width: 100%;
   }
