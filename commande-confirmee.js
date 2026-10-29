@@ -3,7 +3,7 @@ import {
   callGalleryFunction,
   downloadGalleryPhoto,
   isBackendConfigured
-} from "./galeries-api.js";
+} from "./galeries-api.js?v=tarifs-downloads";
 
 const title = document.getElementById("order-status-title");
 const message = document.getElementById("order-status-message");

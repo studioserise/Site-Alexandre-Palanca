@@ -4,7 +4,7 @@ import {
   downloadGalleryPhoto,
   fetchGalleryPreview,
   isBackendConfigured
-} from "./galeries-api.js";
+} from "./galeries-api.js?v=tarifs-downloads";
 
 const config = getConfig();
 const params = new URLSearchParams(window.location.search);
