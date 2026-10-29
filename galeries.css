@@ -71,6 +71,10 @@ button {
   padding-bottom: 28px;
 }
 
+.gallery-landing .gallery-entry-card {
+  transform: translateY(200px);
+}
+
 .gallery-entry-card,
 .gallery-message-card {
   width: min(100%, 520px);
