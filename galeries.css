@@ -381,6 +381,7 @@ button {
   width: min(100%, 1200px);
   margin-inline: auto;
   padding: 14px 18px;
+  border-radius: 12px;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(12px);
 }
