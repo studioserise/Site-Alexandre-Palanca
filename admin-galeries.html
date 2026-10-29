@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>Administration des galeries — Alexandre Palanca</title>
+  <link rel="stylesheet" href="galeries.css">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css">
+  <script src="site-nav.js" defer></script>
+  <script type="module" src="admin-galeries.js"></script>
+</head>
+<body>
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links"><span></span><span></span></button>
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="lieux-marques.html">Lieux &amp; marques</a></li>
+          <li><a class="site-nav-link" href="index.html#portraits">Portraits</a></li>
+          <li><a class="site-nav-link" href="index.html#evenementiel">Événementiel</a></li>
+          <li><a class="site-nav-link" href="galerie.html">Galerie</a></li>
+          <li><a class="site-nav-link" href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="gallery-admin">
+    <p class="gallery-eyebrow">Espace photographe</p>
+    <h1>Administration<br>des galeries</h1>
+    <p class="gallery-error" id="admin-message" role="status"></p>
+
+    <form class="gallery-admin-panel gallery-admin-form" id="admin-login-form">
+      <h2>Connexion administrateur</h2>
+      <label class="gallery-admin-label" for="admin-email">
+        Adresse e-mail
+        <input class="gallery-admin-input" id="admin-email" type="email" autocomplete="username" required>
+      </label>
+      <label class="gallery-admin-label" for="admin-password">
+        Mot de passe
+        <input class="gallery-admin-input" id="admin-password" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="gallery-primary-button" type="submit">Se connecter</button>
+      <p class="gallery-admin-note">Seuls les comptes dont l’identifiant est ajouté à la table gallery_admins peuvent gérer les galeries.</p>
+    </form>
+
+    <section id="admin-dashboard" hidden>
+      <div class="gallery-admin-record-header">
+        <h2>Gestion</h2>
+        <button class="gallery-quiet-button" id="admin-logout" type="button">Se déconnecter</button>
+      </div>
+      <div class="gallery-admin-grid">
+        <section class="gallery-admin-panel">
+          <h2>Créer une galerie</h2>
+          <form class="gallery-admin-form" id="admin-create-gallery-form">
+            <label class="gallery-admin-label" for="admin-gallery-name">
+              Nom affiché
+              <input class="gallery-admin-input" id="admin-gallery-name" maxlength="160" required>
+            </label>
+            <div class="gallery-admin-row">
+              <label class="gallery-admin-label" for="admin-gallery-type">
+                Type
+                <select class="gallery-admin-select" id="admin-gallery-type">
+                  <option value="event">Événement partagé</option>
+                  <option value="individual">Galerie individuelle</option>
+                </select>
+              </label>
+              <label class="gallery-admin-label" for="admin-gallery-days">
+                Accès (jours, maximum 15)
+                <input class="gallery-admin-input" id="admin-gallery-days" type="number" min="1" max="15" value="15" required>
+              </label>
+            </div>
+            <label class="gallery-admin-label" for="admin-gallery-code">
+              Code d’accès à communiquer
+              <input class="gallery-admin-input" id="admin-gallery-code" minlength="10" maxlength="64" pattern="[A-Za-z0-9-]+" required>
+            </label>
+            <button class="gallery-primary-button" type="submit">Créer la galerie</button>
+            <p class="gallery-admin-note" id="admin-created-code" role="status"></p>
+          </form>
+        </section>
+        <section class="gallery-admin-panel">
+          <h2>Galeries</h2>
+          <div class="gallery-admin-list" id="admin-gallery-list"></div>
+        </section>
+      </div>
+
+      <section class="gallery-admin-panel" style="margin-top: 28px">
+        <h2>Ajouter des photographies</h2>
+        <form class="gallery-admin-form" id="admin-add-photos-form">
+          <label class="gallery-admin-label" for="admin-photo-gallery">
+            Galerie ouverte
+            <select class="gallery-admin-select" id="admin-photo-gallery" required></select>
+          </label>
+          <label class="gallery-admin-label" for="admin-photo-number">
+            Numéro de référence
+            <input class="gallery-admin-input" id="admin-photo-number" type="number" min="1" required>
+          </label>
+          <label class="gallery-admin-label" for="admin-photo-preview">
+            Aperçu déjà filigrané (JPG, PNG ou WebP, max. 50 Mo)
+            <input class="gallery-admin-input" id="admin-photo-preview" type="file" accept="image/jpeg,image/png,image/webp" required>
+          </label>
+          <label class="gallery-admin-label" for="admin-photo-original">
+            Original haute résolution (privé, JPG, PNG ou WebP, max. 50 Mo)
+            <input class="gallery-admin-input" id="admin-photo-original" type="file" accept="image/jpeg,image/png,image/webp" required>
+          </label>
+          <p class="gallery-admin-note">Le filigrane doit être intégré au fichier aperçu avant son envoi. Les deux fichiers sont téléversés dans des espaces de stockage privés ; l’original n’est jamais transmis à la galerie publique.</p>
+          <button class="gallery-primary-button" type="submit">Téléverser les deux fichiers</button>
+        </form>
+      </section>
+
+      <section class="gallery-admin-panel" style="margin-top: 28px">
+        <h2>Commandes</h2>
+        <div class="gallery-admin-list" id="admin-order-list"></div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

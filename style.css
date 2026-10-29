@@ -1,0 +1,129 @@
+
+/* =========================
+   3. SIGNATURE ANIMÉE
+========================= */
+
+.hero-brand {
+  --deplacement: clamp(100px, 18vw, 230px);
+
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+/* Position initiale du logo au centre */
+
+.logo-position {
+  position: absolute;
+  width: clamp(156px, 18vw, 246px);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  will-change: transform;
+}
+
+/* Rotation du logo */
+
+.hero-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  animation: rotation-logo 2.4s cubic-bezier(
+    0.45, 0, 0.55, 1
+  ) forwards;
+  transform-origin: center;
+}
+
+/* Rotation en trois temps */
+
+@keyframes rotation-logo {
+  0% {
+    transform: rotate(0deg);
+    animation-timing-function: ease-in;
+  }
+
+  35% {
+    transform: rotate(260deg);
+    animation-timing-function: ease-out;
+  }
+
+  75% {
+    transform: rotate(340deg);
+    animation-timing-function: ease-in-out;
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Déplacement final du logo vers la gauche */
+
+.logo-position.deplacer {
+  animation: position-finale 0.8s ease-in-out forwards;
+}
+
+@keyframes position-finale {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  to {
+    transform: translate(
+      calc(-50% - var(--deplacement)),
+      -50%
+    ) scale(0.72);
+  }
+}
+
+/* Texte masqué au départ */
+
+.hero-signature {
+  position: absolute;
+  width: clamp(220px, 58vw, 970px);
+  height: auto;
+  left: calc(50% - var(--deplacement) + 95px);
+  top: 50%;
+  opacity: 0;
+  transform: translate(-35px, -50%);
+  will-change: opacity, transform;
+}
+
+/* Apparition et glissement du texte */
+
+.hero-signature.reveler {
+  animation: apparition-signature 1s
+    cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes apparition-signature {
+  from {
+    opacity: 0;
+    transform: translate(-35px, -50%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+}
+
+/* Ajustements sur mobile */
+
+@media (max-width: 600px) {
+  .hero-brand {
+    --deplacement: 90px;
+  }
+
+  .logo-position {
+    width: 130px;
+  }
+
+  .hero-signature {
+    width: 55vw;
+    left: calc(50% - var(--deplacement) + 48px);
+  }
+}

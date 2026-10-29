@@ -1,0 +1,1033 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080808">
+
+  <title>Alexandre Palanca — Photographie & Vidéo</title>
+
+  <style>
+    /* =========================
+       1. BASE ET VARIABLES
+    ========================= */
+
+    :root {
+      --black: #080808;
+      --white: #f5f3ef;
+      --page-padding: clamp(24px, 6vw, 100px);
+      --reveal-size: 300px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--black);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--black);
+      color: var(--white);
+      font-family: Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .work-card {
+      scroll-margin-top: 100px;
+    }
+
+    /* =========================
+       2. ACCUEIL IMMERSIF
+    ========================= */
+
+    .intro-sequence {
+      position: relative;
+      height: 184vh;
+    }
+
+    .hero-stage {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      height: 100svh;
+      min-height: 500px;
+      overflow: hidden;
+      isolation: isolate;
+      background: var(--black);
+    }
+
+    .hero-image {
+      position: absolute;
+      inset: -20px;
+      background-image: url("images/accueil.jpg");
+      background-size: cover;
+      background-position: center;
+      will-change: filter;
+      transform: scale(1.03);
+    }
+
+    /* Image de fond légèrement floue */
+
+    .hero-image--blur {
+      filter: blur(3px);
+    }
+
+    /* Copie nette révélée autour du curseur */
+
+    .hero-image--sharp {
+      filter: none;
+
+      -webkit-mask-image: radial-gradient(
+        circle 150px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(0, 0, 0, 1) 0,
+        rgba(0, 0, 0, 0.98) 65px,
+        rgba(0, 0, 0, 0.80) 95px,
+        rgba(0, 0, 0, 0.38) 125px,
+        transparent 150px
+      );
+
+      mask-image: radial-gradient(
+        circle 150px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(0, 0, 0, 1) 0,
+        rgba(0, 0, 0, 0.98) 65px,
+        rgba(0, 0, 0, 0.80) 95px,
+        rgba(0, 0, 0, 0.38) 125px,
+        transparent 150px
+      );
+
+      will-change: mask-image;
+    }
+
+    /* Voile piloté par le défilement */
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      background: rgba(0, 0, 0, 0);
+      pointer-events: none;
+      will-change: background-color;
+    }
+
+    /* =========================
+       3. SIGNATURE CENTRALE
+    ========================= */
+
+    .hero-brand {
+      position: absolute;
+      z-index: 3;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      pointer-events: none;
+      will-change: opacity, transform;
+    }
+
+    .hero-signature-row {
+      --intro-logo-size: clamp(60px, 10.5vw, 150px);
+      --intro-text-size: clamp(128px, 31.2vw, 448px);
+      --intro-gap: clamp(10px, 2.2vw, 32px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--intro-gap);
+      width: max-content;
+      max-width: 100%;
+    }
+
+    .logo-position {
+      position: relative;
+      flex: 0 0 var(--intro-logo-size);
+      width: var(--intro-logo-size);
+      aspect-ratio: 1;
+      overflow: hidden;
+      transform: translateX(calc((var(--intro-text-size) + var(--intro-gap)) / 2)) scale(1.625);
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    .hero-logo-canvas {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 333.333%;
+      aspect-ratio: 16 / 9;
+      transform: translate(-50%, -50%);
+    }
+
+    .hero-logo {
+      width: 100%;
+      height: auto;
+      max-width: none;
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    .hero-signature {
+      flex: 0 0 var(--intro-text-size);
+      width: var(--intro-text-size);
+      height: auto;
+      max-width: none;
+      opacity: 0;
+      transform: translateX(-12%);
+      will-change: opacity, transform;
+    }
+
+    .hero-brand.is-rotated .hero-logo {
+      transform: rotate(360deg);
+    }
+
+    .hero-brand.is-positioned .logo-position {
+      transform: translateX(0) scale(0.903);
+    }
+
+    .hero-brand.is-complete .hero-signature {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* =========================
+       4. TEXTE D'INTRODUCTION
+    ========================= */
+
+    .hero-introduction {
+      position: absolute;
+      z-index: 5;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--page-padding);
+      max-width: 1000px;
+      margin-inline: auto;
+      left: 0;
+      right: 0;
+
+      opacity: 0;
+      transform: translateY(35px);
+      pointer-events: none;
+      will-change: opacity, transform;
+    }
+
+    .eyebrow {
+      margin: 0 0 24px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #bcb8b1;
+    }
+
+    .hero-introduction h2 {
+      margin: 0;
+      max-width: 850px;
+      font-size: clamp(2rem, 4.8vw, 4.5rem);
+      line-height: 1.12;
+      font-weight: 400;
+      letter-spacing: -0.04em;
+    }
+
+    .hero-introduction .intro-text {
+      max-width: 580px;
+      margin: 28px auto 0;
+      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+      line-height: 1.8;
+      color: #d0cdc7;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      z-index: 5;
+      bottom: 35px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #d0cdc7;
+      white-space: nowrap;
+    }
+
+    /* =========================
+       5. LES TROIS AXES
+    ========================= */
+
+    .work-section {
+      position: relative;
+      z-index: 4;
+      min-height: 100svh;
+      padding: 70px var(--page-padding) 120px;
+      background: var(--black);
+    }
+
+    .work-heading {
+      max-width: 720px;
+      margin-bottom: 75px;
+    }
+
+    .work-heading h2 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 4rem);
+      font-weight: 400;
+      letter-spacing: -0.045em;
+    }
+
+    .work-heading p {
+      max-width: 480px;
+      color: #aaa7a1;
+      line-height: 1.8;
+      margin-top: 20px;
+    }
+
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(20px, 3vw, 55px);
+    }
+
+    .work-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      min-width: 0;
+    }
+
+    .work-image-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .work-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+
+      filter: grayscale(100%);
+      transform: scale(1);
+
+      /*
+        Les contours de l'image se fondent
+        progressivement dans le fond noir.
+      */
+
+      -webkit-mask-image: radial-gradient(
+        ellipse at center,
+        #000 38%,
+        rgba(0, 0, 0, 0.92) 55%,
+        rgba(0, 0, 0, 0.55) 72%,
+        transparent 100%
+      );
+
+      mask-image: radial-gradient(
+        ellipse at center,
+        #000 38%,
+        rgba(0, 0, 0, 0.92) 55%,
+        rgba(0, 0, 0, 0.55) 72%,
+        transparent 100%
+      );
+
+      transition:
+        filter 700ms ease,
+        transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    /* Agrandissement du cadre et retour à la couleur */
+
+    .work-card:hover .work-image,
+    .work-card:focus-visible .work-image {
+      filter: grayscale(0%);
+      transform: scale(1.06);
+    }
+
+    .work-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .work-title h3 {
+      margin: 0;
+      font-size: clamp(1.15rem, 1.8vw, 1.7rem);
+      font-weight: 400;
+    }
+
+    .work-number {
+      font-size: 0.75rem;
+      color: #777;
+    }
+
+    .work-description {
+      margin: 12px 0 0;
+      color: #a5a19a;
+      line-height: 1.7;
+      font-size: 0.9rem;
+    }
+
+    .work-link {
+      display: inline-block;
+      margin-top: 20px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .work-link::after {
+      content: " ↗";
+    }
+
+    /* =========================
+       6. RESPONSIVE
+    ========================= */
+
+    @media (max-width: 800px) {
+      :root {
+        --reveal-size: 220px;
+      }
+
+      .hero-image--sharp {
+        display: none;
+      }
+
+      .hero-image--blur {
+        filter: blur(1px);
+      }
+
+      .hero-introduction {
+        padding-inline: 28px;
+      }
+
+      .work-section {
+        padding-top: 45px;
+      }
+
+      .work-grid {
+        grid-template-columns: 1fr;
+        gap: 60px;
+      }
+
+      .work-image {
+        filter: grayscale(0%);
+        -webkit-mask-image: none;
+        mask-image: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hero-signature-row {
+        --intro-logo-size: clamp(48px, 15vw, 90px);
+        --intro-text-size: clamp(104px, 38.4vw, 216px);
+        --intro-gap: clamp(8px, 2.5vw, 15px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css">
+</head>
+
+<body>
+
+  <header class="site-nav" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true">
+          <span class="site-nav-logo-canvas">
+            <img src="images/logo-accueil.png" alt="">
+          </span>
+        </span>
+      </a>
+
+      <button
+        class="site-nav-toggle"
+        id="site-nav-toggle"
+        type="button"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+        aria-controls="site-nav-links">
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="lieux-marques.html">Lieux &amp; marques</a></li>
+          <li><a class="site-nav-link" href="#portraits">Portraits</a></li>
+          <li><a class="site-nav-link" href="#evenementiel">Événementiel</a></li>
+          <li><a class="site-nav-link" href="galerie.html">Galerie</a></li>
+          <li><a class="site-nav-link" href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- =====================
+         ACCUEIL ET TRANSITION
+    ====================== -->
+
+    <section class="intro-sequence" id="accueil">
+
+      <div class="hero-stage" id="hero-stage">
+
+        <!-- Image floue -->
+
+        <div
+          class="hero-image hero-image--blur"
+          id="hero-blur"
+          aria-hidden="true">
+        </div>
+
+        <!-- Image nette révélée par la souris -->
+
+        <div
+          class="hero-image hero-image--sharp"
+          id="hero-sharp"
+          aria-hidden="true">
+        </div>
+
+        <!-- Voile sombre progressif -->
+
+        <div class="hero-overlay" id="hero-overlay"></div>
+
+        
+        <!-- Signature animée -->
+
+        <div class="hero-brand" id="hero-brand">
+
+          <div class="hero-signature-row">
+            <div class="logo-position">
+              <div class="hero-logo-canvas">
+                <img
+                  src="images/logo-accueil.png"
+                  alt=""
+                  class="hero-logo"
+                >
+              </div>
+            </div>
+
+            <img
+              src="images/texte-accueil.png"
+              alt="Alexandre Palanca"
+              class="hero-signature"
+            >
+          </div>
+
+        </div>
+
+
+        <!-- Introduction qui apparaît au scroll -->
+
+        <div class="hero-introduction" id="hero-introduction">
+
+          <p class="eyebrow">Un regard, des histoires</p>
+
+          <h2>
+            Des images pour révéler
+            ce qui vous rend singulier.
+          </h2>
+
+          <p class="intro-text">
+            Photographie, vidéo et création visuelle :
+            nous accompagnons les lieux, les personnes
+            et les événements dans la création d'images
+            qui racontent leur univers.
+          </p>
+
+        </div>
+
+        <div class="scroll-indicator" id="scroll-indicator">
+          Défiler pour découvrir
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================
+         LES TROIS AXES
+    ====================== -->
+
+    <section class="work-section" id="univers">
+
+      <div class="work-heading">
+
+        <p class="eyebrow">Nos domaines d'intervention</p>
+
+        <h2>Trois façons de raconter le réel.</h2>
+
+        <p>
+          Des projets singuliers, des univers différents,
+          une même attention portée à l'image et à ce
+          qu'elle transmet.
+        </p>
+
+      </div>
+
+      <div class="work-grid">
+
+        <!-- Axe 1 -->
+
+        <article class="work-card" id="lieux-marques">
+
+          <a href="lieux-marques.html" aria-label="Découvrir lieux et marques">
+
+            <div class="work-image-frame">
+
+              <img
+                class="work-image"
+                src="images/lieux-marques.jpg"
+                alt="Photographie d'un lieu ou d'un produit"
+                loading="lazy"
+              >
+
+            </div>
+
+            <div class="work-title">
+              <h3>Lieux & marques</h3>
+              <span class="work-number">01</span>
+            </div>
+
+          </a>
+
+          <div>
+            <p class="work-description">
+              Valoriser les lieux, les savoir-faire,
+              les produits et les identités professionnelles
+              à travers la photographie et la vidéo.
+            </p>
+
+            <a class="work-link" href="lieux-marques.html">
+              Explorer
+            </a>
+          </div>
+
+        </article>
+
+
+        <!-- Axe 2 -->
+
+        <article class="work-card" id="portraits">
+
+          <a href="#portraits" aria-label="Découvrir les portraits">
+
+            <div class="work-image-frame">
+
+              <img
+                class="work-image"
+                src="images/portraits.jpg"
+                alt="Portrait photographique"
+                loading="lazy"
+              >
+
+            </div>
+
+            <div class="work-title">
+              <h3>Portraits</h3>
+              <span class="work-number">02</span>
+            </div>
+
+          </a>
+
+          <div>
+            <p class="work-description">
+              Des portraits individuels ou collectifs
+              pour révéler une personnalité, un parcours
+              ou une identité artistique.
+            </p>
+
+            <a class="work-link" href="#portraits">
+              Explorer
+            </a>
+          </div>
+
+        </article>
+
+
+        <!-- Axe 3 -->
+
+        <article class="work-card" id="evenementiel">
+
+          <a href="#evenementiel" aria-label="Découvrir l'événementiel">
+
+            <div class="work-image-frame">
+
+              <img
+                class="work-image"
+                src="images/evenementiel.jpg"
+                alt="Photographie d'un événement"
+                loading="lazy"
+              >
+
+            </div>
+
+            <div class="work-title">
+              <h3>Événementiel</h3>
+              <span class="work-number">03</span>
+            </div>
+
+          </a>
+
+          <div>
+            <p class="work-description">
+              Capturer l'énergie des concerts,
+              des spectacles, des compétitions sportives
+              et des événements.
+            </p>
+
+            <a class="work-link" href="#evenementiel">
+              Explorer
+            </a>
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script>
+    /* =========================
+       1. LOUPE SUIVANT LA SOURIS
+    ========================= */
+
+    const hero = document.getElementById("hero-stage");
+    const sharpImage = document.getElementById("hero-sharp");
+
+    let mouseFrame = null;
+
+    hero.addEventListener("pointermove", (event) => {
+      if (event.pointerType !== "mouse") return;
+
+      if (mouseFrame) {
+        cancelAnimationFrame(mouseFrame);
+      }
+
+      mouseFrame = requestAnimationFrame(() => {
+        const rect = hero.getBoundingClientRect();
+
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        sharpImage.style.setProperty("--mouse-x", `${x}px`);
+        sharpImage.style.setProperty("--mouse-y", `${y}px`);
+      });
+    });
+
+
+    /* =========================
+       2. TRANSITION AU SCROLL
+    ========================= */
+
+    const sequence = document.querySelector(".intro-sequence");
+    const blurImage = document.getElementById("hero-blur");
+    const overlay = document.getElementById("hero-overlay");
+    const brand = document.getElementById("hero-brand");
+    const introduction = document.getElementById("hero-introduction");
+    const scrollIndicator = document.getElementById("scroll-indicator");
+    const siteNav = document.getElementById("site-nav");
+    const siteNavToggle = document.getElementById("site-nav-toggle");
+    const siteNavLinks = document.getElementById("site-nav-links");
+
+    let scrollFrame = null;
+    let signatureAnimationComplete = false;
+    let signatureAnimationRun = 0;
+    let lastScrollY = window.scrollY;
+    let cancelSignatureDelay = null;
+
+    const clamp = (value, min, max) =>
+      Math.min(Math.max(value, min), max);
+
+    const smoothstep = (value) =>
+      value * value * (3 - 2 * value);
+
+    function resetSignatureAnimation() {
+      signatureAnimationComplete = false;
+      brand.classList.remove("is-rotated", "is-positioned", "is-complete");
+      brand.style.removeProperty("opacity");
+      brand.style.removeProperty("transform");
+    }
+
+    function updateScrollAnimation() {
+      const rect = sequence.getBoundingClientRect();
+      const currentScrollY = window.scrollY;
+      const scrollingDown = currentScrollY > lastScrollY;
+      lastScrollY = currentScrollY;
+
+      const totalDistance = sequence.offsetHeight - window.innerHeight;
+
+      const progress = clamp(
+        -rect.top / totalDistance,
+        0,
+        1
+      );
+
+      if (
+        !scrollingDown &&
+        progress < 0.18 &&
+        signatureAnimationComplete &&
+        siteNav.classList.contains("is-visible")
+      ) {
+        siteNav.classList.remove("is-visible");
+        resetSignatureAnimation();
+        startSignatureAnimation();
+      }
+
+      /*
+        Le voile apparaît progressivement.
+        L'image reste visible derrière le texte.
+      */
+
+      const darkProgress = smoothstep(
+        clamp(progress / 0.75, 0, 1)
+      );
+
+      overlay.style.backgroundColor =
+        `rgba(0, 0, 0, ${darkProgress})`;
+
+      /*
+        Le flou augmente pendant le défilement.
+      */
+
+      const blurAmount = 3 + darkProgress * 17;
+
+      blurImage.style.filter = `blur(${blurAmount}px)`;
+
+      sharpImage.style.opacity = String(
+        1 - clamp(progress * 8, 0, 1)
+      );
+
+      /*
+        L'introduction apparaît ensuite.
+      */
+
+      const introProgress = smoothstep(
+        clamp((progress - 0.75) / 0.25, 0, 1)
+      );
+
+      introduction.style.opacity = String(introProgress);
+
+      introduction.style.transform =
+        `translateY(${35 - introProgress * 35}px)`;
+
+      if (signatureAnimationComplete && progress >= 0.18) {
+        siteNav.classList.add("is-visible");
+      }
+
+      scrollIndicator.style.opacity = String(
+        1 - clamp(progress * 8, 0, 1)
+      );
+    }
+
+    function requestScrollUpdate() {
+      if (scrollFrame) return;
+
+      scrollFrame = requestAnimationFrame(() => {
+        updateScrollAnimation();
+        scrollFrame = null;
+      });
+    }
+
+    window.addEventListener("scroll", requestScrollUpdate, {
+      passive: true
+    });
+
+    window.addEventListener("resize", requestScrollUpdate);
+
+    function closeMobileNav(restoreFocus = false) {
+      siteNav.classList.remove("is-menu-open");
+      siteNavToggle.setAttribute("aria-expanded", "false");
+      siteNavToggle.setAttribute("aria-label", "Ouvrir le menu");
+
+      if (restoreFocus) {
+        siteNavToggle.focus();
+      }
+    }
+
+    siteNavToggle.addEventListener("click", () => {
+      const isOpen = siteNav.classList.toggle("is-menu-open");
+
+      siteNavToggle.setAttribute("aria-expanded", String(isOpen));
+      siteNavToggle.setAttribute(
+        "aria-label",
+        isOpen ? "Fermer le menu" : "Ouvrir le menu"
+      );
+    });
+
+    siteNavLinks.addEventListener("click", (event) => {
+      if (event.target.closest("a")) {
+        closeMobileNav();
+      }
+    });
+
+    document.addEventListener("pointerdown", (event) => {
+      if (!siteNav.contains(event.target)) {
+        closeMobileNav();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && siteNav.classList.contains("is-menu-open")) {
+        closeMobileNav(true);
+      }
+    });
+
+    window.matchMedia("(min-width: 801px)").addEventListener("change", (event) => {
+      if (event.matches) {
+        closeMobileNav();
+      }
+    });
+
+    async function playSignatureAnimation(run) {
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+      if (reducedMotion) {
+        if (run !== signatureAnimationRun) return;
+        brand.classList.add("is-rotated", "is-positioned", "is-complete");
+        signatureAnimationComplete = true;
+        requestScrollUpdate();
+        return;
+      }
+
+      await new Promise((resolve) => {
+        const delay = setTimeout(() => {
+          cancelSignatureDelay = null;
+          resolve();
+        }, 1500);
+
+        cancelSignatureDelay = () => {
+          clearTimeout(delay);
+          cancelSignatureDelay = null;
+          resolve();
+        };
+      });
+
+      if (run !== signatureAnimationRun || signatureAnimationComplete) return;
+
+      const logo = brand.querySelector(".hero-logo");
+      const logoPosition = brand.querySelector(".logo-position");
+      const signature = brand.querySelector(".hero-signature");
+
+      const duration = 1450;
+      const movementLeadIn = 180;
+      const movementDuration = duration - movementLeadIn;
+      const signatureDuration = 1800;
+      const initialLogoTransform = getComputedStyle(logoPosition).transform;
+
+      const rotation = logo.animate(
+        [
+          { transform: "rotate(0deg)" },
+          { transform: "rotate(360deg)" }
+        ],
+        {
+          duration,
+          easing: "cubic-bezier(0.65, 0, 0.35, 1)",
+          fill: "forwards"
+        }
+      );
+      const movement = logoPosition.animate(
+        [
+          { transform: initialLogoTransform },
+          { transform: "translateX(0) scale(0.903)" }
+        ],
+        {
+          delay: movementLeadIn,
+          duration: movementDuration,
+          easing: "cubic-bezier(0.65, 0, 0.35, 1)",
+          fill: "forwards"
+        }
+      );
+      try {
+        await Promise.all([rotation.finished, movement.finished]);
+      } catch (error) {
+        if (run !== signatureAnimationRun && error.name === "AbortError") return;
+        throw error;
+      }
+
+      if (run !== signatureAnimationRun || signatureAnimationComplete) return;
+
+      brand.classList.add("is-rotated", "is-positioned");
+      rotation.cancel();
+      movement.cancel();
+
+      const appearance = signature.animate(
+        [
+          { opacity: 0, transform: "translateX(-12%)" },
+          { opacity: 1, transform: "translateX(0)" }
+        ],
+        {
+          duration: signatureDuration,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          fill: "forwards"
+        }
+      );
+      try {
+        await appearance.finished;
+      } catch (error) {
+        if (run !== signatureAnimationRun && error.name === "AbortError") return;
+        throw error;
+      }
+
+      if (run !== signatureAnimationRun || signatureAnimationComplete) return;
+
+      brand.classList.add("is-complete");
+      appearance.cancel();
+
+      signatureAnimationComplete = true;
+      requestScrollUpdate();
+    }
+
+    function startSignatureAnimation() {
+      const run = ++signatureAnimationRun;
+      playSignatureAnimation(run).catch((error) => {
+        console.error("L'animation de signature a échoué.", error);
+      });
+    }
+
+    updateScrollAnimation();
+    startSignatureAnimation();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080808">
+  <title>Contact — Alexandre Palanca</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #080808;
+      color: #f5f3ef;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: grid;
+      min-height: 100svh;
+      margin: 0;
+      place-items: center;
+      text-align: center;
+    }
+
+    main {
+      padding: 32px;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .brand {
+      display: block;
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 36px;
+      overflow: hidden;
+    }
+
+    .brand img {
+      display: block;
+      width: 333.333%;
+      max-width: none;
+      transform: translate(-35%, -22%);
+    }
+
+    h1 {
+      margin: 0 0 24px;
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 400;
+      letter-spacing: -0.05em;
+    }
+
+    .back-link {
+      color: #d0cdc7;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+  </style>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css">
+  <script src="site-nav.js" defer></script>
+</head>
+<body>
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links"><span></span><span></span></button>
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="lieux-marques.html">Lieux &amp; marques</a></li>
+          <li><a class="site-nav-link" href="index.html#portraits">Portraits</a></li>
+          <li><a class="site-nav-link" href="index.html#evenementiel">Événementiel</a></li>
+          <li><a class="site-nav-link" href="galerie.html">Galerie</a></li>
+          <li><a class="site-nav-link" href="contact.html" aria-current="page">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <a class="brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+      <img src="images/logo-accueil.png" alt="">
+    </a>
+    <h1>Contact</h1>
+    <a class="back-link" href="index.html#accueil">Retour à l’accueil</a>
+  </main>
+</body>
+</html>

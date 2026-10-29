@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <meta name="description" content="Photographie éditoriale de lieux, d'architectures, de marques et de savoir-faire par Alexandre Palanca.">
+  <title>Lieux &amp; marques — Alexandre Palanca</title>
+  <link rel="stylesheet" href="lieux-marques.css">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css">
+  <script src="site-nav.js" defer></script>
+  <script type="module" src="lieux-marques.js"></script>
+</head>
+<body class="lm-page">
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true">
+          <span class="site-nav-logo-canvas">
+            <img src="images/logo-accueil.png" alt="">
+          </span>
+        </span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links">
+        <span></span>
+        <span></span>
+      </button>
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="lieux-marques.html" aria-current="page">Lieux &amp; marques</a></li>
+          <li><a class="site-nav-link" href="index.html#portraits">Portraits</a></li>
+          <li><a class="site-nav-link" href="index.html#evenementiel">Événementiel</a></li>
+          <li><a class="site-nav-link" href="galerie.html">Galerie</a></li>
+          <li><a class="site-nav-link" href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="lm-hero" aria-labelledby="lm-hero-title">
+      <img class="lm-hero-image" id="lm-hero-image" alt="" fetchpriority="high">
+      <div class="lm-hero-shade" aria-hidden="true"></div>
+      <div class="lm-hero-copy">
+        <p class="lm-eyebrow" id="lm-hero-eyebrow"></p>
+        <h1 id="lm-hero-title"></h1>
+        <p class="lm-hero-intro" id="lm-hero-intro"></p>
+      </div>
+      <a class="lm-hero-scroll" href="#portfolio"><span aria-hidden="true">↓</span> Découvrir</a>
+      <p class="lm-hero-caption">Photographie présente dans le portfolio · Hôtel Plaza Madeleine</p>
+    </section>
+
+    <section class="lm-portfolio lm-section" id="portfolio" aria-labelledby="lm-portfolio-title">
+      <div class="lm-section-heading">
+        <div>
+          <p class="lm-eyebrow" id="lm-portfolio-eyebrow"></p>
+          <h2 id="lm-portfolio-title"></h2>
+        </div>
+        <p id="lm-portfolio-intro"></p>
+      </div>
+      <div class="lm-mosaic" id="lm-mosaic" aria-label="Mosaïque photographique"></div>
+    </section>
+
+    <section class="lm-approach lm-section" id="approche" aria-labelledby="lm-approach-title">
+      <div class="lm-approach-image-wrap">
+        <img id="lm-approach-image" alt="" loading="lazy">
+        <p class="lm-image-note" id="lm-approach-image-note"></p>
+      </div>
+      <div class="lm-approach-copy">
+        <p class="lm-eyebrow" id="lm-approach-eyebrow"></p>
+        <h2 id="lm-approach-title"></h2>
+        <p id="lm-approach-text"></p>
+        <a class="lm-text-link" href="#prestations">Découvrir les prestations <span aria-hidden="true">↘</span></a>
+      </div>
+    </section>
+
+    <section class="lm-offers" id="prestations" aria-labelledby="lm-offers-title">
+      <div class="lm-offers-heading">
+        <p class="lm-eyebrow" id="lm-offers-eyebrow"></p>
+        <h2 id="lm-offers-title"></h2>
+        <p id="lm-offers-intro"></p>
+      </div>
+      <div class="lm-offer-grid" id="lm-offer-grid"></div>
+      <p class="lm-offer-note" id="lm-offer-note"></p>
+      <p class="lm-offer-price-note" id="lm-offer-price-note"></p>
+    </section>
+
+    <section class="lm-editorial" id="accompagnement" aria-labelledby="lm-editorial-title">
+      <div class="lm-editorial-copy">
+        <p class="lm-eyebrow" id="lm-editorial-eyebrow"></p>
+        <h2 id="lm-editorial-title"></h2>
+        <p id="lm-editorial-text"></p>
+        <ul class="lm-keywords" id="lm-editorial-keywords" aria-label="Champs de l’accompagnement"></ul>
+        <a class="lm-light-link" href="#identity-offer">Construire mon accompagnement <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="lm-editorial-placeholder" id="lm-editorial-placeholder" role="img"></div>
+      <div class="lm-editorial-shade" aria-hidden="true"></div>
+    </section>
+
+    <section class="lm-final" aria-labelledby="lm-final-title">
+      <div class="lm-final-copy">
+        <p class="lm-eyebrow" id="lm-final-eyebrow"></p>
+        <h2 id="lm-final-title"></h2>
+        <p id="lm-final-text"></p>
+        <a class="lm-final-button" href="contact.html">Parlons de votre projet <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>Galeries privées — Alexandre Palanca</title>
+  <link rel="stylesheet" href="galeries.css">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css">
+  <script src="site-nav.js" defer></script>
+  <script type="module" src="galerie.js"></script>
+</head>
+<body>
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links"><span></span><span></span></button>
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="lieux-marques.html">Lieux &amp; marques</a></li>
+          <li><a class="site-nav-link" href="index.html#portraits">Portraits</a></li>
+          <li><a class="site-nav-link" href="index.html#evenementiel">Événementiel</a></li>
+          <li><a class="site-nav-link" href="galerie.html" aria-current="page">Galerie</a></li>
+          <li><a class="site-nav-link" href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="gallery-landing">
+    <section class="gallery-entry-card">
+      <a class="gallery-eyebrow gallery-admin-entry" href="admin-galeries.html" aria-label="Accéder à l’administration des galeries">Accès client</a>
+      <h1>Galeries<br>privées</h1>
+      <p class="gallery-intro">Retrouvez les photographies de votre événement ou de votre séance grâce au code d’accès transmis par Alexandre.</p>
+
+      <form class="gallery-entry-form" id="gallery-entry-form">
+        <label class="gallery-admin-label" for="gallery-access-code">
+          Code d’accès
+          <input
+            class="gallery-entry-input"
+            id="gallery-access-code"
+            name="code"
+            type="text"
+            autocomplete="one-time-code"
+            autocapitalize="characters"
+            spellcheck="false"
+            required
+            placeholder="Saisir votre code">
+        </label>
+        <button class="gallery-primary-button" id="gallery-entry-submit" type="submit">Accéder à la galerie</button>
+      </form>
+      <p class="gallery-form-message" id="gallery-entry-message" role="alert"></p>
+
+      <p class="gallery-demo-note" id="gallery-demo-note" hidden>
+        Démonstration uniquement, sans protection ni paiement : saisissez le code <code>DEMO2026</code>. N’utilisez pas ce code pour des photos privées.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

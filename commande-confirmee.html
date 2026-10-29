@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>État de la commande — Alexandre Palanca</title>
+  <link rel="stylesheet" href="galeries.css">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css">
+  <script src="site-nav.js" defer></script>
+  <script type="module" src="commande-confirmee.js"></script>
+</head>
+<body>
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links"><span></span><span></span></button>
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="lieux-marques.html">Lieux &amp; marques</a></li>
+          <li><a class="site-nav-link" href="index.html#portraits">Portraits</a></li>
+          <li><a class="site-nav-link" href="index.html#evenementiel">Événementiel</a></li>
+          <li><a class="site-nav-link" href="galerie.html">Galerie</a></li>
+          <li><a class="site-nav-link" href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main class="gallery-error-page">
+    <section class="gallery-message-card">
+      <p class="gallery-eyebrow">Commande</p>
+      <h1 id="order-status-title">Vérification du paiement</h1>
+      <p class="gallery-intro" id="order-status-message" role="status">
+        La confirmation est vérifiée auprès du serveur de paiement.
+      </p>
+      <a class="gallery-back-link" href="galerie.html">Retour aux galeries privées</a>
+    </section>
+  </main>
+</body>
+</html>
