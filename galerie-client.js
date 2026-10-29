@@ -2,9 +2,10 @@ import { getConfig } from "./galeries-config.js";
 import {
   callGalleryFunction,
   downloadGalleryPhoto,
+  downloadGalleryPhotosZip,
   fetchGalleryPreview,
   isBackendConfigured
-} from "./galeries-api.js?v=tarifs-downloads";
+} from "./galeries-api.js?v=free-gallery-zip";
 
 const config = getConfig();
 const params = new URLSearchParams(window.location.search);
@@ -21,6 +22,13 @@ const elements = {
   orderItems: document.getElementById("gallery-order-items"),
   count: document.getElementById("gallery-selection-count"),
   discountSummary: document.getElementById("gallery-selection-discount"),
+  selectAll: document.getElementById("gallery-select-all"),
+  paidDetailsContent: document.getElementById("gallery-paid-details-content"),
+  freeDetailsContent: document.getElementById("gallery-free-details-content"),
+  freeSelectionCount: document.getElementById("gallery-free-selection-count"),
+  downloadSelection: document.getElementById("gallery-download-selection"),
+  downloadMessage: document.getElementById("gallery-download-message"),
+  orderTotal: document.getElementById("gallery-order-total"),
   subtotal: document.getElementById("gallery-subtotal"),
   discountLabel: document.getElementById("gallery-discount-label"),
   discount: document.getElementById("gallery-discount"),
@@ -45,9 +53,11 @@ const elements = {
 
 const state = {
   galleryId: null,
+  galleryName: "",
   tariff: "tarif5",
   photos: [],
   selected: new Set(),
+  downloadingSelection: false,
   pricing: config.demoPricing,
   viewerIndex: -1,
   lastFocusedElement: null,
@@ -119,7 +129,7 @@ function makeCheckIcon() {
 }
 
 function togglePhoto(photoId) {
-  if (state.tariff === "tarif0") return;
+  if (state.downloadingSelection) return;
   if (state.selected.has(photoId)) {
     state.selected.delete(photoId);
   } else {
@@ -157,16 +167,16 @@ function createPhotoCard(photo, index) {
   number.className = "gallery-photo-number";
   number.textContent = photo.photoNumber;
 
-  if (!isFree) {
-    const selectButton = document.createElement("button");
-    selectButton.className = "gallery-select-button";
-    selectButton.type = "button";
-    selectButton.setAttribute("aria-label", `Sélectionner la photo ${photo.photoNumber}`);
-    selectButton.setAttribute("aria-pressed", "false");
-    selectButton.append(makeCheckIcon());
-    selectButton.addEventListener("click", () => togglePhoto(photo.id));
-    card.append(selectButton);
-  } else {
+  const selectButton = document.createElement("button");
+  selectButton.className = "gallery-select-button";
+  selectButton.type = "button";
+  selectButton.setAttribute("aria-label", `Sélectionner la photo ${photo.photoNumber}`);
+  selectButton.setAttribute("aria-pressed", "false");
+  selectButton.append(makeCheckIcon());
+  selectButton.addEventListener("click", () => togglePhoto(photo.id));
+  card.append(selectButton);
+
+  if (isFree) {
     const downloadButton = document.createElement("button");
     downloadButton.className = "gallery-photo-download";
     downloadButton.type = "button";
@@ -213,14 +223,15 @@ function renderPhotos() {
 function renderSelection() {
   const totals = calculateTotals();
   const selectedPhotos = state.photos.filter((photo) => state.selected.has(photo.id));
+  const isFree = state.tariff === "tarif0";
 
   for (const card of elements.grid.querySelectorAll(".gallery-photo")) {
     const photoId = card.dataset.photoId;
     const selected = state.selected.has(photoId);
     const button = card.querySelector(".gallery-select-button");
     const number = card.querySelector(".gallery-photo-number").textContent;
-    if (!button) continue;
     button.setAttribute("aria-pressed", String(selected));
+    button.disabled = state.downloadingSelection;
     button.setAttribute(
       "aria-label",
       `${selected ? "Désélectionner" : "Sélectionner"} la photo ${number}`
@@ -229,6 +240,21 @@ function renderSelection() {
 
   elements.count.textContent =
     `${totals.count} photo${totals.count === 1 ? "" : "s"} sélectionnée${totals.count === 1 ? "" : "s"}`;
+  elements.discountSummary.hidden = isFree;
+  elements.orderTotal.hidden = isFree;
+  elements.openDetails.textContent = isFree
+    ? "Détail de la sélection"
+    : "Détail de l’achat";
+  elements.selectAll.hidden = !isFree;
+  elements.selectAll.disabled = !state.photos.length || state.downloadingSelection;
+  elements.selectAll.textContent = totals.count === state.photos.length && totals.count > 0
+    ? "Tout désélectionner"
+    : "Tout sélectionner";
+  elements.freeSelectionCount.textContent =
+    `${totals.count} photo${totals.count === 1 ? "" : "s"} sélectionnée${totals.count === 1 ? "" : "s"}`;
+  elements.freeDetailsContent.hidden = !isFree;
+  elements.paidDetailsContent.hidden = isFree;
+  elements.downloadSelection.disabled = totals.count === 0 || state.downloadingSelection;
   elements.discountSummary.textContent = totals.discountBps
     ? `Remise de ${totals.discountBps / 100} % — économie de ${formatMoney(totals.discountCents)}`
     : "Aucune remise";
@@ -255,6 +281,34 @@ function renderSelection() {
   );
 
   renderViewerSelection();
+}
+
+async function downloadSelectedPhotos() {
+  if (!state.selected.size || state.downloadingSelection) return;
+  const photoIds = state.photos
+    .filter((photo) => state.selected.has(photo.id))
+    .map((photo) => photo.id);
+  state.downloadingSelection = true;
+  elements.downloadMessage.textContent = "";
+  elements.downloadSelection.disabled = true;
+  elements.downloadSelection.textContent = "Préparation du ZIP…";
+  elements.selectAll.disabled = true;
+  renderSelection();
+
+  try {
+    await downloadGalleryPhotosZip(photoIds, state.galleryName, (current, total) => {
+      elements.downloadSelection.textContent = current === "zip"
+        ? "Création du ZIP…"
+        : `Téléchargement ${current}/${total}…`;
+    });
+    elements.downloadMessage.textContent = "Votre archive ZIP a été téléchargée.";
+  } catch (error) {
+    elements.downloadMessage.textContent = error.message;
+  } finally {
+    state.downloadingSelection = false;
+    elements.downloadSelection.textContent = "Télécharger";
+    renderSelection();
+  }
 }
 
 function renderViewerSelection() {
@@ -419,6 +473,7 @@ async function loadGallery() {
   try {
     const data = await callGalleryFunction("gallery-data", { method: "GET" });
     state.galleryId = data.gallery.id;
+    state.galleryName = data.gallery.name;
     state.tariff = data.gallery.tariff;
     state.pricing = data.pricing;
     state.photos = data.photos.map((photo) => ({
@@ -433,7 +488,7 @@ async function loadGallery() {
     if (state.tariff === "tarif0") {
       elements.description.textContent =
         `${galleryTypeDescription} gratuite : les aperçus sont sans filigrane. Téléchargez les originaux haute résolution directement.`;
-      elements.orderBar.hidden = true;
+      elements.orderBar.hidden = false;
     } else {
       const price = formatMoney(data.pricing.unitPriceCents);
       const discountDescription = state.tariff === "tarif5"
@@ -444,7 +499,7 @@ async function loadGallery() {
       elements.orderBar.hidden = false;
     }
     renderPhotos();
-    if (state.tariff !== "tarif0") renderSelection();
+    renderSelection();
   } catch (error) {
     showLoadError(error.message);
   }
@@ -452,6 +507,15 @@ async function loadGallery() {
 
 elements.openDetails.addEventListener("click", () => setDetailsExpanded(true));
 elements.closeDetails.addEventListener("click", () => setDetailsExpanded(false));
+elements.selectAll.addEventListener("click", () => {
+  if (state.selected.size === state.photos.length) {
+    state.selected.clear();
+  } else {
+    state.selected = new Set(state.photos.map((photo) => photo.id));
+  }
+  renderSelection();
+});
+elements.downloadSelection.addEventListener("click", downloadSelectedPhotos);
 elements.checkoutForm.addEventListener("submit", submitCheckout);
 elements.viewerClose.addEventListener("click", closeViewer);
 elements.viewerPrev.addEventListener("click", () => moveViewer(-1));

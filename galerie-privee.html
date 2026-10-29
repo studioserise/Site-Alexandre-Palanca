@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080808">
   <title>Galerie privée — Alexandre Palanca</title>
-  <link rel="stylesheet" href="galeries.css?v=selection-panel-rounded">
+  <link rel="stylesheet" href="galeries.css?v=free-gallery-zip">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css">
   <script src="site-nav.js" defer></script>
-  <script type="module" src="galerie-client.js?v=tarifs-downloads"></script>
+  <script type="module" src="galerie-client.js?v=free-gallery-zip"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -55,30 +55,38 @@
           <h2>Détail de votre sélection</h2>
           <button class="gallery-quiet-button" id="gallery-close-details" type="button">Réduire le détail</button>
         </div>
-        <ul class="gallery-order-items" id="gallery-order-items"></ul>
-        <div class="gallery-order-totals">
-          <div class="gallery-order-line"><span>Sous-total</span><span id="gallery-subtotal">0,00 €</span></div>
-          <div class="gallery-order-line"><span id="gallery-discount-label">Remise</span><span id="gallery-discount">− 0,00 €</span></div>
-          <div class="gallery-order-line is-final"><strong>Total</strong><strong id="gallery-total-detail">0,00 €</strong></div>
+        <div class="gallery-free-details-content" id="gallery-free-details-content" hidden>
+          <strong id="gallery-free-selection-count">0 photo sélectionnée</strong>
+          <button class="gallery-primary-button" id="gallery-download-selection" type="button" disabled>Télécharger</button>
+          <p class="gallery-form-message" id="gallery-download-message" role="status"></p>
         </div>
-        <form class="gallery-checkout-form" id="gallery-checkout-form">
-          <label class="gallery-admin-label" for="gallery-customer-email">
-            Adresse e-mail
-            <input class="gallery-entry-input" id="gallery-customer-email" type="email" autocomplete="email" required placeholder="vous@exemple.fr">
-          </label>
-          <button class="gallery-primary-button" id="gallery-checkout-button" type="submit">Poursuivre vers le paiement</button>
-          <p class="gallery-form-message" id="gallery-checkout-message" role="status"></p>
-        </form>
-        <p class="gallery-checkout-note">Après confirmation sécurisée du paiement, vos photos haute résolution pourront être téléchargées depuis la page de confirmation.</p>
+        <div class="gallery-paid-details-content" id="gallery-paid-details-content">
+          <ul class="gallery-order-items" id="gallery-order-items"></ul>
+          <div class="gallery-order-totals">
+            <div class="gallery-order-line"><span>Sous-total</span><span id="gallery-subtotal">0,00 €</span></div>
+            <div class="gallery-order-line"><span id="gallery-discount-label">Remise</span><span id="gallery-discount">− 0,00 €</span></div>
+            <div class="gallery-order-line is-final"><strong>Total</strong><strong id="gallery-total-detail">0,00 €</strong></div>
+          </div>
+          <form class="gallery-checkout-form" id="gallery-checkout-form">
+            <label class="gallery-admin-label" for="gallery-customer-email">
+              Adresse e-mail
+              <input class="gallery-entry-input" id="gallery-customer-email" type="email" autocomplete="email" required placeholder="vous@exemple.fr">
+            </label>
+            <button class="gallery-primary-button" id="gallery-checkout-button" type="submit">Poursuivre vers le paiement</button>
+            <p class="gallery-form-message" id="gallery-checkout-message" role="status"></p>
+          </form>
+          <p class="gallery-checkout-note">Après confirmation sécurisée du paiement, vos photos haute résolution pourront être téléchargées depuis la page de confirmation.</p>
+        </div>
       </div>
 
       <div class="gallery-order-compact">
         <div class="gallery-order-summary">
           <strong id="gallery-selection-count">0 photo sélectionnée</strong>
           <span id="gallery-selection-discount">Aucune remise</span>
+          <button class="gallery-quiet-button" id="gallery-select-all" type="button" hidden>Tout sélectionner</button>
         </div>
         <div class="gallery-order-actions">
-          <div class="gallery-order-total">
+          <div class="gallery-order-total" id="gallery-order-total">
             <strong id="gallery-total-compact">0,00 €</strong>
             <span>Total indicatif</span>
           </div>

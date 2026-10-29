@@ -1,4 +1,5 @@
 import { getConfig } from "./galeries-config.js";
+import { createZipBlob } from "./gallery-zip.js?v=free-gallery-zip";
 
 export function isBackendConfigured() {
   const { supabaseUrl, supabaseAnonKey } = getConfig();
@@ -68,6 +69,37 @@ export async function fetchGalleryPreview(photoId) {
 }
 
 export async function downloadGalleryPhoto(photoId, orderSessionId) {
+  const { blob, filename } = await fetchGalleryOriginal(photoId, orderSessionId);
+  triggerDownload(blob, filename);
+}
+
+export async function downloadGalleryPhotosZip(photoIds, galleryName, onProgress = () => {}) {
+  if (!photoIds.length) {
+    throw new Error("Sélectionnez au moins une photo à télécharger.");
+  }
+  if (photoIds.length > 0xffff) {
+    throw new Error("La sélection est trop volumineuse pour créer une archive ZIP.");
+  }
+
+  const files = [];
+  for (let index = 0; index < photoIds.length; index += 1) {
+    onProgress(index + 1, photoIds.length);
+    const { blob, filename } = await fetchGalleryOriginal(photoIds[index]);
+    files.push({ name: filename, blob });
+  }
+  onProgress("zip", photoIds.length);
+
+  const archive = await createZipBlob(files);
+  const safeName = galleryName
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "galerie";
+  triggerDownload(archive, `${safeName}-photos.zip`);
+}
+
+async function fetchGalleryOriginal(photoId, orderSessionId) {
   const { supabaseUrl, supabaseAnonKey } = getConfig();
   const token = window.sessionStorage.getItem("gallery-session-token");
   if (!supabaseUrl || !supabaseAnonKey || !token) {
@@ -99,10 +131,17 @@ export async function downloadGalleryPhoto(photoId, orderSessionId) {
     "image/png": "png",
     "image/webp": "webp"
   }[blob.type];
+  return {
+    blob,
+    filename: filename || `photo-${photoId}.${extension || "jpg"}`
+  };
+}
+
+function triggerDownload(blob, filename) {
   const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = objectUrl;
-  link.download = filename || `photo-${photoId}.${extension || "jpg"}`;
+  link.download = filename;
   link.hidden = true;
   document.body.append(link);
   link.click();

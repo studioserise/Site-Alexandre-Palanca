@@ -412,6 +412,38 @@ button {
   font-size: 0.7rem;
 }
 
+.gallery-order-summary #gallery-select-all {
+  align-self: flex-start;
+  margin-left: -8px;
+}
+
+.gallery-free-details-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  color: #d7d4ce;
+  font-size: 0.78rem;
+}
+
+.gallery-free-details-content[hidden] {
+  display: none;
+}
+
+.gallery-paid-details-content[hidden],
+.gallery-order-total[hidden] {
+  display: none;
+}
+
+.gallery-free-details-content .gallery-primary-button {
+  min-width: 150px;
+}
+
+.gallery-free-details-content .gallery-form-message {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .gallery-order-total {
   align-items: flex-end;
 }
@@ -798,6 +830,18 @@ button {
   .gallery-order-summary span,
   .gallery-order-total span {
     font-size: 0.64rem;
+  }
+
+  .gallery-order-summary #gallery-select-all {
+    font-size: 0.66rem;
+  }
+
+  .gallery-free-details-content {
+    gap: 10px;
+  }
+
+  .gallery-free-details-content .gallery-primary-button {
+    min-width: 120px;
   }
 
   .gallery-order-actions {
