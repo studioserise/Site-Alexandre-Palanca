@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080808">
   <title>Galerie privée — Alexandre Palanca</title>
-  <link rel="stylesheet" href="galeries.css?v=free-gallery-zip">
+  <link rel="stylesheet" href="galeries.css?v=free-gallery-download-bar">
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="site-nav.css">
+  <link rel="stylesheet" href="site-nav.css?v=rounded-controls">
   <script src="site-nav.js" defer></script>
-  <script type="module" src="galerie-client.js?v=free-gallery-zip"></script>
+  <script type="module" src="galerie-client.js?v=free-gallery-download-bar"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -55,11 +55,6 @@
           <h2>Détail de votre sélection</h2>
           <button class="gallery-quiet-button" id="gallery-close-details" type="button">Réduire le détail</button>
         </div>
-        <div class="gallery-free-details-content" id="gallery-free-details-content" hidden>
-          <strong id="gallery-free-selection-count">0 photo sélectionnée</strong>
-          <button class="gallery-primary-button" id="gallery-download-selection" type="button" disabled>Télécharger</button>
-          <p class="gallery-form-message" id="gallery-download-message" role="status"></p>
-        </div>
         <div class="gallery-paid-details-content" id="gallery-paid-details-content">
           <ul class="gallery-order-items" id="gallery-order-items"></ul>
           <div class="gallery-order-totals">
@@ -91,6 +86,10 @@
             <span>Total indicatif</span>
           </div>
           <button class="gallery-quiet-button" id="gallery-open-details" type="button" aria-expanded="false">Détail de l’achat</button>
+          <div class="gallery-free-order-actions" id="gallery-free-order-actions" hidden>
+            <button class="gallery-primary-button" id="gallery-download-selection" type="button" disabled>Télécharger</button>
+            <p class="gallery-form-message" id="gallery-download-message" role="status"></p>
+          </div>
         </div>
       </div>
     </div>

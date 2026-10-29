@@ -18,6 +18,13 @@
     visibility 0s linear 500ms;
 }
 
+button,
+input,
+select,
+textarea {
+  border-radius: 9px;
+}
+
 .site-nav.is-visible {
   opacity: 1;
   visibility: visible;

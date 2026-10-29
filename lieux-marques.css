@@ -716,6 +716,7 @@ button {
   margin-top: 34px;
   padding: 0 20px;
   border: 1px solid rgba(245, 243, 239, 0.54);
+  border-radius: 9px;
   color: #f5f3ef;
   font-size: 0.68rem;
   letter-spacing: 0.1em;

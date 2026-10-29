@@ -24,8 +24,7 @@ const elements = {
   discountSummary: document.getElementById("gallery-selection-discount"),
   selectAll: document.getElementById("gallery-select-all"),
   paidDetailsContent: document.getElementById("gallery-paid-details-content"),
-  freeDetailsContent: document.getElementById("gallery-free-details-content"),
-  freeSelectionCount: document.getElementById("gallery-free-selection-count"),
+  freeOrderActions: document.getElementById("gallery-free-order-actions"),
   downloadSelection: document.getElementById("gallery-download-selection"),
   downloadMessage: document.getElementById("gallery-download-message"),
   orderTotal: document.getElementById("gallery-order-total"),
@@ -242,17 +241,19 @@ function renderSelection() {
     `${totals.count} photo${totals.count === 1 ? "" : "s"} sélectionnée${totals.count === 1 ? "" : "s"}`;
   elements.discountSummary.hidden = isFree;
   elements.orderTotal.hidden = isFree;
-  elements.openDetails.textContent = isFree
-    ? "Détail de la sélection"
-    : "Détail de l’achat";
+  elements.openDetails.textContent = "Détail de l’achat";
+  elements.openDetails.hidden = isFree;
+  elements.downloadSelection.hidden = !isFree;
+  elements.freeOrderActions.hidden = !isFree;
+  if (isFree) {
+    elements.orderDetails.hidden = true;
+    elements.openDetails.setAttribute("aria-expanded", "false");
+  }
   elements.selectAll.hidden = !isFree;
   elements.selectAll.disabled = !state.photos.length || state.downloadingSelection;
   elements.selectAll.textContent = totals.count === state.photos.length && totals.count > 0
     ? "Tout désélectionner"
     : "Tout sélectionner";
-  elements.freeSelectionCount.textContent =
-    `${totals.count} photo${totals.count === 1 ? "" : "s"} sélectionnée${totals.count === 1 ? "" : "s"}`;
-  elements.freeDetailsContent.hidden = !isFree;
   elements.paidDetailsContent.hidden = isFree;
   elements.downloadSelection.disabled = totals.count === 0 || state.downloadingSelection;
   elements.discountSummary.textContent = totals.discountBps
@@ -289,6 +290,7 @@ async function downloadSelectedPhotos() {
     .filter((photo) => state.selected.has(photo.id))
     .map((photo) => photo.id);
   state.downloadingSelection = true;
+  elements.downloadMessage.removeAttribute("data-kind");
   elements.downloadMessage.textContent = "";
   elements.downloadSelection.disabled = true;
   elements.downloadSelection.textContent = "Préparation du ZIP…";
@@ -301,8 +303,10 @@ async function downloadSelectedPhotos() {
         ? "Création du ZIP…"
         : `Téléchargement ${current}/${total}…`;
     });
+    elements.downloadMessage.dataset.kind = "success";
     elements.downloadMessage.textContent = "Votre archive ZIP a été téléchargée.";
   } catch (error) {
+    elements.downloadMessage.removeAttribute("data-kind");
     elements.downloadMessage.textContent = error.message;
   } finally {
     state.downloadingSelection = false;
