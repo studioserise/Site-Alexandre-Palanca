@@ -1,6 +1,7 @@
 import { getConfig } from "./galeries-config.js";
 import {
   callGalleryFunction,
+  downloadGalleryPhoto,
   fetchGalleryPreview,
   isBackendConfigured
 } from "./galeries-api.js";
@@ -35,6 +36,7 @@ const elements = {
   viewerNumber: document.getElementById("gallery-viewer-number"),
   viewerCounter: document.getElementById("gallery-viewer-counter"),
   viewerSelect: document.getElementById("gallery-viewer-select"),
+  viewerDownload: document.getElementById("gallery-viewer-download"),
   viewerClose: document.getElementById("gallery-viewer-close"),
   viewerPrev: document.getElementById("gallery-viewer-prev"),
   viewerNext: document.getElementById("gallery-viewer-next"),
@@ -43,6 +45,7 @@ const elements = {
 
 const state = {
   galleryId: null,
+  tariff: "tarif5",
   photos: [],
   selected: new Set(),
   pricing: config.demoPricing,
@@ -116,6 +119,7 @@ function makeCheckIcon() {
 }
 
 function togglePhoto(photoId) {
+  if (state.tariff === "tarif0") return;
   if (state.selected.has(photoId)) {
     state.selected.delete(photoId);
   } else {
@@ -135,30 +139,55 @@ function createPhotoCard(photo, index) {
   openButton.setAttribute("aria-label", `Ouvrir la photo ${photo.photoNumber}`);
 
   const image = document.createElement("img");
-  image.alt = `Aperçu filigrané de la photo ${photo.photoNumber}`;
+  const isFree = !photo.demo && state.tariff === "tarif0";
+  image.alt = `${isFree ? "Aperçu" : "Aperçu filigrané"} de la photo ${photo.photoNumber}`;
   image.loading = "lazy";
   image.dataset.photoId = photo.id;
   openButton.append(image);
 
-  const watermark = document.createElement("span");
-  watermark.className = "gallery-preview-watermark";
-  watermark.textContent = photo.demo ? "APERÇU DÉMO" : "APERÇU";
-  openButton.append(watermark);
+  if (!isFree) {
+    const watermark = document.createElement("span");
+    watermark.className = "gallery-preview-watermark";
+    watermark.textContent = photo.demo ? "APERÇU DÉMO" : "APERÇU";
+    openButton.append(watermark);
+  }
   openButton.addEventListener("click", () => openViewer(index));
 
   const number = document.createElement("span");
   number.className = "gallery-photo-number";
   number.textContent = photo.photoNumber;
 
-  const selectButton = document.createElement("button");
-  selectButton.className = "gallery-select-button";
-  selectButton.type = "button";
-  selectButton.setAttribute("aria-label", `Sélectionner la photo ${photo.photoNumber}`);
-  selectButton.setAttribute("aria-pressed", "false");
-  selectButton.append(makeCheckIcon());
-  selectButton.addEventListener("click", () => togglePhoto(photo.id));
+  if (!isFree) {
+    const selectButton = document.createElement("button");
+    selectButton.className = "gallery-select-button";
+    selectButton.type = "button";
+    selectButton.setAttribute("aria-label", `Sélectionner la photo ${photo.photoNumber}`);
+    selectButton.setAttribute("aria-pressed", "false");
+    selectButton.append(makeCheckIcon());
+    selectButton.addEventListener("click", () => togglePhoto(photo.id));
+    card.append(selectButton);
+  } else {
+    const downloadButton = document.createElement("button");
+    downloadButton.className = "gallery-photo-download";
+    downloadButton.type = "button";
+    downloadButton.textContent = "Télécharger HD";
+    downloadButton.addEventListener("click", async () => {
+      downloadButton.disabled = true;
+      try {
+        await downloadGalleryPhoto(photo.id);
+      } catch (error) {
+        elements.loadError.hidden = false;
+        elements.loadError.textContent = error.message;
+        downloadButton.textContent = "Réessayer";
+        downloadButton.title = error.message;
+      } finally {
+        downloadButton.disabled = false;
+      }
+    });
+    card.append(downloadButton);
+  }
 
-  card.append(openButton, number, selectButton);
+  card.append(openButton, number);
   return card;
 }
 
@@ -190,6 +219,7 @@ function renderSelection() {
     const selected = state.selected.has(photoId);
     const button = card.querySelector(".gallery-select-button");
     const number = card.querySelector(".gallery-photo-number").textContent;
+    if (!button) continue;
     button.setAttribute("aria-pressed", String(selected));
     button.setAttribute(
       "aria-label",
@@ -241,8 +271,9 @@ function renderViewerSelection() {
 function renderViewer() {
   const photo = state.photos[state.viewerIndex];
   if (!photo) return;
+  const isFree = !photo.demo && state.tariff === "tarif0";
   elements.viewerImage.removeAttribute("src");
-  elements.viewerImage.alt = `Aperçu filigrané de la photo ${photo.photoNumber}`;
+  elements.viewerImage.alt = `${isFree ? "Aperçu" : "Aperçu filigrané"} de la photo ${photo.photoNumber}`;
   ensurePreview(photo).then((url) => {
     if (state.photos[state.viewerIndex]?.id === photo.id && !elements.viewer.hidden) {
       elements.viewerImage.src = url;
@@ -251,6 +282,24 @@ function renderViewer() {
     elements.viewerImage.alt = `Aperçu indisponible : ${error.message}`;
   });
   elements.viewerNumber.textContent = `Photo ${photo.photoNumber}`;
+  elements.viewer.querySelector(".gallery-viewer-watermark").hidden = isFree;
+  elements.viewerSelect.hidden = isFree;
+  elements.viewerDownload.hidden = !isFree;
+  elements.viewerDownload.textContent = "Télécharger en haute résolution";
+  elements.viewerDownload.removeAttribute("title");
+  elements.viewerDownload.onclick = async () => {
+    elements.viewerDownload.disabled = true;
+    try {
+      await downloadGalleryPhoto(photo.id);
+    } catch (error) {
+      elements.loadError.hidden = false;
+      elements.loadError.textContent = error.message;
+      elements.viewerDownload.textContent = "Réessayer le téléchargement";
+      elements.viewerDownload.title = error.message;
+    } finally {
+      elements.viewerDownload.disabled = false;
+    }
+  };
   elements.viewerCounter.textContent =
     `${state.viewerIndex + 1} / ${state.photos.length}`;
   renderViewerSelection();
@@ -288,6 +337,11 @@ function setDetailsExpanded(expanded) {
 async function submitCheckout(event) {
   event.preventDefault();
   elements.checkoutMessage.textContent = "";
+
+  if (state.tariff === "tarif0") {
+    elements.checkoutMessage.textContent = "Cette galerie est gratuite : téléchargez chaque photo directement depuis son aperçu.";
+    return;
+  }
 
   if (isDemo) {
     elements.checkoutMessage.textContent =
@@ -365,6 +419,7 @@ async function loadGallery() {
   try {
     const data = await callGalleryFunction("gallery-data", { method: "GET" });
     state.galleryId = data.gallery.id;
+    state.tariff = data.gallery.tariff;
     state.pricing = data.pricing;
     state.photos = data.photos.map((photo) => ({
       ...photo,
@@ -372,13 +427,24 @@ async function loadGallery() {
       demo: false
     }));
     elements.title.textContent = data.gallery.name;
-    elements.description.textContent =
-      data.gallery.type === "individual"
-        ? "Galerie personnelle : vos aperçus sont filigranés. Sélectionnez les photos que vous souhaitez commander."
-        : "Galerie de l’événement : vos aperçus sont filigranés. Sélectionnez les photos que vous souhaitez commander.";
-    elements.orderBar.hidden = false;
+    const galleryTypeDescription = data.gallery.type === "individual"
+      ? "Galerie personnelle"
+      : "Galerie de l’événement";
+    if (state.tariff === "tarif0") {
+      elements.description.textContent =
+        `${galleryTypeDescription} gratuite : les aperçus sont sans filigrane. Téléchargez les originaux haute résolution directement.`;
+      elements.orderBar.hidden = true;
+    } else {
+      const price = formatMoney(data.pricing.unitPriceCents);
+      const discountDescription = state.tariff === "tarif5"
+        ? " Des réductions s’appliquent aux commandes de plusieurs photos."
+        : "";
+      elements.description.textContent =
+        `${galleryTypeDescription} : aperçus filigranés, ${price} par photo.${discountDescription} Après paiement confirmé, téléchargez vos originaux depuis la page de confirmation.`;
+      elements.orderBar.hidden = false;
+    }
     renderPhotos();
-    renderSelection();
+    if (state.tariff !== "tarif0") renderSelection();
   } catch (error) {
     showLoadError(error.message);
   }

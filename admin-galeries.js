@@ -8,6 +8,7 @@ const message = document.getElementById("admin-message");
 const galleryList = document.getElementById("admin-gallery-list");
 const orderList = document.getElementById("admin-order-list");
 const photoGallerySelect = document.getElementById("admin-photo-gallery");
+const tariffSelect = document.getElementById("admin-gallery-tariff");
 const accessTokenKey = "gallery-admin-access-token";
 
 let accessToken = window.sessionStorage.getItem(accessTokenKey);
@@ -22,6 +23,31 @@ function makeText(tag, className, value) {
   if (className) element.className = className;
   element.textContent = value;
   return element;
+}
+
+function tariffLabel(tariff) {
+  return {
+    tarif0: "Gratuit",
+    tarif2: "2 € / photo",
+    tarif5: "5 € / photo"
+  }[tariff] || "Tarif inconnu";
+}
+
+function updatePhotoUploadNote() {
+  const tariff = photoGallerySelect.selectedOptions[0]?.dataset.tariff;
+  const previewLabel = document.getElementById("admin-photo-preview-label");
+  const uploadNote = document.getElementById("admin-photo-upload-note");
+  if (!tariff) {
+    previewLabel.textContent = "Aperçu (JPG, PNG ou WebP, max. 50 Mo)";
+    uploadNote.textContent = "Créez ou ouvrez une galerie avant d’ajouter des photos.";
+    return;
+  }
+  const isFree = tariff === "tarif0";
+  previewLabel.textContent =
+    `${isFree ? "Aperçu sans filigrane" : "Aperçu déjà filigrané"} (JPG, PNG ou WebP, max. 50 Mo)`;
+  uploadNote.textContent = isFree
+    ? "Cette galerie est gratuite : choisissez un aperçu sans filigrane. Les deux fichiers restent privés ; seul le téléchargement autorisé transmettra l’original."
+    : "Cette galerie est payante : le filigrane doit être intégré à l’aperçu avant l’envoi. Les deux fichiers restent privés ; seul l’original acheté sera téléchargeable.";
 }
 
 async function callAdmin(body) {
@@ -63,10 +89,12 @@ function renderGalleries(galleries) {
   for (const gallery of openGalleries) {
     const option = document.createElement("option");
     option.value = gallery.id;
-    option.textContent = gallery.name;
+    option.textContent = `${gallery.name} — ${tariffLabel(gallery.tariff)}`;
+    option.dataset.tariff = gallery.tariff;
     photoGallerySelect.append(option);
   }
   photoGallerySelect.disabled = openGalleries.length === 0;
+  updatePhotoUploadNote();
   if (!galleries.length) {
     galleryList.append(makeText("p", "gallery-admin-note", "Aucune galerie."));
     return;
@@ -89,7 +117,7 @@ function renderGalleries(galleries) {
       )
     );
     record.append(header);
-    record.append(makeText("small", "", `${gallery.type === "event" ? "Événement partagé" : "Individuelle"} · ferme le ${new Date(gallery.expires_at).toLocaleDateString("fr-FR")}`));
+    record.append(makeText("small", "", `${gallery.type === "event" ? "Événement partagé" : "Individuelle"} · ${tariffLabel(gallery.tariff)} · ferme le ${new Date(gallery.expires_at).toLocaleDateString("fr-FR")}`));
     if (gallery.status === "open") {
       const button = makeText("button", "gallery-quiet-button", "Fermer cette galerie");
       button.type = "button";
@@ -229,6 +257,7 @@ document.getElementById("admin-create-gallery-form").addEventListener("submit", 
       action: "create-gallery",
       name: document.getElementById("admin-gallery-name").value.trim(),
       type: document.getElementById("admin-gallery-type").value,
+      tariff: tariffSelect.value,
       daysOpen: Number(document.getElementById("admin-gallery-days").value),
       code
     });
@@ -245,6 +274,8 @@ document.getElementById("admin-create-gallery-form").addEventListener("submit", 
     button.disabled = false;
   }
 });
+
+photoGallerySelect.addEventListener("change", updatePhotoUploadNote);
 
 document.getElementById("admin-add-photos-form").addEventListener("submit", async (event) => {
   event.preventDefault();

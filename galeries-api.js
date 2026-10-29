@@ -67,6 +67,49 @@ export async function fetchGalleryPreview(photoId) {
   return URL.createObjectURL(await response.blob());
 }
 
+export async function downloadGalleryPhoto(photoId, orderSessionId) {
+  const { supabaseUrl, supabaseAnonKey } = getConfig();
+  const token = window.sessionStorage.getItem("gallery-session-token");
+  if (!supabaseUrl || !supabaseAnonKey || !token) {
+    throw new Error("La session de galerie a expiré. Saisissez de nouveau votre code d’accès.");
+  }
+  const url = new URL(
+    `${supabaseUrl.replace(/\/$/, "")}/functions/v1/gallery-download`
+  );
+  url.searchParams.set("photo_id", photoId);
+  if (orderSessionId) url.searchParams.set("session_id", orderSessionId);
+
+  const response = await fetch(url, {
+    headers: {
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store"
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Le téléchargement de la photo a échoué.");
+  }
+
+  const filename = response.headers.get("Content-Disposition")
+    ?.match(/filename="([^"]+)"/i)?.[1];
+  const blob = await response.blob();
+  const extension = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp"
+  }[blob.type];
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = filename || `photo-${photoId}.${extension || "jpg"}`;
+  link.hidden = true;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+}
+
 export async function uploadSignedObject(bucket, path, token, file) {
   const { supabaseUrl, supabaseAnonKey } = getConfig();
   const encodedPath = path.split("/").map(encodeURIComponent).join("/");

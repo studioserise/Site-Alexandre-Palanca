@@ -70,6 +70,14 @@
                   <option value="individual">Galerie individuelle</option>
                 </select>
               </label>
+              <label class="gallery-admin-label" for="admin-gallery-tariff">
+                Tarif
+                <select class="gallery-admin-select" id="admin-gallery-tariff">
+                  <option value="tarif0">Gratuit — téléchargement haute résolution</option>
+                  <option value="tarif2">2 € par photo — sans réduction</option>
+                  <option value="tarif5" selected>5 € par photo — réductions par quantité</option>
+                </select>
+              </label>
               <label class="gallery-admin-label" for="admin-gallery-days">
                 Accès (jours, maximum 15)
                 <input class="gallery-admin-input" id="admin-gallery-days" type="number" min="1" max="15" value="15" required>
@@ -101,14 +109,14 @@
             <input class="gallery-admin-input" id="admin-photo-number" type="number" min="1" required>
           </label>
           <label class="gallery-admin-label" for="admin-photo-preview">
-            Aperçu déjà filigrané (JPG, PNG ou WebP, max. 50 Mo)
+            <span id="admin-photo-preview-label">Aperçu (JPG, PNG ou WebP, max. 50 Mo)</span>
             <input class="gallery-admin-input" id="admin-photo-preview" type="file" accept="image/jpeg,image/png,image/webp" required>
           </label>
           <label class="gallery-admin-label" for="admin-photo-original">
             Original haute résolution (privé, JPG, PNG ou WebP, max. 50 Mo)
             <input class="gallery-admin-input" id="admin-photo-original" type="file" accept="image/jpeg,image/png,image/webp" required>
           </label>
-          <p class="gallery-admin-note">Le filigrane doit être intégré au fichier aperçu avant son envoi. Les deux fichiers sont téléversés dans des espaces de stockage privés ; l’original n’est jamais transmis à la galerie publique.</p>
+          <p class="gallery-admin-note" id="admin-photo-upload-note">Pour une galerie payante, intégrez le filigrane dans l’aperçu avant son envoi. Pour une galerie gratuite, envoyez un aperçu sans filigrane. Les deux fichiers restent dans des espaces privés.</p>
           <button class="gallery-primary-button" type="submit">Téléverser les deux fichiers</button>
         </form>
       </section>
