@@ -3,7 +3,7 @@ import {
   callGalleryFunction,
   downloadGalleryPhotosZip,
   isBackendConfigured
-} from "./galeries-api.js?v=paid-order-zip";
+} from "./galeries-api.js?v=paid-order-email";
 
 const title = document.getElementById("order-status-title");
 const message = document.getElementById("order-status-message");

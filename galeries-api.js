@@ -106,10 +106,11 @@ export async function downloadGalleryPhotosZip(
 
 async function fetchGalleryOriginal(photoId, orderSessionId) {
   const { supabaseUrl, supabaseAnonKey } = getConfig();
-  const token = window.sessionStorage.getItem("gallery-session-token");
-  if (!supabaseUrl || !supabaseAnonKey || !token) {
+  const sessionToken = window.sessionStorage.getItem("gallery-session-token");
+  if (!supabaseUrl || !supabaseAnonKey || (!sessionToken && !orderSessionId)) {
     throw new Error("La session de galerie a expiré. Saisissez de nouveau votre code d’accès.");
   }
+  const token = sessionToken ?? supabaseAnonKey;
   const url = new URL(
     `${supabaseUrl.replace(/\/$/, "")}/functions/v1/gallery-download`
   );

@@ -1,0 +1,23 @@
+[functions.gallery-access]
+verify_jwt = false
+
+[functions.gallery-data]
+verify_jwt = false
+
+[functions.gallery-preview]
+verify_jwt = false
+
+[functions.gallery-download]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.admin-api]
+verify_jwt = false
+
+[functions.order-status]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
