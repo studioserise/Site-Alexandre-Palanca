@@ -73,7 +73,12 @@ export async function downloadGalleryPhoto(photoId, orderSessionId) {
   triggerDownload(blob, filename);
 }
 
-export async function downloadGalleryPhotosZip(photoIds, galleryName, onProgress = () => {}) {
+export async function downloadGalleryPhotosZip(
+  photoIds,
+  galleryName,
+  onProgress = () => {},
+  orderSessionId
+) {
   if (!photoIds.length) {
     throw new Error("Sélectionnez au moins une photo à télécharger.");
   }
@@ -84,7 +89,7 @@ export async function downloadGalleryPhotosZip(photoIds, galleryName, onProgress
   const files = [];
   for (let index = 0; index < photoIds.length; index += 1) {
     onProgress(index + 1, photoIds.length);
-    const { blob, filename } = await fetchGalleryOriginal(photoIds[index]);
+    const { blob, filename } = await fetchGalleryOriginal(photoIds[index], orderSessionId);
     files.push({ name: filename, blob });
   }
   onProgress("zip", photoIds.length);

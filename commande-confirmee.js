@@ -1,13 +1,15 @@
 import { getConfig } from "./galeries-config.js";
 import {
   callGalleryFunction,
-  downloadGalleryPhoto,
+  downloadGalleryPhotosZip,
   isBackendConfigured
-} from "./galeries-api.js?v=tarifs-downloads";
+} from "./galeries-api.js?v=paid-order-zip";
 
 const title = document.getElementById("order-status-title");
 const message = document.getElementById("order-status-message");
 const downloads = document.getElementById("order-downloads");
+const downloadButton = document.getElementById("order-download-zip");
+const downloadMessage = document.getElementById("order-download-message");
 const sessionId = new URLSearchParams(window.location.search).get("session_id");
 
 if (!isBackendConfigured() || !sessionId || !getConfig()) {
@@ -29,29 +31,35 @@ if (!isBackendConfigured() || !sessionId || !getConfig()) {
     if (["paid_to_prepare", "sent"].includes(result.status)) {
       title.textContent = "Merci pour votre commande";
       message.textContent =
-        "Le paiement est confirmé. Téléchargez ci-dessous vos photographies haute résolution.";
-      downloads.replaceChildren(
-        ...result.photos.map((photo) => {
-          const button = document.createElement("button");
-          button.className = "gallery-primary-button";
-          button.type = "button";
-          button.textContent = `Télécharger la photo ${String(photo.photoNumber).padStart(3, "0")}`;
-          button.addEventListener("click", async () => {
-            button.disabled = true;
-            try {
-              await downloadGalleryPhoto(photo.photoId, sessionId);
-            } catch (error) {
-              message.textContent = error.message;
-              button.textContent = "Réessayer le téléchargement";
-              button.title = error.message;
-            } finally {
-              button.disabled = false;
-            }
-          });
-          return button;
-        })
-      );
+        "Le paiement est confirmé. Téléchargez ci-dessous les photographies haute résolution de votre commande.";
       downloads.hidden = result.photos.length === 0;
+      if (result.photos.length) {
+        downloadButton.addEventListener("click", async () => {
+          downloadButton.disabled = true;
+          downloadMessage.textContent = "";
+          downloadMessage.removeAttribute("data-kind");
+          downloadButton.textContent = "Préparation du ZIP…";
+          try {
+            await downloadGalleryPhotosZip(
+              result.photos.map((photo) => photo.photoId),
+              "commande",
+              (current, total) => {
+                downloadButton.textContent = current === "zip"
+                  ? "Création du ZIP…"
+                  : `Téléchargement ${current}/${total}…`;
+              },
+              sessionId
+            );
+            downloadMessage.dataset.kind = "success";
+            downloadMessage.textContent = "Votre archive ZIP a été téléchargée.";
+          } catch (error) {
+            downloadMessage.textContent = error.message;
+          } finally {
+            downloadButton.disabled = false;
+            downloadButton.textContent = "Télécharger mes photos en ZIP";
+          }
+        });
+      }
       if (!result.photos.length) {
         message.textContent =
           "Le paiement est confirmé, mais aucune photo téléchargeable n’est associée à cette commande. Contactez Alexandre.";
