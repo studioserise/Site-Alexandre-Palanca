@@ -36,12 +36,13 @@ a {
 }
 
 .portraits-intro {
+  position: relative;
   display: flex;
-  min-height: min(660px, 78svh);
+  min-height: min(820px, 100svh);
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 160px var(--portraits-pad) clamp(70px, 9vw, 118px);
+  padding: 150px var(--portraits-pad) clamp(74px, 10vw, 140px);
   background:
     radial-gradient(ellipse at 86% 32%, rgba(166, 154, 126, 0.09), transparent 34%),
     var(--portraits-black);
@@ -79,10 +80,13 @@ a {
 }
 
 .portraits-scroll {
+  position: absolute;
+  z-index: 2;
+  right: var(--portraits-pad);
+  bottom: 76px;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 34px;
+  gap: 10px;
   color: rgba(245, 243, 239, 0.82);
   font-size: 0.65rem;
   letter-spacing: 0.14em;
@@ -336,9 +340,15 @@ a {
   }
 
   .portraits-intro {
-    min-height: 76svh;
-    padding-top: 130px;
-    padding-bottom: 70px;
+    min-height: 88svh;
+    min-height: 88dvh;
+    padding-top: 122px;
+    padding-bottom: 100px;
+  }
+
+  .portraits-scroll {
+    right: var(--portraits-pad);
+    bottom: 68px;
   }
 
   .portraits-intro h1 {
