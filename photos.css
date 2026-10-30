@@ -69,6 +69,7 @@
   min-height: clamp(580px, 48vw, 720px);
   align-items: flex-end;
   overflow: hidden;
+  border-radius: 14px;
   padding: clamp(28px, 3.5vw, 52px);
   background: #171715;
 }
