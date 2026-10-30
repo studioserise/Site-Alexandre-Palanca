@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <meta name="description" content="Photographie événementielle pour raconter l'ambiance, les temps forts et les rencontres.">
+  <title>Événementiel — Alexandre Palanca</title>
+  <link rel="stylesheet" href="lieux-marques.css">
+  <link rel="stylesheet" href="evenementiel.css">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css?v=rounded-controls">
+  <script src="site-nav.js" defer></script>
+</head>
+<body class="evenementiel-page">
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true">
+          <span class="site-nav-logo-canvas">
+            <img src="images/logo-accueil.png" alt="">
+          </span>
+        </span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links">
+        <span></span>
+        <span></span>
+      </button>
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="photos.html" aria-current="page">Photos</a></li>
+          <li><a class="site-nav-link" href="video.html">Vidéos</a></li>
+          <li><a class="site-nav-link" href="lieux-marques.html">Lieux &amp; marques</a></li>
+          <li><a class="site-nav-link" href="galerie.html">Galerie</a></li>
+          <li><a class="site-nav-link" href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="event-hero" aria-labelledby="event-title">
+      <img class="event-hero-image" src="images/photos/evenementiel.jpg" alt="Concert en plein air et public rassemblé devant la scène" fetchpriority="high">
+      <div class="event-hero-shade" aria-hidden="true"></div>
+      <div class="event-hero-copy">
+        <p class="lm-eyebrow">Photographie · Événementiel</p>
+        <h1 id="event-title">Événementiel</h1>
+        <p>Un événement à raconter, des instants à capturer. Le photographe se déplace à la date de votre événement pour en saisir l'ambiance, les temps forts et les rencontres.</p>
+        <a class="lm-final-button event-contact-button" href="contact.html">Faire une demande de devis <span aria-hidden="true">↗</span></a>
+      </div>
+      <a class="event-hero-scroll" href="#event-contact"><span aria-hidden="true">↓</span> Découvrir</a>
+    </section>
+
+    <section class="lm-final" id="event-contact" aria-labelledby="event-final-title">
+      <div class="lm-final-copy">
+        <p class="lm-eyebrow">Projet sur mesure</p>
+        <h2 id="event-final-title">Un projet particulier ?</h2>
+        <p>Parlons de votre lieu, de votre activité ou de votre univers pour imaginer une série d’images adaptée à vos besoins.</p>
+        <a class="lm-final-button" href="contact.html">Parlons de votre projet <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
