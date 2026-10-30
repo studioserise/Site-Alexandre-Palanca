@@ -19,5 +19,8 @@ verify_jwt = false
 [functions.order-status]
 verify_jwt = false
 
+[functions.contact-request]
+verify_jwt = false
+
 [functions.stripe-webhook]
 verify_jwt = false

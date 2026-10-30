@@ -25,6 +25,7 @@ Le backend Supabase et le flux Stripe sont préparés dans `supabase/`, mais ils
    - `STRIPE_WEBHOOK_SECRET` — secret du webhook Stripe de cet environnement
    - `RESEND_API_KEY` — clé d’API Resend, uniquement côté serveur
    - `ORDER_EMAIL_FROM=Alexandre Palanca <info@alexandrepalanca.fr>` — expéditeur vérifié dans Resend
+   - `CONTACT_EMAIL_TO=alexapalanca@gmail.com` — boîte qui reçoit les demandes du formulaire de contact
 
    Supabase fournit normalement `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` aux fonctions déployées ; vérifiez leurs valeurs dans l’environnement de déploiement. La clé `anon` est publique et peut être configurée dans le frontend. La clé `service_role`, les clés Stripe et le secret de session ne doivent jamais être publiés.
 
@@ -39,8 +40,9 @@ Le backend Supabase et le flux Stripe sont préparés dans `supabase/`, mais ils
    - `order-status`
    - `admin-api`
    - `stripe-webhook`
+   - `contact-request`
 
-   Les fonctions désactivent la validation JWT automatique de Supabase pour valider elles-mêmes soit le jeton de galerie signé, soit la session Auth administrateur, soit la signature webhook Stripe. Ne retirez pas ces contrôles.
+   Les fonctions désactivent la validation JWT automatique de Supabase et appliquent leurs propres contrôles : jeton de galerie signé, session Auth administrateur, signature webhook Stripe ou, pour `contact-request`, origine autorisée et limitation de fréquence. Ne retirez pas ces contrôles.
 
 ## Administration
 
@@ -88,3 +90,17 @@ Les nouveaux codes d’accès doivent contenir au moins 10 lettres, chiffres ou 
 - Remplacer le contenu de démonstration par des aperçus réellement filigranés avant d’ouvrir les galeries clients.
 
 Les tests de déploiement et de paiement réel/test nécessitent le projet Supabase, le domaine HTTPS et les secrets serveur décrits ci-dessus ; ils ne sont pas présents dans les fichiers locaux.
+
+## Formulaire de contact et demandes de devis
+
+La page `contact.html` envoie les demandes à la fonction Supabase `contact-request`, qui transmet le message via Resend à `CONTACT_EMAIL_TO`. Elle utilise `ORDER_EMAIL_FROM` comme expéditeur vérifié et `RESEND_API_KEY` côté serveur. Les demandes ne sont pas enregistrées dans la base du site ; elles sont envoyées par e-mail. La fonction valide les champs, vérifie l’origine configurée et limite les envois à cinq demandes par adresse réseau sur 15 minutes.
+
+Avant d’activer l’envoi en production :
+
+1. Vérifiez que `FRONTEND_ORIGIN` correspond exactement à l’origine du site HTTPS.
+2. Vérifiez que `RESEND_API_KEY` est configurée et que l’adresse définie par `ORDER_EMAIL_FROM` est vérifiée dans Resend.
+3. Configurez `CONTACT_EMAIL_TO=alexapalanca@gmail.com` comme secret Supabase.
+4. Déployez la fonction `contact-request`.
+5. Testez une demande reçue dans la boîte destinataire, ainsi que les erreurs d’envoi et le contrôle anti-spam.
+
+Le formulaire demande le nom, l’adresse e-mail, la prestation et une description du projet. Le téléphone et la date souhaitée sont facultatifs. Les messages sont envoyés sans fichier joint.

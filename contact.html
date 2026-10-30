@@ -2,80 +2,32 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080808">
-  <title>Contact — Alexandre Palanca</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #080808;
-      color: #f5f3ef;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      display: grid;
-      min-height: 100svh;
-      margin: 0;
-      place-items: center;
-      text-align: center;
-    }
-
-    main {
-      padding: 32px;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .brand {
-      display: block;
-      width: 52px;
-      height: 52px;
-      margin: 0 auto 36px;
-      overflow: hidden;
-    }
-
-    .brand img {
-      display: block;
-      width: 333.333%;
-      max-width: none;
-      transform: translate(-35%, -22%);
-    }
-
-    h1 {
-      margin: 0 0 24px;
-      font-size: clamp(2.5rem, 8vw, 5rem);
-      font-weight: 400;
-      letter-spacing: -0.05em;
-    }
-
-    .back-link {
-      color: #d0cdc7;
-      font-size: 0.8rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-  </style>
+  <meta name="description" content="Contactez Alexandre Palanca pour parler de votre projet photo ou vidéo et demander un devis.">
+  <title>Contact &amp; devis — Alexandre Palanca</title>
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=rounded-controls">
   <link rel="stylesheet" href="cursor.css?v=3">
+  <link rel="stylesheet" href="contact.css?v=1">
   <script src="site-nav.js" defer></script>
   <script src="cursor.js?v=1" defer></script>
+  <script type="module" src="contact.js?v=1"></script>
 </head>
-<body>
+<body class="contact-page">
   <header class="site-nav is-visible" id="site-nav">
     <div class="site-nav-inner">
       <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
-        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+        <span class="site-nav-logo-frame" aria-hidden="true">
+          <span class="site-nav-logo-canvas">
+            <img src="images/logo-accueil.png" alt="">
+          </span>
+        </span>
       </a>
-      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links"><span></span><span></span></button>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links">
+        <span></span>
+        <span></span>
+      </button>
       <nav aria-label="Navigation principale">
         <ul class="site-nav-links" id="site-nav-links">
           <li><a class="site-nav-link" href="photos.html">Photos</a></li>
@@ -87,12 +39,72 @@
       </nav>
     </div>
   </header>
-  <main>
-    <a class="brand" href="index.html#accueil" aria-label="Retour à l'accueil">
-      <img src="images/logo-accueil.png" alt="">
-    </a>
-    <h1>Contact</h1>
-    <a class="back-link" href="index.html#accueil">Retour à l’accueil</a>
+
+  <main class="contact-main">
+    <section class="contact-intro" aria-labelledby="contact-title">
+      <p class="contact-eyebrow">Parlons de votre projet</p>
+      <h1 id="contact-title">Une idée, une histoire à raconter&nbsp;?</h1>
+      <p>Décrivez-moi votre projet photo ou vidéo. Je reviendrai vers vous pour en discuter et préparer une proposition adaptée.</p>
+      <p class="contact-response-note">Les champs marqués d’un astérisque sont obligatoires.</p>
+    </section>
+
+    <form class="contact-form" id="contact-form" novalidate>
+      <div class="contact-form-grid">
+        <div class="contact-field">
+          <label for="contact-name">Nom et prénom <span aria-hidden="true">*</span></label>
+          <input id="contact-name" name="name" autocomplete="name" maxlength="100" required>
+        </div>
+
+        <div class="contact-field">
+          <label for="contact-email">Adresse e-mail <span aria-hidden="true">*</span></label>
+          <input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+        </div>
+
+        <div class="contact-field">
+          <label for="contact-phone">Téléphone <span class="contact-optional">(facultatif)</span></label>
+          <input id="contact-phone" name="phone" type="tel" autocomplete="tel" maxlength="30">
+        </div>
+
+        <div class="contact-field">
+          <label for="contact-service">Type de prestation <span aria-hidden="true">*</span></label>
+          <select id="contact-service" name="service" required>
+            <option value="" selected disabled>Choisir une prestation</option>
+            <option value="Portraits">Portraits</option>
+            <option value="Événementiel">Événementiel</option>
+            <option value="Vidéos">Vidéos</option>
+            <option value="Lieux & marques">Lieux &amp; marques</option>
+            <option value="Autre">Autre projet</option>
+          </select>
+        </div>
+
+        <div class="contact-field contact-field--wide">
+          <label for="contact-date">Date ou période souhaitée <span class="contact-optional">(facultatif)</span></label>
+          <input id="contact-date" name="date" type="date">
+        </div>
+
+        <div class="contact-field contact-field--wide">
+          <label for="contact-message">Quelques mots sur votre projet <span aria-hidden="true">*</span></label>
+          <textarea id="contact-message" name="message" rows="6" maxlength="4000" required></textarea>
+        </div>
+
+        <div class="contact-honeypot" aria-hidden="true">
+          <label for="contact-website">Ne pas remplir ce champ</label>
+          <input id="contact-website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div class="contact-consent contact-field--wide">
+          <input id="contact-consent" name="consent" type="checkbox" required>
+          <label for="contact-consent">J’accepte que les informations transmises soient utilisées uniquement pour répondre à ma demande. <span aria-hidden="true">*</span></label>
+        </div>
+      </div>
+
+      <p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p>
+      <button class="contact-submit" id="contact-submit" type="submit">
+        <span>Envoyer ma demande</span>
+        <span aria-hidden="true">↗</span>
+      </button>
+      <p class="contact-privacy-note">Vos coordonnées ne seront pas affichées sur le site. Elles sont transmises de façon sécurisée pour traiter votre demande.</p>
+    </form>
   </main>
 </body>
 </html>
