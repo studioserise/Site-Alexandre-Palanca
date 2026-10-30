@@ -14,6 +14,10 @@
   box-sizing: border-box;
 }
 
+.contact-page .site-nav-link {
+  text-decoration: none;
+}
+
 html {
   min-width: 320px;
   scroll-behavior: smooth;
