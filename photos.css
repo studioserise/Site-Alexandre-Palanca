@@ -202,8 +202,7 @@
   }
 
   .photo-universe {
-    min-height: 620px;
-    min-height: 82svh;
+    min-height: clamp(560px, 72svh, 700px);
     padding: 28px 22px 76px;
   }
 

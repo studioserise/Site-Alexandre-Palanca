@@ -274,13 +274,13 @@
       position: relative;
       z-index: 4;
       min-height: 100svh;
-      padding: 70px var(--page-padding) 120px;
+      padding: 70px var(--page-padding) 90px;
       background: var(--black);
     }
 
     .work-heading {
       max-width: 720px;
-      margin-bottom: 75px;
+      margin-bottom: clamp(40px, 5vw, 68px);
     }
 
     .work-heading h2 {
@@ -307,7 +307,7 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 20px;
       min-width: 0;
     }
 
@@ -317,6 +317,7 @@
       aspect-ratio: 4 / 5;
       overflow: hidden;
       isolation: isolate;
+      border-radius: 14px;
     }
 
     .work-image {
@@ -423,6 +424,7 @@
 
       .work-section {
         padding-top: 45px;
+        padding-bottom: 70px;
       }
 
       .work-grid {
@@ -458,6 +460,8 @@
   </style>
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=rounded-controls">
+  <link rel="stylesheet" href="cursor.css?v=1">
+  <script src="cursor.js?v=1" defer></script>
 </head>
 
 <body>

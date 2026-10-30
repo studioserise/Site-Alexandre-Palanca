@@ -211,6 +211,7 @@ button {
   min-width: 0;
   margin: 0;
   overflow: hidden;
+  border-radius: 10px;
   background: #181817;
 }
 
@@ -296,6 +297,8 @@ button {
 .lm-approach-image-wrap {
   position: relative;
   min-height: clamp(360px, 52vw, 720px);
+  overflow: hidden;
+  border-radius: 14px;
 }
 
 .lm-approach-image-wrap img {
