@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <meta name="description" content="Découvrez les univers photographiques Portraits et Événementiel d'Alexandre Palanca.">
+  <title>Photos — Alexandre Palanca</title>
+  <link rel="stylesheet" href="lieux-marques.css">
+  <link rel="stylesheet" href="photos.css">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css?v=rounded-controls">
+  <script src="site-nav.js" defer></script>
+</head>
+<body class="photos-page">
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true">
+          <span class="site-nav-logo-canvas">
+            <img src="images/logo-accueil.png" alt="">
+          </span>
+        </span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links">
+        <span></span>
+        <span></span>
+      </button>
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="photos.html" aria-current="page">Photos</a></li>
+          <li><a class="site-nav-link" href="video.html">Vidéos</a></li>
+          <li><a class="site-nav-link" href="lieux-marques.html">Lieux &amp; marques</a></li>
+          <li><a class="site-nav-link" href="galerie.html">Galerie</a></li>
+          <li><a class="site-nav-link" href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <header class="photos-intro">
+      <p class="lm-eyebrow">Photographie · Deux univers</p>
+      <h1>Des histoires à regarder.</h1>
+      <p>Raconter des personnes, des lieux et des instants à travers des images sensibles et vivantes.</p>
+      <a class="photos-scroll" href="#portraits"><span aria-hidden="true">↓</span> Découvrir</a>
+    </header>
+
+    <section class="photo-universe" id="portraits" aria-labelledby="portraits-title">
+      <img class="photo-universe-image" src="images/photos/portraits.jpg" alt="Portrait d'une femme en lumière naturelle" fetchpriority="high">
+      <div class="photo-universe-shade" aria-hidden="true"></div>
+      <div class="photo-universe-copy">
+        <p class="lm-eyebrow">01 · Une séance à votre image</p>
+        <h2 id="portraits-title">Portraits</h2>
+        <p>Une séance photo organisée autour de vous, de votre image ou de votre projet. Le rendez-vous est fixé directement avec le photographe, selon vos disponibilités et celles du photographe.</p>
+        <a class="photo-universe-button" href="portraits.html">Découvrir les portraits <span aria-hidden="true">↗</span></a>
+      </div>
+      <span class="photo-universe-index" aria-hidden="true">01 / 02</span>
+    </section>
+
+    <section class="photo-universe photo-universe--event" id="evenementiel" aria-labelledby="event-title">
+      <img class="photo-universe-image" src="images/photos/evenementiel.jpg" alt="Concert en plein air et public rassemblé devant la scène" loading="lazy">
+      <div class="photo-universe-shade" aria-hidden="true"></div>
+      <div class="photo-universe-copy">
+        <p class="lm-eyebrow">02 · Le récit d'un événement</p>
+        <h2 id="event-title">Événementiel</h2>
+        <p>Un événement à raconter, des instants à capturer. Le photographe se déplace à la date de votre événement pour en saisir l'ambiance, les temps forts et les rencontres.</p>
+        <a class="photo-universe-button" href="index.html#evenementiel">Découvrir l'événementiel <span aria-hidden="true">↗</span></a>
+      </div>
+      <span class="photo-universe-index" aria-hidden="true">02 / 02</span>
+    </section>
+
+    <section class="lm-final" aria-labelledby="photos-final-title">
+      <div class="lm-final-copy">
+        <p class="lm-eyebrow">Projet sur mesure</p>
+        <h2 id="photos-final-title">Un projet particulier ?</h2>
+        <p>Parlons de votre lieu, de votre activité ou de votre univers pour imaginer une série d’images adaptée à vos besoins.</p>
+        <a class="lm-final-button" href="contact.html">Parlons de votre projet <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

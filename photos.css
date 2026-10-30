@@ -1,0 +1,218 @@
+.photos-intro {
+  position: relative;
+  display: flex;
+  min-height: min(660px, 82svh);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 150px var(--lm-page-pad) clamp(74px, 9vw, 118px);
+  background:
+    radial-gradient(ellipse at 86% 32%, rgba(166, 154, 126, 0.09), transparent 34%),
+    var(--lm-black);
+}
+
+.photos-intro h1,
+.photo-universe h2 {
+  margin: 0;
+  font-weight: 400;
+}
+
+.photos-intro h1 {
+  max-width: 1000px;
+  font-size: clamp(3.2rem, 6.5vw, 6.4rem);
+  line-height: 0.98;
+}
+
+.photos-intro > p:not(.lm-eyebrow) {
+  max-width: 500px;
+  margin: 26px 0 0;
+  color: rgba(245, 243, 239, 0.83);
+  font-size: clamp(0.94rem, 1.4vw, 1.08rem);
+  line-height: 1.8;
+}
+
+.photos-scroll {
+  position: absolute;
+  right: var(--lm-page-pad);
+  bottom: 76px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(245, 243, 239, 0.82);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: opacity 180ms ease;
+}
+
+.photos-scroll:hover {
+  opacity: 0.68;
+}
+
+.photos-scroll span {
+  font-size: 1.05rem;
+}
+
+.photo-universe {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: min(760px, 82svh);
+  align-items: flex-end;
+  overflow: hidden;
+  padding: clamp(58px, 8vw, 112px) var(--lm-page-pad);
+  background: #171715;
+}
+
+.photo-universe-image {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  transition: transform 800ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.photo-universe:hover .photo-universe-image {
+  transform: scale(1.02);
+}
+
+.photo-universe-shade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, 0.78), rgba(5, 5, 5, 0.2) 72%),
+    linear-gradient(0deg, rgba(5, 5, 5, 0.8), transparent 74%),
+    linear-gradient(180deg, rgba(5, 5, 5, 0.22), transparent 28%);
+}
+
+.photo-universe--event .photo-universe-image {
+  object-position: center 54%;
+}
+
+.photo-universe--event .photo-universe-shade {
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, 0.72), rgba(5, 5, 5, 0.14) 76%),
+    linear-gradient(0deg, rgba(5, 5, 5, 0.8), transparent 74%),
+    linear-gradient(180deg, rgba(5, 5, 5, 0.22), transparent 28%);
+}
+
+.photo-universe-copy {
+  position: relative;
+  z-index: 2;
+  width: min(720px, 68%);
+}
+
+.photo-universe-copy h2 {
+  font-size: clamp(3.3rem, 7vw, 7rem);
+  line-height: 0.98;
+}
+
+.photo-universe-copy > p:not(.lm-eyebrow) {
+  max-width: 560px;
+  margin: 24px 0 0;
+  color: rgba(245, 243, 239, 0.86);
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+  line-height: 1.85;
+}
+
+.photo-universe-button {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  gap: 24px;
+  margin-top: 30px;
+  padding: 0 20px;
+  border: 1px solid rgba(245, 243, 239, 0.68);
+  border-radius: 9px;
+  color: #f5f3ef;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.photo-universe-button:hover {
+  background: #f5f3ef;
+  color: #080808;
+}
+
+.photo-universe-index {
+  position: absolute;
+  z-index: 2;
+  right: var(--lm-page-pad);
+  bottom: clamp(58px, 8vw, 112px);
+  color: rgba(245, 243, 239, 0.7);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+}
+
+@media (min-width: 1500px) {
+  .photos-intro,
+  .photo-universe {
+    padding-right: max(var(--lm-page-pad), calc((100vw - 1500px) / 2));
+    padding-left: max(var(--lm-page-pad), calc((100vw - 1500px) / 2));
+  }
+}
+
+@media (max-width: 680px) {
+  :root {
+    --lm-page-pad: 22px;
+  }
+
+  .photos-intro {
+    min-height: 76svh;
+    padding-top: 130px;
+    padding-bottom: 110px;
+  }
+
+  .photos-intro h1 {
+    font-size: clamp(2.9rem, 11vw, 4.8rem);
+  }
+
+  .photos-scroll {
+    right: var(--lm-page-pad);
+    bottom: 68px;
+  }
+
+  .photo-universe {
+    min-height: 680px;
+    min-height: 82svh;
+    padding-top: 64px;
+    padding-bottom: 86px;
+  }
+
+  .photo-universe-image {
+    object-position: 55% center;
+  }
+
+  .photo-universe-copy {
+    width: 100%;
+  }
+
+  .photo-universe-copy h2 {
+    font-size: clamp(3rem, 12vw, 4.8rem);
+  }
+
+  .photo-universe-copy > p:not(.lm-eyebrow) {
+    margin-top: 18px;
+    font-size: 0.88rem;
+  }
+
+  .photo-universe-index {
+    right: var(--lm-page-pad);
+    bottom: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photos-page *,
+  .photos-page *::before,
+  .photos-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
