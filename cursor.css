@@ -1,9 +1,9 @@
 html,
 html * {
-  cursor: url("images/viseur.png") 18 18, crosshair;
+  cursor: url("images/viseur.png?v=2") 45 45, crosshair !important;
 }
 
 html.is-cursor-pressed,
 html.is-cursor-pressed * {
-  cursor: url("images/viseur-clic.png") 18 18, crosshair;
+  cursor: url("images/viseur-clic.png?v=2") 45 45, crosshair !important;
 }
