@@ -2,7 +2,7 @@ const cursorRoot = document.documentElement;
 const PRESSED = "is-cursor-pressed";
 
 // Préchargement : évite le retour au curseur par défaut au premier changement d'état
-["images/viseur.png?v=6", "images/viseur-clic.png?v=6"].forEach((src) => {
+["images/viseur.png?v=7", "images/viseur-clic.png?v=7"].forEach((src) => {
   new Image().src = src;
 });
 
