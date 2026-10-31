@@ -1,4 +1,8 @@
 :root {
+  --service-fade: clamp(96px, 11vw, 170px);
+}
+
+:root {
   color-scheme: dark;
   --portraits-black: #080808;
   --portraits-muted: #aaa7a1;
@@ -103,13 +107,16 @@ a {
 }
 
 .portrait-services {
+  padding-block: var(--service-fade);
   background-color: #f0ede6;
   background-image:
     linear-gradient(
       to bottom,
-      #080808 0%,
-      rgba(8, 8, 8, 0) 22%,
-      rgba(8, 8, 8, 0) 68%,
+      #080808 0,
+      rgba(8, 8, 8, 0.55) calc(var(--service-fade) * 0.4),
+      rgba(8, 8, 8, 0) var(--service-fade),
+      rgba(8, 8, 8, 0) calc(100% - var(--service-fade)),
+      rgba(8, 8, 8, 0.55) calc(100% - var(--service-fade) * 0.4),
       #080808 100%
     ),
     linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),

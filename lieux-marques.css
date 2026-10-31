@@ -1,4 +1,8 @@
 :root {
+  --service-fade: clamp(96px, 11vw, 170px);
+}
+
+:root {
   color-scheme: dark;
   --lm-black: #080808;
   --lm-ink: #171715;
@@ -426,14 +430,16 @@ button {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: clamp(129px, 16.5vw, 225px) var(--lm-page-pad) 76px;
+  padding: clamp(129px, 16.5vw, 225px) var(--lm-page-pad) calc(var(--service-fade) + 32px);
   background-color: var(--lm-paper);
   background-image:
     linear-gradient(
       to bottom,
-      #080808 0%,
-      rgba(8, 8, 8, 0) 22%,
-      rgba(8, 8, 8, 0) 68%,
+      #080808 0,
+      rgba(8, 8, 8, 0.55) calc(var(--service-fade) * 0.4),
+      rgba(8, 8, 8, 0) var(--service-fade),
+      rgba(8, 8, 8, 0) calc(100% - var(--service-fade)),
+      rgba(8, 8, 8, 0.55) calc(100% - var(--service-fade) * 0.4),
       #080808 100%
     ),
     linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
@@ -658,7 +664,7 @@ button {
 .lm-offer-price-note {
   max-width: 720px;
   margin: 64px auto 0;
-  color: #d0cdc7;
+  color: #393833;
   font-size: 0.72rem;
   line-height: 1.6;
   text-align: center;
@@ -968,7 +974,7 @@ button {
 
   .lm-offers {
     padding-top: 126px;
-    padding-bottom: 68px;
+    padding-bottom: calc(var(--service-fade) + 24px);
   }
 
   .lm-offers-heading {
