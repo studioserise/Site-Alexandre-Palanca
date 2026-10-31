@@ -254,3 +254,9 @@
     padding-left: max(calc(var(--lm-page-pad) + 30px), calc((100vw - 1500px) / 2));
   }
 }
+
+/* Vignettage des photographies */
+.photo-universe-image {
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 38%, rgba(0, 0, 0, 0.92) 55%, rgba(0, 0, 0, 0.55) 72%, rgba(0, 0, 0, 0.4) 100%);
+  mask-image: radial-gradient(ellipse at center, #000 38%, rgba(0, 0, 0, 0.92) 55%, rgba(0, 0, 0, 0.55) 72%, rgba(0, 0, 0, 0.4) 100%);
+}

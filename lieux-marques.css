@@ -94,6 +94,7 @@ button {
 
 .lm-hero-shade {
   background:
+    linear-gradient(0deg, #000 0, rgba(0, 0, 0, 0.55) 9%, transparent 30%),
     linear-gradient(90deg, rgba(5, 5, 5, 0.58), rgba(5, 5, 5, 0.08) 80%),
     linear-gradient(0deg, rgba(5, 5, 5, 0.76), transparent 65%),
     linear-gradient(180deg, rgba(5, 5, 5, 0.42), transparent 28%);
@@ -845,6 +846,7 @@ button {
 
   .lm-hero-shade {
     background:
+      linear-gradient(0deg, #000 0, rgba(0, 0, 0, 0.55) 10%, transparent 30%),
       linear-gradient(90deg, rgba(5, 5, 5, 0.5), rgba(5, 5, 5, 0.04)),
       linear-gradient(0deg, rgba(5, 5, 5, 0.78), transparent 72%),
       linear-gradient(180deg, rgba(5, 5, 5, 0.34), transparent 24%);
@@ -1089,4 +1091,11 @@ button {
   .lm-final {
     padding-left: max(calc(var(--lm-page-pad) + 30px), calc((100vw - 1500px) / 2));
   }
+}
+
+/* Vignettage des photographies */
+.lm-approach-image-wrap img,
+.lm-editorial-placeholder {
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 38%, rgba(0, 0, 0, 0.92) 55%, rgba(0, 0, 0, 0.55) 72%, rgba(0, 0, 0, 0.4) 100%);
+  mask-image: radial-gradient(ellipse at center, #000 38%, rgba(0, 0, 0, 0.92) 55%, rgba(0, 0, 0, 0.55) 72%, rgba(0, 0, 0, 0.4) 100%);
 }
