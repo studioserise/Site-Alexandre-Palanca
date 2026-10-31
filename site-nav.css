@@ -120,7 +120,7 @@ textarea {
 
 .site-footer {
   padding: 110px clamp(24px, 6.95vw, 100px) 80px;
-  background: linear-gradient(to bottom, rgba(17, 17, 16, 0) 0, #111110 110px, #111110 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, #000 110px, #000 100%);
   color: #d8d5cf;
 }
 

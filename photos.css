@@ -71,7 +71,7 @@
   overflow: hidden;
   border-radius: 14px;
   padding: clamp(28px, 3.5vw, 52px);
-  background: #171715;
+  background: #000;
 }
 
 .photo-universe-image {
@@ -242,4 +242,15 @@
   .photos-intro h1 { font-size: clamp(1.94rem, 9.18vw, 3.46rem); }
   .photo-universe-copy h2 { font-size: clamp(1.73rem, 8.64vw, 3.46rem); }
   .photo-universe-copy > p:not(.lm-eyebrow) { font-size: 0.89rem; }
+}
+
+/* Décalage de 30 px vers la droite pour dégager le repère latéral */
+@media (min-width: 1101px) {
+  .photos-intro {
+    padding-left: calc(var(--lm-page-pad) + 30px);
+  }
+
+  .photo-universes {
+    padding-left: max(calc(var(--lm-page-pad) + 30px), calc((100vw - 1500px) / 2));
+  }
 }

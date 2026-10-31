@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: dark;
-  --lm-black: #080808;
+  --lm-black: #000;
   --lm-ink: #171715;
   --lm-cream: #e9e5dc;
   --lm-paper: #f0ede6;
@@ -57,7 +57,7 @@ button {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: #171715;
+  background: #000;
 }
 
 .lm-final {
@@ -216,7 +216,7 @@ button {
   margin: 0;
   overflow: hidden;
   border-radius: 10px;
-  background: #181817;
+  background: #000;
 }
 
 .lm-mosaic-item img {
@@ -272,7 +272,7 @@ button {
   padding: clamp(18px, 3vw, 36px);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 60%),
-    #1b1b19;
+    #000;
   color: #d7d2c8;
 }
 
@@ -301,7 +301,7 @@ button {
 .lm-services {
   padding-top: clamp(72px, 9vw, 128px);
   padding-bottom: clamp(80px, 10vw, 144px);
-  background: #111110;
+  background: #000;
 }
 
 .lm-services-heading {
@@ -435,12 +435,12 @@ button {
   background-image:
     linear-gradient(
       to bottom,
-      #080808 0,
-      rgba(8, 8, 8, 0.55) calc(var(--service-fade) * 0.4),
-      rgba(8, 8, 8, 0) var(--service-fade),
-      rgba(8, 8, 8, 0) calc(100% - var(--service-fade)),
-      rgba(8, 8, 8, 0.55) calc(100% - var(--service-fade) * 0.4),
-      #080808 100%
+      #000 0,
+      rgba(0, 0, 0, 0.55) calc(var(--service-fade) * 0.4),
+      rgba(0, 0, 0, 0) var(--service-fade),
+      rgba(0, 0, 0, 0) calc(100% - var(--service-fade)),
+      rgba(0, 0, 0, 0.55) calc(100% - var(--service-fade) * 0.4),
+      #000 100%
     ),
     linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
     url("images/accueil.jpg");
@@ -1075,4 +1075,18 @@ button {
   .lm-section-heading h2,
   .lm-approach-copy h2,
   .lm-services-heading h2 { font-size: clamp(1.84rem, 8.1vw, 3.02rem); }
+}
+
+/* Décalage de 30 px vers la droite pour dégager le repère latéral */
+@media (min-width: 1101px) {
+  .lm-hero,
+  .lm-section,
+  .lm-offers,
+  .lm-editorial {
+    padding-left: calc(var(--lm-page-pad) + 30px);
+  }
+
+  .lm-final {
+    padding-left: max(calc(var(--lm-page-pad) + 30px), calc((100vw - 1500px) / 2));
+  }
 }

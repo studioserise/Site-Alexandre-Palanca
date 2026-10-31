@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080808">
+  <meta name="theme-color" content="#000">
   <meta name="description" content="Photographe et vidéaste indépendant à Sarlat-la-Canéda, en Dordogne et dans le Périgord. Portraits, événements, lieux et marques.">
 
   <title>Alexandre Palanca — Photographe & vidéaste à Sarlat</title>
@@ -15,7 +15,7 @@
     ========================= */
 
     :root {
-      --black: #080808;
+      --black: #000;
       --white: #f5f3ef;
       --page-padding: clamp(24px, 6vw, 100px);
       --reveal-size: 300px;
@@ -516,7 +516,7 @@
       align-items: center;
       gap: clamp(42px, 8vw, 120px);
       padding: clamp(88px, 12vw, 160px) var(--page-padding);
-      background: #111110;
+      background: #000;
     }
 
     .about-copy {
@@ -625,9 +625,21 @@
       .hero-introduction h2 { font-size: clamp(1.4rem, 6.48vw, 2.16rem); }
       .hero-introduction .intro-text { font-size: 0.92rem; }
     }
+
+    /* Décalage de 30 px vers la droite pour dégager le repère latéral */
+    @media (min-width: 1101px) {
+      .hero-meta--contact {
+        left: calc(max(22px, var(--page-padding)) + 30px);
+      }
+
+      .work-section,
+      .about-section {
+        padding-left: calc(var(--page-padding) + 30px);
+      }
+    }
   </style>
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="site-nav.css?v=mobile-type3">
+  <link rel="stylesheet" href="site-nav.css?v=black2">
   <link rel="stylesheet" href="cursor.css?v=3">
   <script type="module" src="site-nav.js?v=footer-icons"></script>
   <link rel="stylesheet" href="section-marker.css?v=5">
