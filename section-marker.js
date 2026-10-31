@@ -23,7 +23,7 @@
   const PITCH = 14; // espacement visé entre deux graduations (px)
   const INSET = 22; // marge haute et basse de la règle (px)
   const SIGMA_PX = 46; // étendue de l'effet d'agrandissement (px)
-  const ARRIVAL = 0.16; // distance (en sections) à laquelle un grand tiret s'active
+  const RAMP = 0.14; // fondu du numéro, en fraction de la hauteur de fenêtre
 
   const marker = document.createElement("div");
   marker.className = "section-marker";
@@ -36,12 +36,15 @@
   let ticks = [];
   let labels = [];
   let anchors = [];
+  let shown = [];
   let pitch = PITCH;
   let target = 0;
   let current = 0;
   let frame = 0;
 
   // Des sections côte à côte (même position verticale) ne forment qu'une étape.
+  const smooth = (x) => x * x * (3 - 2 * x);
+
   const computeGroups = () => {
     groupOf = [];
     let previous = null;
@@ -97,6 +100,32 @@
     }
   };
 
+  // Le numéro apparaît quand le haut de la section atteint le haut de la fenêtre
+  // et disparaît quand son bas atteint le milieu de la fenêtre.
+  const readVisibility = () => {
+    const h = window.innerHeight;
+    const ramp = h * RAMP;
+    const room = Math.max(document.documentElement.scrollHeight - h - window.scrollY, 0);
+    const top = [];
+    const bottom = [];
+    sections.forEach((el, i) => {
+      const r = el.getBoundingClientRect();
+      const g = groupOf[i];
+      top[g] = top[g] === undefined ? r.top : Math.min(top[g], r.top);
+      bottom[g] = bottom[g] === undefined ? r.bottom : Math.max(bottom[g], r.bottom);
+    });
+    shown = top.map((t, g) => {
+      // La dernière section ne peut pas toujours remonter jusqu'en haut de la fenêtre.
+      const reach = Math.max(t - room, 0);
+      const appear = Math.min(Math.max(1 - (t - reach) / ramp, 0), 1);
+      // Les sections courtes gardent leur numéro un instant : seuil ramené à 40 % de leur hauteur.
+      const height = bottom[g] - top[g];
+      const mid = Math.min(h / 2, height * 0.4);
+      const vanish = Math.min(Math.max((bottom[g] - mid) / Math.min(ramp, height * 0.3), 0), 1);
+      return smooth(Math.min(appear, vanish));
+    });
+  };
+
   const readPosition = () => {
     const y = window.scrollY;
     if (y <= anchors[0]) return 0;
@@ -105,8 +134,6 @@
     }
     return groupCount - 1;
   };
-
-  const smooth = (x) => x * x * (3 - 2 * x);
 
   const render = () => {
     const c = current * subdivisions;
@@ -118,7 +145,7 @@
       let alpha;
       if (tick.dataset.major) {
         const index = Number(tick.dataset.major);
-        const a = smooth(Math.max(0, 1 - Math.abs(current - index) / ARRIVAL));
+        const a = shown[index] || 0;
         width = 0.3 + 0.1 * g + 0.6 * a;
         alpha = 0.6 + 0.4 * Math.max(g, a);
         labels[index].style.opacity = a;
@@ -143,6 +170,7 @@
 
   const update = () => {
     target = readPosition();
+    readVisibility();
     if (!frame) frame = requestAnimationFrame(loop);
   };
 
@@ -154,6 +182,7 @@
     }
     computeAnchors();
     target = readPosition();
+    readVisibility();
     current = target;
     render();
   };
