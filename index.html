@@ -424,8 +424,17 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 50px;
       min-width: 0;
+    }
+
+    .work-image-frame::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 35%, rgba(0, 0, 0, 0.35) 65%, rgba(0, 0, 0, 0.75) 100%);
     }
 
     .work-image-frame {
