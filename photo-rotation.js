@@ -4,7 +4,7 @@
   'use strict';
 
   var FIGURES = '.portrait-photo';
-  var INTERVAL = 8000;
+  var INTERVAL = 6000;
   var STEP = 130;
   var DURATION = 1100;
 
