@@ -119,8 +119,8 @@ textarea {
 }
 
 .site-footer {
-  padding: 54px var(--site-nav-edge-spacing) 26px;
-  background: #111110;
+  padding: 110px clamp(24px, 6.95vw, 100px) 80px;
+  background: linear-gradient(to bottom, rgba(17, 17, 16, 0) 0, #111110 110px, #111110 100%);
   color: #d8d5cf;
 }
 
@@ -133,6 +133,7 @@ textarea {
 }
 
 .site-footer-brand > a {
+  text-decoration: none;
   color: #f5f3ef;
   font-family: "Intro Rust", sans-serif;
   font-size: 1.6rem;
@@ -185,6 +186,8 @@ textarea {
 
 .site-footer-legal {
   display: flex;
+  margin-top: 20px;
+  padding-bottom: 8px;
   grid-column: 1 / -1;
   flex-wrap: wrap;
   gap: 12px 26px;
@@ -343,7 +346,8 @@ textarea {
 
 @media (max-width: 480px) {
   .site-footer {
-    padding-top: 42px;
+    padding-top: 64px;
+    padding-bottom: 48px;
   }
 
   .site-footer-inner {
