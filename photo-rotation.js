@@ -4,7 +4,7 @@
   'use strict';
 
   var FIGURES = '.portrait-photo';
-  var INTERVAL = 4000;
+  var INTERVAL = 8000;
   var SLOT_OFFSET = 700;
   var DURATION = 1100;
 
