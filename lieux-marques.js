@@ -1,15 +1,15 @@
 const content = {
   hero: {
     eyebrow: "Photographie · Lieux & marques",
-    title: "Des lieux à vivre.\nDes histoires à raconter.",
-    intro: "Des images éditoriales pour révéler l’identité d’un lieu, d’une marque ou d’un savoir-faire.",
+    title: "Des lieux à découvrir.\nDes images qui leur ressemblent.",
+    intro: "Photographie et vidéo pour présenter un établissement, une marque ou un savoir-faire.",
     image: "images/lieux-marques.jpg",
     imageAlt: "Façade de l’Hôtel Plaza Madeleine photographiée depuis la rue."
   },
   portfolio: {
     eyebrow: "Sélection photographique",
     title: "Lieux, gestes et matières.",
-    intro: "Une première image issue du portfolio. Les autres emplacements attendent vos photographies de projets.",
+    intro: "Une image du portfolio est présentée ici. Les autres emplacements attendent des photographies de projets à venir.",
     items: [
       {
         image: "images/lieux-marques.jpg",
@@ -36,8 +36,8 @@ const content = {
   },
   approach: {
     eyebrow: "L’approche",
-    title: "Révéler ce qui rend chaque lieu singulier.",
-    text: "Une architecture, une matière, un geste ou une lumière participent à l’identité d’un lieu. Mon approche consiste à les observer et à les réunir dans une série d’images cohérente, pensée pour raconter un univers et prolonger son identité visuelle.",
+    title: "Chaque lieu a ses propres repères.",
+    text: "L’architecture, la lumière, les matières et les gestes donnent à un lieu son caractère. Je les photographie pour constituer des images cohérentes avec son activité et ses usages.",
     image: "images/accueil.jpg",
     imageAlt: "Hôtel Plaza Madeleine, façade et volets photographiés en lumière naturelle.",
     note: "Photographie présente dans le portfolio"
@@ -46,8 +46,8 @@ const content = {
     eyebrow: "Des formats adaptés à votre projet",
     title: "Les prestations",
     intro: "De la séance ponctuelle à la création d’une bibliothèque de contenus, chaque accompagnement est pensé selon vos besoins.",
-    note: "Chaque projet est différent. Les prestations sont adaptées au lieu, aux besoins et aux usages des images.",
-    priceNote: "Prix et volumes indicatifs, à ajuster selon le périmètre du projet.",
+    note: "Les prestations présentées ci-dessous sont à ajuster selon le lieu, les besoins et les usages des images.",
+    priceNote: "Prix et volumes indicatifs, à ajuster selon le périmètre du projet. Les formats courts, formats verticaux, sous-titres et déclinaisons pour les réseaux sociaux restent à confirmer selon leur disponibilité.",
     packs: [
       {
         id: "essential-offer",
@@ -80,7 +80,7 @@ const content = {
             deliverables: [
               "1 séance photo de 2 à 3 heures.",
               "20 à 30 photographies retouchées.",
-              "5 à 8 vidéos courtes verticales.",
+              "Formats vidéo courts : disponibilité à confirmer.",
               "Une mini-banque de contenus classée par thème.",
               "Un calendrier éditorial indicatif sur 2 mois.",
               "Livraison des fichiers prêts à publier."
@@ -94,10 +94,10 @@ const content = {
             deliverables: [
               "2 séances photo réparties sur la période.",
               "35 à 50 photographies retouchées.",
-              "8 à 12 vidéos courtes verticales.",
+              "Formats vidéo courts : disponibilité et volume à confirmer.",
               "3 séries de contenus thématiques.",
               "Un calendrier éditorial sur 3 mois.",
-              "Des contenus adaptés aux publications, stories et Reels."
+              "Déclinaisons pour les réseaux sociaux : à confirmer selon les formats disponibles."
             ]
           },
           {
@@ -108,7 +108,7 @@ const content = {
             deliverables: [
               "4 séances photo réparties sur 6 mois.",
               "70 à 100 photographies retouchées.",
-              "16 à 24 vidéos courtes verticales.",
+              "Formats vidéo courts : disponibilité et volume à confirmer.",
               "Des séries adaptées aux saisons et aux temps forts.",
               "Un calendrier éditorial global, actualisé au fil des séances.",
               "Une banque de contenus organisée et livrée progressivement."
@@ -137,8 +137,8 @@ const content = {
   },
   editorial: {
     eyebrow: "Accompagnement éditorial",
-    title: "Des images pour faire vivre votre communication.",
-    text: "Construire une bibliothèque de contenus cohérente, pensée pour vos prochaines semaines de communication et adaptée à l’identité de votre établissement ou de votre marque.",
+    title: "Des images pour votre communication.",
+    text: "Une banque d’images organisée peut faciliter la communication de votre établissement ou de votre marque au fil de l’année.",
     keywords: [
       "Photographie",
       "Direction artistique",

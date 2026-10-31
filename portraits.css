@@ -416,7 +416,7 @@ a {
   }
 
   .portrait-copy h2 {
-    font-size: clamp(2.4rem, 10vw, 3.6rem);
+    font-size: clamp(1.75rem, 10vw, 3.6rem);
   }
 
   .portrait-description {

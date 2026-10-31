@@ -81,6 +81,8 @@ Les nouveaux codes d’accès doivent contenir au moins 10 lettres, chiffres ou 
 
 ## Vérifications avant production
 
+- Vérifier les mentions légales et la politique de confidentialité avant publication, notamment les obligations de diffusion de l’adresse de domiciliation, les durées de conservation proposées et les sous-traitants réellement utilisés. Le téléphone, Instagram et Facebook sont renseignés dans le pied de page.
+- Ne pas présenter les galeries clients comme opérationnelles tant que le déploiement Supabase, les buckets privés, les secrets serveur et les tests de bout en bout ne sont pas validés.
 - Confirmer que les deux buckets sont privés et que les utilisateurs `anon` et `authenticated` n’ont pas d’accès direct aux tables ou aux objets.
 - Vérifier qu’un original ne peut pas être récupéré depuis le navigateur, même avec une URL devinée.
 - Tester code valide, code invalide, expiration et fermeture manuelle d’une galerie.

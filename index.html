@@ -5,8 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#080808">
+  <meta name="description" content="Photographe et vidéaste indépendant à Sarlat-la-Canéda, en Dordogne et dans le Périgord. Portraits, événements, lieux et marques.">
 
-  <title>Alexandre Palanca — Photographie & Vidéos</title>
+  <title>Alexandre Palanca — Photographe & vidéaste à Sarlat</title>
 
   <style>
     /* =========================
@@ -401,6 +402,46 @@
       content: " ↗";
     }
 
+    .about-section {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
+      align-items: center;
+      gap: clamp(42px, 8vw, 120px);
+      padding: clamp(88px, 12vw, 160px) var(--page-padding);
+      background: #111110;
+    }
+
+    .about-copy {
+      max-width: 640px;
+    }
+
+    .about-copy h2 {
+      margin: 0;
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      font-weight: 400;
+      letter-spacing: -0.045em;
+    }
+
+    .about-copy p:not(.eyebrow) {
+      margin: 24px 0 0;
+      color: #c1beb8;
+      font-size: 0.95rem;
+      line-height: 1.9;
+    }
+
+    .about-photo-placeholder {
+      display: grid;
+      min-height: clamp(320px, 42vw, 560px);
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #242320, #171716);
+      color: #aaa7a1;
+      font-size: 0.65rem;
+      letter-spacing: 0.16em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
     /* =========================
        6. RESPONSIVE
     ========================= */
@@ -432,6 +473,15 @@
         gap: 60px;
       }
 
+      .about-section {
+        grid-template-columns: 1fr;
+        gap: 34px;
+      }
+
+      .about-photo-placeholder {
+        min-height: 105vw;
+      }
+
       .work-image {
         filter: grayscale(0%);
         -webkit-mask-image: none;
@@ -459,8 +509,9 @@
     }
   </style>
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="site-nav.css?v=rounded-controls">
+  <link rel="stylesheet" href="site-nav.css?v=footer-icons">
   <link rel="stylesheet" href="cursor.css?v=3">
+  <script type="module" src="site-nav.js?v=footer-icons"></script>
   <script src="cursor.js?v=1" defer></script>
 </head>
 
@@ -559,18 +610,17 @@
 
         <div class="hero-introduction" id="hero-introduction">
 
-          <p class="eyebrow">Un regard, des histoires</p>
+          <p class="eyebrow">Photographie &amp; vidéo</p>
 
           <h2>
-            Des images pour révéler
-            ce qui vous rend singulier.
+            Des images pour vos lieux,
+            vos projets et vos événements.
           </h2>
 
           <p class="intro-text">
-            Photographie, vidéo et création visuelle :
-            nous accompagnons les lieux, les personnes
-            et les événements dans la création d'images
-            qui racontent leur univers.
+            Je crée des images fixes et animées pour les personnes,
+            les événements et les lieux, avec une attention particulière
+            à la lumière, aux gestes et à l'atmosphère.
           </p>
 
         </div>
@@ -592,14 +642,13 @@
 
       <div class="work-heading">
 
-        <p class="eyebrow">Nos domaines d'intervention</p>
+        <p class="eyebrow">Mes domaines d'intervention</p>
 
-        <h2>Trois façons de raconter le réel.</h2>
+        <h2>Trois univers, une même attention à l’image.</h2>
 
         <p>
-          Des projets singuliers, des univers différents,
-          une même attention portée à l'image et à ce
-          qu'elle transmet.
+          Des projets différents, avec la même exigence de justesse
+          et de soin dans chaque image.
         </p>
 
       </div>
@@ -631,8 +680,8 @@
 
           <div>
             <p class="work-description">
-              Portraits et reportages photographiques pour raconter
-              les personnes, les activités et les événements.
+              Portraits et reportages photographiques de personnes,
+              d'activités et d'événements.
             </p>
 
             <a class="work-link" href="photos.html">
@@ -668,8 +717,8 @@
 
           <div>
             <p class="work-description">
-              Des créations vidéo pour donner mouvement et vie
-              à vos histoires, vos projets et vos événements.
+              Des créations vidéo adaptées à vos projets et aux
+              événements que vous souhaitez documenter.
             </p>
 
             <a class="work-link" href="video.html">
@@ -705,9 +754,8 @@
 
           <div>
             <p class="work-description">
-              Valoriser les lieux, les savoir-faire,
-              les produits et les identités professionnelles
-              à travers la photographie et la vidéo.
+              Photographies et vidéos pour présenter les lieux,
+              les savoir-faire, les produits et les activités.
             </p>
 
             <a class="work-link" href="lieux-marques.html">
@@ -719,6 +767,26 @@
 
       </div>
 
+    </section>
+
+    <section class="about-section" id="a-propos" aria-labelledby="about-title">
+      <div class="about-copy">
+        <p class="eyebrow">Photographe &amp; vidéaste</p>
+        <h2 id="about-title">À propos</h2>
+        <p>
+          Je suis Alexandre, photographe et vidéaste indépendant. J’aime observer
+          les personnes dans leur environnement, les gestes d’un métier et
+          l’atmosphère propre à chaque lieu ou événement.
+        </p>
+        <p>
+          Avant chaque prise de vue, je prends le temps d’échanger pour comprendre
+          vos attentes et définir le cadre de la séance ou du tournage. Je m’implique
+          de la préparation à la livraison des images.
+        </p>
+      </div>
+      <div class="about-photo-placeholder" role="img" aria-label="Photographie d’Alexandre à intégrer ultérieurement">
+        Photographie d’Alexandre à intégrer
+      </div>
     </section>
 
   </main>
@@ -764,8 +832,6 @@
     const introduction = document.getElementById("hero-introduction");
     const scrollIndicator = document.getElementById("scroll-indicator");
     const siteNav = document.getElementById("site-nav");
-    const siteNavToggle = document.getElementById("site-nav-toggle");
-    const siteNavLinks = document.getElementById("site-nav-links");
 
     let scrollFrame = null;
     let signatureAnimationComplete = false;
@@ -873,50 +939,6 @@
     });
 
     window.addEventListener("resize", requestScrollUpdate);
-
-    function closeMobileNav(restoreFocus = false) {
-      siteNav.classList.remove("is-menu-open");
-      siteNavToggle.setAttribute("aria-expanded", "false");
-      siteNavToggle.setAttribute("aria-label", "Ouvrir le menu");
-
-      if (restoreFocus) {
-        siteNavToggle.focus();
-      }
-    }
-
-    siteNavToggle.addEventListener("click", () => {
-      const isOpen = siteNav.classList.toggle("is-menu-open");
-
-      siteNavToggle.setAttribute("aria-expanded", String(isOpen));
-      siteNavToggle.setAttribute(
-        "aria-label",
-        isOpen ? "Fermer le menu" : "Ouvrir le menu"
-      );
-    });
-
-    siteNavLinks.addEventListener("click", (event) => {
-      if (event.target.closest("a")) {
-        closeMobileNav();
-      }
-    });
-
-    document.addEventListener("pointerdown", (event) => {
-      if (!siteNav.contains(event.target)) {
-        closeMobileNav();
-      }
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && siteNav.classList.contains("is-menu-open")) {
-        closeMobileNav(true);
-      }
-    });
-
-    window.matchMedia("(min-width: 801px)").addEventListener("change", (event) => {
-      if (event.matches) {
-        closeMobileNav();
-      }
-    });
 
     async function playSignatureAnimation(run) {
       const reducedMotion = window.matchMedia(

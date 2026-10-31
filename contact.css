@@ -180,6 +180,13 @@ body {
   font-size: 0.74rem;
 }
 
+.contact-consent label a,
+.contact-privacy-note a {
+  color: #e8e5df;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .contact-honeypot {
   position: absolute;
   width: 1px;
