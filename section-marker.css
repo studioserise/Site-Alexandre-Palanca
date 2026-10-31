@@ -50,7 +50,7 @@
 }
 
 /* Pas de repère sur mobile ni sur petits écrans : il empiéterait sur le contenu. */
-@media (max-width: 1200px) {
+@media (max-width: 1100px) {
   .section-marker {
     display: none;
   }
