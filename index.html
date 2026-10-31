@@ -267,6 +267,96 @@
       white-space: nowrap;
     }
 
+    /* Informations discrètes autour de l'image (au-dessus des deux couches photo) */
+
+    .hero-socials,
+    .hero-meta {
+      position: absolute;
+      z-index: 5;
+      color: #f2efe8;
+      will-change: opacity;
+    }
+
+    .hero-socials {
+      top: 50%;
+      right: max(22px, var(--page-padding));
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transform: translateY(-50%);
+    }
+
+    .hero-social-link {
+      display: flex;
+      width: 44px;
+      height: 44px;
+      align-items: center;
+      justify-content: center;
+      color: inherit;
+      opacity: 0.78;
+      transition: opacity 200ms ease, transform 200ms ease;
+    }
+
+    .hero-social-link svg {
+      width: 21px;
+      height: 21px;
+    }
+
+    .hero-social-link:hover,
+    .hero-social-link:focus-visible {
+      opacity: 1;
+      transform: translateY(-2px);
+    }
+
+    .hero-meta {
+      bottom: 35px;
+      margin: 0;
+      font-size: 0.68rem;
+      line-height: 1.7;
+      letter-spacing: 0.1em;
+      color: rgba(242, 239, 232, 0.85);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+    }
+
+    .hero-meta--contact {
+      left: max(22px, var(--page-padding));
+    }
+
+    .hero-meta--place {
+      right: max(22px, var(--page-padding));
+      text-align: right;
+    }
+
+    .hero-meta span {
+      display: block;
+    }
+
+    @media (max-width: 800px) {
+      .hero-socials {
+        top: 22px;
+        right: auto;
+        left: 50%;
+        flex-direction: row;
+        gap: 4px;
+        transform: translateX(-50%);
+      }
+
+      .hero-meta {
+        bottom: 72px;
+        font-size: 0.52rem;
+        line-height: 1.6;
+        letter-spacing: 0.06em;
+      }
+
+      .hero-meta--contact {
+        left: 22px;
+      }
+
+      .hero-meta--place {
+        right: 22px;
+      }
+    }
+
     /* =========================
        5. LES TROIS AXES
     ========================= */
@@ -507,9 +597,19 @@
         scroll-behavior: auto !important;
       }
     }
+
+    @media (max-width: 680px) {
+      .work-heading h2 { font-size: 1.73rem; }
+      .work-title h3 { font-size: 1.08rem; }
+      .work-description { font-size: 0.91rem; }
+      .about-copy h2 { font-size: clamp(1.84rem, 8.64vw, 2.81rem); }
+      .about-copy p:not(.eyebrow) { font-size: 0.95rem; }
+      .hero-introduction h2 { font-size: clamp(1.4rem, 6.48vw, 2.16rem); }
+      .hero-introduction .intro-text { font-size: 0.92rem; }
+    }
   </style>
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="site-nav.css?v=footer-fade">
+  <link rel="stylesheet" href="site-nav.css?v=mobile-type3">
   <link rel="stylesheet" href="cursor.css?v=3">
   <script type="module" src="site-nav.js?v=footer-icons"></script>
   <script src="cursor.js?v=1" defer></script>
@@ -624,6 +724,23 @@
           </p>
 
         </div>
+
+        <!-- Réseaux sociaux : remplacer les URL ci-dessous -->
+        <nav class="hero-socials" id="hero-socials" aria-label="Réseaux sociaux">
+          <a class="hero-social-link" href="https://www.instagram.com/alexpalanca_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/></svg></a>
+          <a class="hero-social-link" href="https://www.facebook.com/alexandre.palanca.7" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8.5h2.5V5H14a3.5 3.5 0 0 0-3.5 3.5V11H8v3.5h2.5V21H14v-6.5h2.5l.5-3.5h-3V8.8a.3.3 0 0 1 .3-.3z"/></svg></a>
+        </nav>
+
+        <!-- Coordonnées (bas gauche) : remplacer le texte de chaque ligne -->
+        <p class="hero-meta hero-meta--contact" id="hero-meta-contact">
+          <span>À compléter – coordonnées</span>
+          <span>À compléter – coordonnées</span>
+        </p>
+
+        <!-- Lieu de la photo (bas droite) : remplacer le texte -->
+        <p class="hero-meta hero-meta--place" id="hero-meta-place">
+          <span>À compléter – lieu</span>
+        </p>
 
         <div class="scroll-indicator" id="scroll-indicator">
           Défiler pour découvrir
@@ -831,6 +948,7 @@
     const brand = document.getElementById("hero-brand");
     const introduction = document.getElementById("hero-introduction");
     const scrollIndicator = document.getElementById("scroll-indicator");
+    const heroSideInfo = document.querySelectorAll(".hero-socials, .hero-meta");
     const siteNav = document.getElementById("site-nav");
 
     let scrollFrame = null;
@@ -923,6 +1041,13 @@
       scrollIndicator.style.opacity = String(
         1 - clamp(progress * 8, 0, 1)
       );
+
+      const sideInfoOpacity = 1 - clamp(progress * 8, 0, 1);
+
+      heroSideInfo.forEach((element) => {
+        element.style.opacity = String(sideInfoOpacity);
+        element.style.pointerEvents = sideInfoOpacity < 0.05 ? "none" : "";
+      });
     }
 
     function requestScrollUpdate() {

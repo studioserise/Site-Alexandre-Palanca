@@ -374,3 +374,7 @@ textarea {
     transition-duration: 0.01ms !important;
   }
 }
+
+@media (max-width: 680px) {
+  .site-footer-brand > a { font-size: 1.4rem; }
+}

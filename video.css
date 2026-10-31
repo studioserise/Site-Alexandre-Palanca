@@ -558,3 +558,12 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+@media (max-width: 680px) {
+  .video-hero h1 { font-size: clamp(2.27rem, 9.72vw, 3.89rem); }
+  .video-section-heading h2,
+  .video-production-heading h2,
+  .video-final-copy h2 { font-size: clamp(2.05rem, 9.18vw, 3.24rem); }
+  .video-format-image h3 { font-size: clamp(1.3rem, 5.94vw, 1.94rem); }
+  .video-hero-intro { font-size: 0.91rem; }
+}

@@ -317,3 +317,8 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+@media (max-width: 680px) {
+  .contact-intro h1 { font-size: clamp(2.16rem, 10.26vw, 3.67rem); }
+  .contact-intro > p:not(.contact-eyebrow) { font-size: 0.89rem; }
+}

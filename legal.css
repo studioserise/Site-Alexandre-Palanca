@@ -79,3 +79,10 @@ body {
     padding-top: 126px;
   }
 }
+
+@media (max-width: 680px) {
+  .legal-main h1 { font-size: 1.73rem; }
+  .legal-main h2 { font-size: 1.3rem; }
+  .legal-main p,
+  .legal-main li { font-size: 0.93rem; }
+}

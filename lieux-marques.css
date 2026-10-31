@@ -1061,3 +1061,18 @@ button {
     animation-iteration-count: 1 !important;
   }
 }
+
+@media (max-width: 680px) {
+  .lm-hero h1 { font-size: clamp(1.62rem, 7.56vw, 2.92rem); }
+  .lm-offers-heading h2,
+  .lm-final-copy h2 { font-size: clamp(2.05rem, 9.18vw, 3.24rem); }
+  .lm-editorial-copy h2 { font-size: clamp(1.62rem, 7.34vw, 3.24rem); }
+  .lm-offer-header h3 { font-size: clamp(1.3rem, 5.94vw, 1.94rem); }
+  .lm-hero-intro { font-size: 0.91rem; }
+}
+
+@media (max-width: 680px) {
+  .lm-section-heading h2,
+  .lm-approach-copy h2,
+  .lm-services-heading h2 { font-size: clamp(1.84rem, 8.1vw, 3.02rem); }
+}

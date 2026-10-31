@@ -925,3 +925,9 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+
+@media (max-width: 680px) {
+  .gallery-landing h1,
+  .gallery-message-card h1 { font-size: clamp(2.16rem, 9.72vw, 3.67rem); }
+  .gallery-page-header h1 { font-size: clamp(1.94rem, 8.64vw, 3.24rem); }
+}

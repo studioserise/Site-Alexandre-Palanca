@@ -237,3 +237,9 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+@media (max-width: 680px) {
+  .photos-intro h1 { font-size: clamp(1.94rem, 9.18vw, 3.46rem); }
+  .photo-universe-copy h2 { font-size: clamp(1.73rem, 8.64vw, 3.46rem); }
+  .photo-universe-copy > p:not(.lm-eyebrow) { font-size: 0.89rem; }
+}
