@@ -106,3 +106,12 @@ Avant d’activer l’envoi en production :
 5. Testez une demande reçue dans la boîte destinataire, ainsi que les erreurs d’envoi et le contrôle anti-spam.
 
 Le formulaire demande le nom, l’adresse e-mail, la prestation et une description du projet. Le téléphone et la date souhaitée sont facultatifs. Les messages sont envoyés sans fichier joint.
+
+## Gestion commerciale (devis et factures)
+
+1. Appliquer la migration `supabase/migrations/202610310004_commercial_management.sql`.
+2. Déployer la fonction : `supabase functions deploy commerce-api`.
+3. Vérifier les secrets `RESEND_API_KEY` et `ORDER_EMAIL_FROM` (envoi des documents par e-mail).
+4. Renseigner l'émetteur (nom, adresse, SIREN, IBAN, mentions) dans l'onglet « Réglages » de `gestion-commerciale.html`.
+
+L'accès se fait par « Accès administrateur » dans la page Galerie. Les PDF sont archivés dans le bucket privé `commerce-documents`.

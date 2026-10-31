@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png?v=2">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Espace administrateur — Alexandre Palanca</title>
+  <link rel="stylesheet" href="galeries.css?v=black2">
+  <link rel="stylesheet" href="commerce.css?v=1">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css?v=black2">
+  <link rel="stylesheet" href="cursor.css?v=7">
+  <script src="site-nav.js?v=footer-icons" defer></script>
+  <script src="cursor.js?v=3" defer></script>
+  <script type="module" src="admin.js?v=1"></script>
+</head>
+<body>
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links"><span></span><span></span></button>
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="photos.html">Photos</a></li>
+          <li><a class="site-nav-link" href="video.html">Vidéos</a></li>
+          <li><a class="site-nav-link" href="lieux-marques.html">Lieux &amp; marques</a></li>
+          <li><a class="site-nav-link" href="galerie.html" aria-current="page">Galerie</a></li>
+          <li><a class="site-nav-link" href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="gallery-admin admin-hub">
+    <p class="gallery-eyebrow">Espace photographe</p>
+    <h1>Accès<br>administrateur</h1>
+    <p class="gallery-error" id="admin-message" role="status"></p>
+
+    <form class="gallery-admin-panel gallery-admin-form admin-hub-login" id="admin-login-form">
+      <h2>Connexion administrateur</h2>
+      <label class="gallery-admin-label" for="admin-email">
+        Adresse e-mail
+        <input class="gallery-admin-input" id="admin-email" type="email" autocomplete="username" required>
+      </label>
+      <label class="gallery-admin-label" for="admin-password">
+        Mot de passe
+        <input class="gallery-admin-input" id="admin-password" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="gallery-primary-button" type="submit">Se connecter</button>
+    </form>
+
+    <section id="admin-choice" hidden>
+      <div class="gallery-admin-record-header">
+        <h2>Où souhaitez-vous aller ?</h2>
+        <button class="gallery-quiet-button" id="admin-logout" type="button">Se déconnecter</button>
+      </div>
+      <div class="gallery-admin-grid">
+        <a class="gallery-admin-panel admin-hub-card" href="admin-galeries.html">
+          <h2>Gestion des galeries</h2>
+          <p class="gallery-admin-note">Créer les galeries privées, ajouter des photos, suivre les commandes et les téléchargements.</p>
+          <span class="admin-hub-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="gallery-admin-panel admin-hub-card" href="gestion-commerciale.html">
+          <h2>Gestion commerciale</h2>
+          <p class="gallery-admin-note">Devis, factures, clients, prestations, acomptes et règlements.</p>
+          <span class="admin-hub-arrow" aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
