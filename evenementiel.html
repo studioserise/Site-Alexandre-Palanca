@@ -27,6 +27,11 @@
   <link rel="stylesheet" href="section-marker.css?v=black">
   <script src="cursor.js?v=3" defer></script>
   <script src="section-marker.js?v=8" defer></script>
+  <script src="vendor/gsap.min.js" defer></script>
+  <script src="vendor/ScrollTrigger.min.js" defer></script>
+  <script type="module" src="drone.js?v=6"></script>
+  <link rel="stylesheet" href="drone.css?v=6">
+  <link rel="stylesheet" href="mobile-cta.css?v=2">
 </head>
 <body class="portraits-page evenementiel-page">
   <header class="site-nav is-visible" id="site-nav">
@@ -59,7 +64,7 @@
       <p class="portraits-eyebrow">Photographie · Événementiel</p>
       <h1 id="event-title">L'instant, dans toute son intensité.</h1>
       <p class="portraits-intro-text">Des célébrations privées aux rendez-vous culturels, je photographie l’ambiance, les temps forts et les échanges qui font la singularité de chaque événement.</p>
-      <a class="portraits-scroll" href="#evenements-publics"><span aria-hidden="true">↓</span> Découvrir</a>
+      <a class="portraits-scroll" href="#evenements-publics"><span aria-hidden="true">↓</span> Découvrir les formules</a>
     </header>
 
     <div class="portrait-services portrait-services--event">
@@ -123,6 +128,8 @@
         </div>
       </section>
     </div>
+
+    <section id="drone-evenementiel" data-drone-section data-drone-variant="compact" data-drone-flight="local" data-drone-flip="left" data-drone-cta="lieux-marques.html#digital" data-drone-text="Mariage, concert, festival ou événement d'entreprise : le drone ajoute des plans d'ensemble du lieu et de l'assistance pour enrichir votre reportage photo."></section>
 
     <section class="portraits-conditions" aria-label="Informations communes aux formules événementielles">
       <div class="portrait-condition">

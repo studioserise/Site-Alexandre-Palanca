@@ -1,0 +1,275 @@
+.dg-section {
+  position: relative;
+  --service-fade: clamp(96px, 11vw, 170px);
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(129px, 16.5vw, 225px) var(--lm-page-pad, clamp(22px, 6.5vw, 104px)) calc(var(--service-fade) + 32px);
+  background-color: #f0ede6;
+  background-image:
+    linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.55) calc(var(--service-fade) * 0.4), rgba(0, 0, 0, 0) var(--service-fade), rgba(0, 0, 0, 0) calc(100% - var(--service-fade)), rgba(0, 0, 0, 0.55) calc(100% - var(--service-fade) * 0.4), #000 100%),
+    linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
+    url("images/Lieux-et-marques/hero-fond-nb.jpg?v=1");
+  background-position: center;
+  background-size: cover;
+  color: #171715;
+}
+
+/* Cadres translucides : même rendu que les cartes de prestations */
+.dg-formula,
+.dg-config,
+.dg-summary,
+.dg-study {
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  border-radius: 14px;
+}
+
+.dg-formula::before,
+.dg-config::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: inherit;
+  content: "";
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 62%, rgba(0, 0, 0, 0.78) 78%, transparent 100%);
+  mask-image: radial-gradient(ellipse at center, #000 62%, rgba(0, 0, 0, 0.78) 78%, transparent 100%);
+  pointer-events: none;
+}
+
+.dg-inner {
+  display: grid;
+  gap: clamp(72px, 9vw, 130px);
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.dg-eyebrow {
+  margin: 0 0 20px;
+  color: #6c685f;
+  font-size: 0.67rem;
+  letter-spacing: 0.21em;
+  text-transform: uppercase;
+}
+
+.dg-section h2 {
+  margin: 0 0 30px;
+  font-size: clamp(2.2rem, 4.6vw, 4.2rem);
+  font-weight: 400;
+  line-height: 1.04;
+}
+
+.dg-section h3,
+.dg-section h4 {
+  margin: 0;
+  font-weight: 400;
+}
+
+.dg-lead {
+  max-width: 560px;
+  margin: 0 0 18px;
+  line-height: 1.75;
+}
+
+.dg-footnote {
+  margin: 22px 0 0;
+  color: #6c685f;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+/* Introduction */
+.dg-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(32px, 6vw, 96px);
+  align-items: center;
+}
+
+.dg-axes {
+  display: grid;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(23, 23, 21, 0.25);
+}
+
+.dg-axes li {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(23, 23, 21, 0.25);
+}
+
+.dg-axe-number { color: #6c685f; font-size: 0.7rem; letter-spacing: 0.14em; padding-top: 6px; }
+.dg-axes h3 { margin-bottom: 6px; font-size: 1.35rem; }
+.dg-axes p { margin: 0; color: #46433d; font-size: 0.92rem; line-height: 1.6; }
+
+.dg-previews {
+  position: relative;
+  min-height: 360px;
+  padding-bottom: 12%;
+}
+
+.dg-device { margin: 0; }
+
+.dg-device-screen {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #1d1d1a;
+  color: #8d897f;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.dg-device-screen img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.dg-device--desktop {
+  width: 86%;
+  padding: 10px;
+  border-radius: 12px;
+  background: #0b0b0a;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.22);
+}
+
+.dg-device--desktop .dg-device-screen { aspect-ratio: 16 / 10; border-radius: 4px; }
+
+.dg-device--mobile {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 26%;
+  padding: 6px;
+  border-radius: 24px;
+  background: #0b0b0a;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+}
+
+.dg-device--mobile .dg-device-screen { aspect-ratio: 9 / 19; border-radius: 18px; }
+
+/* Formules */
+.dg-formulas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 28px);
+}
+
+.dg-formula {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(24px, 2.6vw, 38px);
+}
+
+.dg-formula-index { margin: 0 0 40px; color: #817e76; font-size: 0.7rem; letter-spacing: 0.14em; }
+.dg-formula h3 { font-size: clamp(1.8rem, 2.6vw, 2.5rem); text-transform: uppercase; }
+.dg-formula-price { display: grid; margin: 18px 0 14px; }
+.dg-formula-price small { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.7; }
+.dg-formula-price strong { font-size: 2rem; font-weight: 400; }
+.dg-formula-audience { margin: 0 0 22px; font-size: 0.9rem; opacity: 0.8; }
+.dg-formula ul { margin: 0 0 22px; padding: 0; list-style: none; }
+.dg-formula li { padding: 9px 0 9px 18px; position: relative; border-top: 1px solid rgba(128, 124, 114, 0.35); font-size: 0.88rem; line-height: 1.45; }
+.dg-formula li::before { content: ""; position: absolute; left: 0; top: 1.05em; width: 7px; height: 1px; background: currentColor; }
+.dg-formula-note { margin: auto 0 0; font-size: 0.82rem; font-style: italic; opacity: 0.75; }
+
+/* Options */
+.dg-options { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 12px clamp(32px, 6vw, 96px); align-items: start; }
+.dg-options-head h3 { margin-bottom: 14px; font-size: clamp(1.8rem, 3vw, 2.6rem); }
+.dg-options-head p { margin: 0; line-height: 1.7; }
+.dg-options-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid rgba(23, 23, 21, 0.3); }
+.dg-options-list li { display: flex; justify-content: space-between; gap: 16px; padding: 20px 0; border-bottom: 1px solid rgba(23, 23, 21, 0.3); }
+.dg-options-list strong { font-weight: 400; white-space: nowrap; }
+.dg-options .dg-footnote { grid-column: 2; margin-top: 4px; }
+
+/* Configurateur */
+.dg-config { padding: clamp(24px, 4vw, 56px); color: #171715; }
+.dg-config .dg-eyebrow { color: #595751; }
+.dg-config-head h3 { margin-bottom: 36px; font-size: clamp(2rem, 3.6vw, 3.2rem); }
+
+.dg-progress { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 0 0 36px; padding: 0; list-style: none; }
+.dg-progress li { border-top: 1px solid rgba(23, 23, 21, 0.25); padding-top: 10px; color: #817e76; }
+.dg-progress li.is-current { border-color: #171715; color: #171715; }
+.dg-progress li.is-done { color: #393833; }
+.dg-progress-btn { display: flex; gap: 8px; align-items: baseline; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; text-align: left; }
+button.dg-progress-btn { cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+
+.dg-config-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: clamp(24px, 4vw, 64px); align-items: start; }
+.dg-step-body h4 { margin-bottom: 20px; font-size: 1.5rem; }
+.dg-hint { margin: -8px 0 18px; color: #595751; font-size: 0.85rem; }
+
+.dg-choice { position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 4px; border-top: 1px solid rgba(23, 23, 21, 0.2); cursor: pointer; }
+.dg-choice:last-child { border-bottom: 1px solid rgba(23, 23, 21, 0.2); }
+.dg-choice input { position: absolute; opacity: 0; }
+.dg-choice-box { flex: 0 0 18px; width: 18px; height: 18px; border: 1px solid #595751; border-radius: 50%; }
+.dg-choice input[type="checkbox"] + .dg-choice-box { border-radius: 2px; }
+.dg-choice input:checked + .dg-choice-box { background: #171715; box-shadow: inset 0 0 0 4px #f0ede6; }
+.dg-choice input:focus-visible + .dg-choice-box { outline: 2px solid #171715; outline-offset: 3px; }
+.dg-choice-body { display: grid; flex: 1; gap: 4px; }
+.dg-choice-detail { color: #595751; font-size: 0.82rem; }
+.dg-choice-tag { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; color: #393833; }
+
+.dg-summary { position: sticky; top: 110px; padding: 24px; border: 1px solid rgba(23, 23, 21, 0.25); }
+.dg-summary-title { margin: 0 0 14px; color: #595751; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; }
+.dg-summary-line { margin: 0 0 6px; font-size: 0.9rem; }
+.dg-summary-total { display: grid; margin: 18px 0 0; padding-top: 14px; border-top: 1px solid rgba(23, 23, 21, 0.25); }
+.dg-summary-total small { color: #595751; font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.dg-summary-total strong { font-size: 1.5rem; font-weight: 400; }
+.dg-summary-study { margin: 12px 0 0; color: #393833; font-size: 0.8rem; line-height: 1.5; }
+
+.dg-recap-list { margin: 0 0 8px; padding: 0; list-style: none; border-top: 1px solid rgba(23, 23, 21, 0.2); }
+.dg-recap-list li { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid rgba(23, 23, 21, 0.2); font-size: 0.92rem; }
+.dg-recap-list strong { font-weight: 400; text-align: right; }
+.dg-recap-list .is-quote strong { color: #393833; font-style: italic; }
+.dg-total { display: grid; margin: 22px 0 0; }
+.dg-total small { color: #595751; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; }
+.dg-total strong { margin: 4px 0; font-size: 2rem; font-weight: 400; }
+.dg-study { margin: 18px 0 0; padding: 16px 18px; border: 1px solid rgba(23, 23, 21, 0.5); line-height: 1.6; }
+.dg-config .dg-footnote { color: #595751; }
+
+.dg-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.dg-field { display: grid; gap: 8px; font-size: 0.78rem; color: #393833; }
+.dg-field input, .dg-field textarea { width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid rgba(23, 23, 21, 0.4); background: transparent; color: #171715; font: inherit; font-size: 1rem; border-radius: 0; }
+.dg-field input:focus, .dg-field textarea:focus { outline: 0; border-bottom-color: #171715; }
+.dg-consent { display: flex; gap: 12px; margin-top: 20px; font-size: 0.82rem; line-height: 1.55; color: #393833; }
+.dg-consent a { color: inherit; }
+.dg-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.dg-status { min-height: 1.4em; margin: 14px 0 0; color: #8a3b22; font-size: 0.88rem; }
+
+.dg-actions { display: flex; justify-content: space-between; gap: 16px; margin-top: 36px; }
+.dg-btn { padding: 16px 28px; border: 1px solid #171715; background: #171715; color: #f0ede6; font: inherit; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; transition: opacity 0.25s ease, background-color 0.25s ease, color 0.25s ease; }
+.dg-btn:hover:not(:disabled) { background: transparent; color: #171715; }
+.dg-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.dg-btn--ghost { background: transparent; color: #171715; }
+.dg-btn--ghost:hover:not(:disabled) { background: #171715; color: #f0ede6; }
+.dg-success { padding: 40px 0; }
+.dg-success h4 { margin-bottom: 12px; font-size: 1.8rem; }
+
+@media (max-width: 1000px) {
+  .dg-formulas { grid-template-columns: 1fr; }
+  .dg-config-layout { grid-template-columns: 1fr; }
+  .dg-summary { position: static; order: -1; }
+}
+
+@media (max-width: 800px) {
+  .dg-intro, .dg-options { grid-template-columns: 1fr; }
+  .dg-options .dg-footnote { grid-column: 1; }
+  .dg-fields { grid-template-columns: 1fr; }
+  .dg-progress { grid-template-columns: 1fr; gap: 0; }
+  .dg-progress li { border-top: 0; border-left: 2px solid rgba(240, 237, 230, 0.25); padding: 6px 0 6px 12px; }
+  .dg-progress li.is-current { border-left-color: #f0ede6; }
+  .dg-choice { flex-wrap: wrap; }
+  .dg-choice-tag { margin-left: 34px; }
+  .dg-actions { flex-direction: column-reverse; }
+  .dg-btn { width: 100%; }
+}

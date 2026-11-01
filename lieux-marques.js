@@ -2,51 +2,47 @@ const content = {
   hero: {
     eyebrow: "Photographie · Lieux & marques",
     title: "Des lieux à découvrir.\nDes images qui leur ressemblent.",
-    intro: "Photographie et vidéo pour présenter un établissement, une marque ou un savoir-faire.",
-    image: "images/lieux-marques.jpg",
-    imageAlt: "Façade de l’Hôtel Plaza Madeleine photographiée depuis la rue."
+    intro: "Photographie et vidéo pour présenter un établissement, une marque ou un savoir-faire."
   },
   portfolio: {
     eyebrow: "Sélection photographique",
     title: "Lieux, gestes et matières.",
-    intro: "Une image du portfolio est présentée ici. Les autres emplacements attendent des photographies de projets à venir.",
+    intro: "Je m’attache à saisir les détails qui font l’authenticité d’un lieu : une matière, un objet, une lumière, tout ce qui lui donne son caractère.",
     items: [
       {
-        image: "images/lieux-marques.jpg",
-        alt: "Façade de l’Hôtel Plaza Madeleine.",
-        caption: "Hospitalité",
+        image: "images/Lieux-et-marques/letm-04.png",
+        alt: "Chambre sous charpente apparente, aux murs rouges et au lit blanc.",
         className: "lm-mosaic-item--large"
       },
       {
-        placeholder: "Photographie à ajouter",
-        caption: "Architecture",
+        image: "images/Lieux-et-marques/letm-01.jpg",
+        alt: "Chambre d’hôtel aux tentures rouges, reflétée dans un miroir ancien.",
         className: "lm-mosaic-item--tall"
       },
       {
-        placeholder: "Photographie à ajouter",
-        caption: "Savoir-faire",
+        image: "images/Lieux-et-marques/letm-02.jpg",
+        alt: "Plaque de cheminée en fonte devant un mur en pierre.",
         className: "lm-mosaic-item--small"
       },
       {
-        placeholder: "Photographie à ajouter",
-        caption: "Matières",
+        image: "images/Lieux-et-marques/letm-03.jpg",
+        alt: "Table de salon avec verres, bouteille de vin et fauteuils en velours rouge.",
         className: "lm-mosaic-item--wide"
-      },
+      }
     ]
   },
   approach: {
     eyebrow: "L’approche",
     title: "Chaque lieu a ses propres repères.",
     text: "L’architecture, la lumière, les matières et les gestes donnent à un lieu son caractère. Je les photographie pour constituer des images cohérentes avec son activité et ses usages.",
-    image: "images/accueil.jpg",
-    imageAlt: "Hôtel Plaza Madeleine, façade et volets photographiés en lumière naturelle.",
-    note: "Photographie présente dans le portfolio"
+    image: "images/Lieux-et-marques/letm-05.png?v=2",
+    imageAlt: "Photographie d’un lieu réalisée pour la section L’approche."
   },
   offers: {
-    eyebrow: "Des formats adaptés à votre projet",
-    title: "Les prestations",
+    eyebrow: "Des formules adaptées à votre projet",
+    title: "Les formules",
     intro: "De la séance ponctuelle à la création d’une bibliothèque de contenus, chaque accompagnement est pensé selon vos besoins.",
-    note: "Les prestations présentées ci-dessous sont à ajuster selon le lieu, les besoins et les usages des images.",
+    note: "Les formules présentées ci-dessous sont à ajuster selon le lieu, les besoins et les usages des images.",
     priceNote: "Prix et volumes indicatifs, à ajuster selon le périmètre du projet. Les formats courts, formats verticaux, sous-titres et déclinaisons pour les réseaux sociaux restent à confirmer selon leur disponibilité.",
     packs: [
       {
@@ -145,7 +141,8 @@ const content = {
       "Création de contenu",
       "Planification"
     ],
-    placeholder: "Photographie éditoriale à ajouter pour l’accompagnement de contenu."
+    placeholder: "Photographie éditoriale à ajouter pour l’accompagnement de contenu.",
+    imageAlt: "Photographies illustrant l’accompagnement éditorial."
   },
   final: {
     eyebrow: "Projet sur mesure",
@@ -202,7 +199,6 @@ function renderMosaic() {
       );
       figure.append(placeholder);
     }
-    figure.append(createElement("figcaption", "", item.caption));
     mosaic.append(figure);
   }
 }
@@ -300,12 +296,53 @@ function renderOffers() {
   }
 }
 
+function setupEditorialSlideshow(frame) {
+  const names = ["editorial", "éditorial"];
+  const candidates = [1, 2, 3, 4, 5].map((n) =>
+    names.map((name) => `images/Lieux-et-marques/${name}-0${n}.jpg`)
+  );
+  const loadImage = (src) =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.className = "lm-editorial-slide";
+      img.alt = "";
+      img.decoding = "async";
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = encodeURI(src);
+    });
+  const loadFirst = async (sources) => {
+    for (const src of sources) {
+      const img = await loadImage(src);
+      if (img) return img;
+    }
+    return null;
+  };
+
+  Promise.all(candidates.map(loadFirst)).then((loaded) => {
+    const slides = loaded.filter(Boolean);
+    if (!slides.length) {
+      frame.append(createElement("span", "", content.editorial.placeholder));
+      return;
+    }
+    frame.setAttribute("aria-label", content.editorial.imageAlt);
+    frame.classList.add("has-image");
+    frame.append(...slides);
+    slides[0].classList.add("is-active");
+    if (slides.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let current = 0;
+    window.setInterval(() => {
+      slides[current].classList.remove("is-active");
+      current = (current + 1) % slides.length;
+      slides[current].classList.add("is-active");
+    }, 5000);
+  });
+}
+
 function renderPage() {
   setText("lm-hero-eyebrow", content.hero.eyebrow);
   document.getElementById("lm-hero-title").textContent = content.hero.title;
   setText("lm-hero-intro", content.hero.intro);
-  document.getElementById("lm-hero-image").src = content.hero.image;
-  document.getElementById("lm-hero-image").alt = content.hero.imageAlt;
 
   setText("lm-portfolio-eyebrow", content.portfolio.eyebrow);
   setText("lm-portfolio-title", content.portfolio.title);
@@ -317,7 +354,6 @@ function renderPage() {
   setText("lm-approach-text", content.approach.text);
   document.getElementById("lm-approach-image").src = content.approach.image;
   document.getElementById("lm-approach-image").alt = content.approach.imageAlt;
-  setText("lm-approach-image-note", content.approach.note);
 
   setText("lm-offers-eyebrow", content.offers.eyebrow);
   setText("lm-offers-title", content.offers.title);
@@ -331,7 +367,7 @@ function renderPage() {
   setText("lm-editorial-text", content.editorial.text);
   const editorialPlaceholder = document.getElementById("lm-editorial-placeholder");
   editorialPlaceholder.setAttribute("aria-label", content.editorial.placeholder);
-  editorialPlaceholder.append(createElement("span", "", content.editorial.placeholder));
+  setupEditorialSlideshow(editorialPlaceholder);
   document.getElementById("lm-editorial-keywords").replaceChildren(
     ...content.editorial.keywords.map((keyword) => createElement("li", "", keyword))
   );

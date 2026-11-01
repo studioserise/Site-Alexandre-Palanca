@@ -17,7 +17,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://alexandrepalanca.fr/images/alexandre.jpg">
   <title>Photographie &amp; vidéo pour professionnels à Sarlat</title>
-  <link rel="stylesheet" href="lieux-marques.css?v=vig">
+  <link rel="stylesheet" href="lieux-marques.css?v=fond1">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=black2">
   <link rel="stylesheet" href="cursor.css?v=7">
@@ -25,7 +25,14 @@
   <link rel="stylesheet" href="section-marker.css?v=black">
   <script src="cursor.js?v=3" defer></script>
   <script src="section-marker.js?v=8" defer></script>
-  <script type="module" src="lieux-marques.js?v=services-review"></script>
+  <script src="vendor/gsap.min.js" defer></script>
+  <script src="vendor/ScrollTrigger.min.js" defer></script>
+  <script type="module" src="drone.js?v=6"></script>
+  <script type="module" src="digital.js?v=2"></script>
+  <script type="module" src="lieux-marques.js?v=term1"></script>
+  <link rel="stylesheet" href="drone.css?v=6">
+  <link rel="stylesheet" href="digital.css?v=2">
+  <link rel="stylesheet" href="mobile-cta.css?v=2">
 </head>
 <body class="lm-page">
   <header class="site-nav is-visible" id="site-nav">
@@ -55,15 +62,16 @@
 
   <main>
     <section class="lm-hero" aria-labelledby="lm-hero-title">
-      <img class="lm-hero-image" id="lm-hero-image" alt="" fetchpriority="high">
+      <video class="lm-hero-image" id="lm-hero-image" autoplay muted loop playsinline preload="auto" poster="images/Lieux-et-marques/hero-lieux-et-marques-poster.jpg" aria-hidden="true">
+        <source src="images/Lieux-et-marques/hero-lieux-et-marques.mp4" type="video/mp4">
+      </video>
       <div class="lm-hero-shade" aria-hidden="true"></div>
       <div class="lm-hero-copy">
         <p class="lm-eyebrow" id="lm-hero-eyebrow"></p>
         <h1 id="lm-hero-title"></h1>
         <p class="lm-hero-intro" id="lm-hero-intro"></p>
       </div>
-      <a class="lm-hero-scroll" href="#portfolio"><span aria-hidden="true">↓</span> Découvrir</a>
-      <p class="lm-hero-caption">Photographie présente dans le portfolio · Hôtel Plaza Madeleine</p>
+      <a class="lm-hero-scroll" href="#portfolio"><span aria-hidden="true">↓</span> Découvrir les réalisations</a>
     </section>
 
     <section class="lm-portfolio lm-section" id="portfolio" aria-labelledby="lm-portfolio-title">
@@ -80,13 +88,12 @@
     <section class="lm-approach lm-section" id="approche" aria-labelledby="lm-approach-title">
       <div class="lm-approach-image-wrap">
         <img id="lm-approach-image" alt="" loading="lazy">
-        <p class="lm-image-note" id="lm-approach-image-note"></p>
       </div>
       <div class="lm-approach-copy">
         <p class="lm-eyebrow" id="lm-approach-eyebrow"></p>
         <h2 id="lm-approach-title"></h2>
         <p id="lm-approach-text"></p>
-        <a class="lm-text-link" href="#prestations">Découvrir les prestations <span aria-hidden="true">↘</span></a>
+        <a class="lm-text-link" href="#prestations">Découvrir les formules <span aria-hidden="true">↘</span></a>
       </div>
     </section>
 
@@ -126,6 +133,8 @@
       <p class="lm-offer-price-note" id="lm-offer-price-note"></p>
     </section>
 
+    <section data-drone-section data-drone-flight="local" data-drone-cta="#digital"></section>
+
     <section class="lm-editorial" id="accompagnement" aria-labelledby="lm-editorial-title">
       <div class="lm-editorial-copy">
         <p class="lm-eyebrow" id="lm-editorial-eyebrow"></p>
@@ -137,6 +146,8 @@
       <div class="lm-editorial-placeholder" id="lm-editorial-placeholder" role="img"></div>
       <div class="lm-editorial-shade" aria-hidden="true"></div>
     </section>
+
+    <section id="digital" data-digital-section></section>
 
     <section class="lm-final" aria-labelledby="lm-final-title">
       <div class="lm-final-copy">

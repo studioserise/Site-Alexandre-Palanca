@@ -85,7 +85,7 @@
     .hero-image {
       position: absolute;
       inset: -20px;
-      background-image: url("images/accueil.jpg");
+      background-image: url("images/hero-accueil-web.jpg?v=1");
       background-size: cover;
       background-position: center;
       will-change: filter;
@@ -557,17 +557,23 @@
       line-height: 1.9;
     }
 
-    .about-photo-placeholder {
-      display: grid;
+    .about-photo {
+      position: relative;
       min-height: clamp(320px, 42vw, 560px);
-      place-items: center;
+      margin: 0;
+      overflow: hidden;
       border-radius: 12px;
-      background: linear-gradient(145deg, #242320, #171716);
-      color: #aaa7a1;
-      font-size: 0.65rem;
-      letter-spacing: 0.16em;
-      text-align: center;
-      text-transform: uppercase;
+      background: #171716;
+    }
+
+    .about-photo img {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 45%;
     }
 
     /* =========================
@@ -606,7 +612,7 @@
         gap: 34px;
       }
 
-      .about-photo-placeholder {
+      .about-photo {
         min-height: 105vw;
       }
 
@@ -665,6 +671,11 @@
   <link rel="stylesheet" href="section-marker.css?v=5">
   <script src="cursor.js?v=3" defer></script>
   <script src="section-marker.js?v=8" defer></script>
+  <script src="vendor/gsap.min.js" defer></script>
+  <script src="vendor/ScrollTrigger.min.js" defer></script>
+  <script type="module" src="drone.js?v=6"></script>
+  <link rel="stylesheet" href="drone.css?v=6">
+  <link rel="stylesheet" href="mobile-cta.css?v=2">
 </head>
 
 <body>
@@ -826,7 +837,7 @@
         <!-- Axe 1 -->
         <article class="work-card" id="portraits">
 
-          <a href="photos.html" aria-label="Découvrir les prestations photo">
+          <a href="photos.html" aria-label="Découvrir les formules photo">
 
             <div class="work-image-frame">
 
@@ -863,7 +874,7 @@
         <!-- Axe 2 -->
         <article class="work-card" id="evenementiel">
 
-          <a href="video.html" aria-label="Découvrir les prestations vidéo">
+          <a href="video.html" aria-label="Découvrir les formats vidéo">
 
             <div class="work-image-frame">
 
@@ -906,8 +917,8 @@
 
               <img
                 class="work-image"
-                src="images/lieux-marques.jpg"
-                alt="Photographie d'un lieu ou d'un produit"
+                src="images/Lieux-et-marques/letm-05.png?v=2"
+                alt="Terrasse de restaurant dans une rue en pierre"
                 loading="lazy"
               >
 
@@ -937,6 +948,8 @@
 
     </section>
 
+    <section data-drone-section data-drone-flight="home" data-drone-cta="lieux-marques.html#digital"></section>
+
     <section class="about-section" id="a-propos" aria-labelledby="about-title">
       <div class="about-copy">
         <p class="eyebrow">Photographe &amp; vidéaste</p>
@@ -952,9 +965,9 @@
           de la préparation à la livraison des images.
         </p>
       </div>
-      <div class="about-photo-placeholder" role="img" aria-label="Photographie d’Alexandre à intégrer ultérieurement">
-        Photographie d’Alexandre à intégrer
-      </div>
+      <figure class="about-photo">
+        <img src="images/photo-alexandre.jpg" alt="Alexandre Palanca photographiant avec son appareil, en noir et blanc" loading="lazy">
+      </figure>
     </section>
 
   </main>

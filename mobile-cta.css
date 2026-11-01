@@ -1,0 +1,24 @@
+/* Boutons et liens d'action en version mobile : sans flèches, en pastilles translucides arrondies */
+@media (max-width: 800px) {
+  :is(.portrait-link, .portraits-final-button, .video-cta, .video-final-button, .lm-final-button, .photo-universe-button, .lm-light-link, .lm-text-link, .drone-cta, .portraits-scroll, .video-hero-scroll, .photos-scroll, .lm-hero-scroll, .contact-submit, .dg-btn) > span[aria-hidden="true"] {
+    display: none;
+  }
+
+  .work-link::after { content: none; }
+
+  body :is(.portrait-link, .portraits-final-button, .video-cta, .video-final-button, .lm-final-button, .photo-universe-button, .lm-light-link, .lm-text-link, .drone-cta, .portraits-scroll, .video-hero-scroll, .photos-scroll, .lm-hero-scroll, .work-link) {
+    display: inline-flex;
+    width: auto;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 26px;
+    border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    text-decoration: none;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+
+  body :is(.contact-submit, .dg-btn) { border-radius: 999px; }
+}

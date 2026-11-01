@@ -265,7 +265,7 @@ a {
       #000 100%
     ),
     linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
-    url("images/accueil.jpg");
+    url("images/video/fond-modalites.jpg?v=1");
   background-position: center;
   background-size: cover;
   color: #171715;
