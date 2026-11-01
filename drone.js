@@ -12,7 +12,11 @@ const DRONE_CONTENT = {
   eyebrow: "Prises de vues aériennes",
   title: "Prendre de la hauteur.",
   text: "Une autre perspective pour raconter les lieux, révéler les espaces et donner une nouvelle dimension à vos projets. Grâce aux prises de vues aériennes, chaque réalisation prend de la hauteur.",
-  features: ["Photographie aérienne", "Vidéo aérienne", "Captation événementielle"],
+  features: [
+    { label: "Photographie aérienne", href: "evenementiel.html" },
+    { label: "Vidéo aérienne", href: "video.html" },
+    { label: "Mise en valeur de lieux", href: "lieux-marques.html" }
+  ],
   cta: "Découvrir les formules",
   // Fond par défaut : photo ou vidéo (.mp4/.webm), remplaçable par page avec data-drone-media.
   backdrop: "images/Lieux-et-marques/hero-lieux-et-marques-poster.jpg",
@@ -89,18 +93,25 @@ function renderSection(section) {
   const title = el("h2", "", content.title);
   title.id = titleId;
   const cta = el("a", "drone-cta");
-  cta.href = section.dataset.droneCta || "lieux-marques.html#digital";
+  cta.href = section.dataset.droneCta || "#";
   const arrow = el("span", "", "↗");
   arrow.setAttribute("aria-hidden", "true");
-  cta.append(content.cta + " ", arrow);
+  cta.append((section.dataset.droneCtaLabel || content.cta) + " ", arrow);
 
   if (compact) {
     copy.append(el("p", "drone-eyebrow", content.eyebrow), title, el("p", "drone-text", section.dataset.droneText || content.compactText), cta);
   } else {
     const list = el("ul", "drone-features");
     list.setAttribute("aria-label", "Prises de vues aériennes");
-    content.features.forEach((feature) => list.append(el("li", "", feature)));
-    copy.append(el("p", "drone-eyebrow", content.eyebrow), title, el("p", "drone-text", content.text), list, cta);
+    content.features.forEach((feature) => {
+      const li = el("li", "");
+      const link = el("a", "drone-feature-link", feature.label);
+      link.href = feature.href;
+      li.append(link);
+      list.append(li);
+    });
+    copy.append(el("p", "drone-eyebrow", content.eyebrow), title, el("p", "drone-text", content.text), list);
+    if (section.dataset.droneCta) copy.append(cta);
   }
 
   const stage = el("div", "drone-stage");
