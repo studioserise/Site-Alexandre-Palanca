@@ -6,7 +6,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <script src="page-transition.js?v=5"></script>
   <script src="reveal.js?v=3"></script>
-  <script src="photo-rotation.js?v=4" defer></script>
+  <script src="photo-rotation.js?v=5" defer></script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#000">
   <meta name="description" content="Photographe d’événements à Sarlat et en Dordogne : mariages, anniversaires, événements professionnels, concerts, festivals et rencontres culturelles.">
@@ -59,43 +59,13 @@
       <p class="portraits-eyebrow">Photographie · Événementiel</p>
       <h1 id="event-title">L'instant, dans toute son intensité.</h1>
       <p class="portraits-intro-text">Des célébrations privées aux rendez-vous culturels, je photographie l’ambiance, les temps forts et les échanges qui font la singularité de chaque événement.</p>
-      <a class="portraits-scroll" href="#evenements-prives"><span aria-hidden="true">↓</span> Découvrir</a>
+      <a class="portraits-scroll" href="#evenements-publics"><span aria-hidden="true">↓</span> Découvrir</a>
     </header>
 
     <div class="portrait-services portrait-services--event">
-      <section class="portrait-service" id="evenements-prives" aria-labelledby="private-events-title">
+      <section class="portrait-service" id="evenements-publics" aria-labelledby="public-events-title">
         <div class="portrait-copy">
           <p class="portraits-eyebrow">Formule 01</p>
-          <h2 id="private-events-title">Événements privés</h2>
-          <p class="portrait-description">Mariages, anniversaires, baptêmes et autres célébrations privées : je suis le déroulement de votre événement pour photographier les temps forts, les détails et les moments partagés.</p>
-          <dl class="portrait-details">
-            <div>
-              <dt>Tarif</dt>
-              <dd>Sur devis</dd>
-            </div>
-            <div>
-              <dt>Durée</dt>
-              <dd>Adaptée à votre événement</dd>
-            </div>
-          </dl>
-          <a class="portrait-link" href="contact.html">Faire une demande de devis <span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="portrait-gallery" aria-label="Photographies d'événements privés">
-          <figure class="portrait-photo portrait-photo--tall">
-            <img src="images/evenementiel/prive-professionnel.jpg" alt="Table dressée pour une réception de mariage" fetchpriority="high">
-          </figure>
-          <figure class="portrait-photo">
-            <img src="images/evenementiel/prive-02.jpg" alt="Couple de mariés tenant un bouquet" loading="lazy">
-          </figure>
-          <figure class="portrait-photo">
-            <img src="images/evenementiel/prive-03.jpg" alt="Participants assistant à une conférence professionnelle" loading="lazy">
-          </figure>
-        </div>
-      </section>
-
-      <section class="portrait-service portrait-service--reverse" id="evenements-publics" aria-labelledby="public-events-title">
-        <div class="portrait-copy">
-          <p class="portraits-eyebrow">Formule 02</p>
           <h2 id="public-events-title">Événements publics</h2>
           <p class="portrait-description">Concerts, festivals, spectacles, compétitions sportives, événements professionnels et rendez-vous culturels : je photographie les performances, le public et l’ambiance du lieu.</p>
           <dl class="portrait-details">
@@ -112,13 +82,43 @@
         </div>
         <div class="portrait-gallery" aria-label="Photographies d'événements publics">
           <figure class="portrait-photo portrait-photo--tall">
-            <img src="images/evenementiel/sport-competition-01.jpg?v=4" alt="Athlète quittant l'aire de compétition dans une salle" loading="lazy">
+            <img src="images/evenementiel/sport-competition-01.jpg?v=4" data-rotation="images/evenementiel/concert-01.jpg,images/evenementiel/festival-01.jpg,images/evenementiel/concert-31.jpg,images/evenementiel/concert-11.jpg,images/evenementiel/spectacle-01.jpg,images/evenementiel/cabaret-01.jpg" alt="Athlète quittant l'aire de compétition dans une salle" fetchpriority="high">
           </figure>
           <figure class="portrait-photo">
-            <img src="images/evenementiel/sport-competition-02.jpg?v=4" alt="Équipe portant un sac lesté lors d'une épreuve sportive" loading="lazy">
+            <img src="images/evenementiel/sport-competition-02.jpg?v=4" data-rotation="images/evenementiel/concert-02.jpg,images/evenementiel/festival-02.jpg,images/evenementiel/concert-32.jpg,images/evenementiel/concert-12.jpg,images/evenementiel/spectacle-02.jpg,images/evenementiel/cabaret-02.jpg" alt="Équipe portant un sac lesté lors d'une épreuve sportive" loading="lazy">
           </figure>
           <figure class="portrait-photo">
-            <img src="images/evenementiel/sport-competition-03.jpg?v=4" alt="Athlète soulevant une barre à l'haltérophilie, en noir et blanc" loading="lazy">
+            <img src="images/evenementiel/sport-competition-03.jpg?v=4" data-rotation="images/evenementiel/concert-03.jpg,images/evenementiel/festival-03.jpg,images/evenementiel/concert-33.jpg,images/evenementiel/concert-13.jpg,images/evenementiel/spectacle-03.jpg,images/evenementiel/cabaret-03.jpg" alt="Athlète soulevant une barre à l'haltérophilie, en noir et blanc" loading="lazy">
+          </figure>
+        </div>
+      </section>
+
+      <section class="portrait-service portrait-service--reverse" id="evenements-prives" aria-labelledby="private-events-title">
+        <div class="portrait-copy">
+          <p class="portraits-eyebrow">Formule 02</p>
+          <h2 id="private-events-title">Événements privés</h2>
+          <p class="portrait-description">Mariages, anniversaires, baptêmes et autres célébrations privées : je suis le déroulement de votre événement pour photographier les temps forts, les détails et les moments partagés.</p>
+          <dl class="portrait-details">
+            <div>
+              <dt>Tarif</dt>
+              <dd>Sur devis</dd>
+            </div>
+            <div>
+              <dt>Durée</dt>
+              <dd>Adaptée à votre événement</dd>
+            </div>
+          </dl>
+          <a class="portrait-link" href="contact.html">Faire une demande de devis <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="portrait-gallery" aria-label="Photographies d'événements privés">
+          <figure class="portrait-photo portrait-photo--tall">
+            <img src="images/evenementiel/prive-professionnel.jpg" alt="Table dressée pour une réception de mariage" loading="lazy">
+          </figure>
+          <figure class="portrait-photo">
+            <img src="images/evenementiel/prive-02.jpg" alt="Couple de mariés tenant un bouquet" loading="lazy">
+          </figure>
+          <figure class="portrait-photo">
+            <img src="images/evenementiel/prive-03.jpg" alt="Participants assistant à une conférence professionnelle" loading="lazy">
           </figure>
         </div>
       </section>

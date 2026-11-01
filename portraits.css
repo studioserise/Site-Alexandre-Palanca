@@ -138,7 +138,7 @@ a {
       #000 100%
     ),
     linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
-    url("images/portraits/hero-portraits.jpg");
+    url("images/portraits/hero-portraits-nb.jpg?v=2");
 }
 
 .portrait-services--event {

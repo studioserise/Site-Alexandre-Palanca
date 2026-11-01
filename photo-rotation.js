@@ -88,6 +88,7 @@
       var waiting = figs.length;
       Array.prototype.forEach.call(figs, function (fig, index) {
         var img = fig.querySelector('img');
+        var explicit = img && img.getAttribute('data-rotation');
         var build = img && candidates(img.getAttribute('src'));
         var done = function (extra) {
           items[index] = { fig: fig, img: img, list: [img.getAttribute('src')].concat(extra || []) };
@@ -96,6 +97,7 @@
           var count = Math.min.apply(null, items.map(function (it) { return it.list.length; }));
           if (count > 1) start(gallery, items, count);
         };
+        if (explicit) return done(explicit.split(','));
         if (!build) return done([]);
         discover(build, done);
       });
