@@ -378,3 +378,21 @@ function renderPage() {
 }
 
 renderPage();
+
+// Certains navigateurs bloquent l'autoplay (économie d'énergie, réglages) : on relance la lecture dès que possible.
+(function keepHeroVideoPlaying() {
+  const video = document.getElementById("lm-hero-image");
+  if (!video || typeof video.play !== "function") return;
+  video.muted = true;
+  const start = () => {
+    if (!video.paused) return;
+    const attempt = video.play();
+    if (attempt && attempt.catch) attempt.catch(() => {});
+  };
+  start();
+  video.addEventListener("canplay", start);
+  document.addEventListener("visibilitychange", start);
+  ["pointerdown", "keydown", "scroll", "touchstart"].forEach((type) =>
+    window.addEventListener(type, start, { once: true, passive: true })
+  );
+})();
