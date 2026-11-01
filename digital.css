@@ -158,8 +158,8 @@
 .dg-device--mobile .dg-device-screen { aspect-ratio: 9 / 19; border-radius: 18px; }
 
 /* Formules */
-.dg-formula .lm-offer-description { min-height: 0; margin-top: 12px; }
-.dg-formula .lm-deliverables { margin-top: 16px; }
+.dg-formula .lm-offer-description { min-height: 0; margin-top: 14px; margin-bottom: 8px; }
+.dg-formula .lm-deliverables { margin-top: 22px; }
 
 /* Options */
 .dg-options { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 12px clamp(32px, 6vw, 96px); align-items: start; }
