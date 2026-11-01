@@ -163,7 +163,6 @@ a {
   align-items: center;
   gap: clamp(36px, 6vw, 96px);
   padding: clamp(72px, 9vw, 120px) var(--portraits-pad);
-  border-top: 1px solid rgba(23, 23, 21, 0.16);
 }
 
 .portrait-service--reverse {
@@ -210,7 +209,7 @@ a {
 .portrait-copy h2 {
   max-width: 540px;
   color: #171715;
-  font-size: clamp(2.5rem, 4.4vw, 4.7rem);
+  font-size: clamp(2.5rem, 3.6vw, 4.7rem);
   line-height: 1.05;
 }
 

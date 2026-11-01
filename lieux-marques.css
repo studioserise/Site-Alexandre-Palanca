@@ -725,18 +725,18 @@ button {
 .lm-keywords {
   display: flex;
   flex-wrap: wrap;
-  gap: 11px 22px;
+  gap: 11px 9px;
   margin: 34px 0 0;
   padding: 0;
   color: #d0cdc7;
-  font-size: 0.64rem;
-  letter-spacing: 0.1em;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
   list-style: none;
   text-transform: uppercase;
 }
 
 .lm-keywords li + li::before {
-  margin-right: 22px;
+  margin-right: 9px;
   color: #827e75;
   content: "·";
 }

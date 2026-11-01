@@ -33,7 +33,7 @@ const content = {
   },
   approach: {
     eyebrow: "L’approche",
-    title: "Chaque lieu a ses propres repères.",
+    title: "Chaque lieu à ses propres repères.",
     text: "L’architecture, la lumière, les matières et les gestes donnent à un lieu son caractère. Je les photographie pour constituer des images cohérentes avec son activité et ses usages.",
     image: "images/Lieux-et-marques/letm-05.png?v=2",
     imageAlt: "Photographie d’un lieu réalisée pour la section L’approche."

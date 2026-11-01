@@ -55,14 +55,16 @@ function renderIntro() {
 
 function renderFormulas() {
   return h("div", { class: "dg-block" },
-    h("div", { class: "dg-formulas" },
-      C.formulas.map((formula, index) => h("article", { class: "dg-formula" },
-        h("p", { class: "dg-formula-index", text: String(index + 1).padStart(2, "0") }),
-        h("h3", { text: formula.name }),
-        h("p", { class: "dg-formula-price" }, h("small", { text: "À partir de" }), h("strong", { text: formatPrice(formula.price) })),
-        h("p", { class: "dg-formula-audience", text: formula.audience }),
-        h("ul", {}, formula.features.map((feature) => h("li", { text: feature }))),
-        h("p", { class: "dg-formula-note", text: formula.note })
+    h("div", { class: "dg-formulas lm-offer-grid" },
+      C.formulas.map((formula, index) => h("article", { class: "lm-offer-card dg-formula" },
+        h("header", { class: "lm-offer-header" },
+          h("span", { class: "lm-offer-number", text: String(index + 1).padStart(2, "0") }),
+          h("h3", { text: formula.name })
+        ),
+        h("p", { class: "lm-offer-price", text: `À partir de ${formatPrice(formula.price)}` }),
+        h("p", { class: "lm-offer-description", text: formula.audience }),
+        h("ul", { class: "lm-deliverables" }, formula.features.map((feature) => h("li", { text: feature }))),
+        h("p", { class: "lm-offer-subnote", text: formula.note })
       ))
     ),
     h("p", { class: "dg-footnote", text: C.formulasFootnote })
