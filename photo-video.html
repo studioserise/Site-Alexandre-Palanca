@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080807">
+  <meta name="description" content="Photographie et vidéo par Alex & Elisa : portraits, événements, films et images de marque en Dordogne et dans le Périgord.">
+  <script src="page-transition.js?v=5"></script>
+  <title>Photo &amp; vidéo — Alex &amp; Elisa</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css">
+  <link rel="stylesheet" href="redesign.css?v=28">
+  <link rel="stylesheet" href="contact.css">
+  <link rel="stylesheet" href="drone.css?v=8">
+  <link rel="stylesheet" href="cursor.css?v=7">
+  <link rel="stylesheet" href="section-marker.css?v=black">
+  <script src="site-nav.js" defer></script>
+  <script src="redesign.js" defer></script>
+  <script src="cursor.js?v=3" defer></script>
+  <script src="section-marker.js?v=8" defer></script>
+  <script src="vendor/gsap.min.js" defer></script>
+  <script src="vendor/ScrollTrigger.min.js" defer></script>
+  <script type="module" src="drone.js?v=9"></script>
+  <script type="module" src="contact.js"></script>
+</head>
+<body>
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l’accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links"><span></span><span></span></button>
+      <nav aria-label="Navigation principale"><ul class="site-nav-links" id="site-nav-links"></ul></nav>
+    </div>
+  </header>
+  <main>
+    <section class="redesign-hero" aria-labelledby="photo-title">
+      <div class="flip-card photo-hero-flip" tabindex="0">
+        <div class="flip-card-inner">
+          <figure class="redesign-hero-image flip-card-face">
+            <img src="images/portraits/hero-portraits-nb.jpg" alt="Portrait en lumière naturelle">
+            <figcaption class="flip-hint">Survolez pour découvrir ↻</figcaption>
+          </figure>
+          <div class="flip-card-face flip-card-face--back">
+            <span class="studio-eyebrow">Des formats pour chacun</span>
+            <h3>Portraits, événements, lieux, produits…</h3>
+            <p>Pour les particuliers, les artistes, les associations, les entreprises et les lieux qui souhaitent raconter leur histoire en images.</p>
+          </div>
+        </div>
+      </div>
+      <div class="redesign-hero-copy">
+        <p class="studio-eyebrow">Photographie · Alex</p>
+        <h1 id="photo-title">La photo, au plus près de votre histoire.</h1>
+        <p>Portraits, événements, projets professionnels ou lieux de vie : nous préparons chaque séance avec vous pour créer des images sincères et utiles, fidèles à l’atmosphère que vous souhaitez partager.</p>
+      </div>
+    </section>
+
+    <section class="redesign-section" aria-labelledby="photo-offers-title">
+      <p class="studio-eyebrow">Les propositions photo</p>
+      <h2 class="studio-section-heading" id="photo-offers-title">Des séances pensées selon votre projet.</h2>
+      <div class="flip-card-grid">
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">01 · Portrait</span><h3>La séance portrait</h3><p>Une séance d’environ 1 h · Pour une personne, un couple ou une famille.</p><p class="flip-price">À partir de 120 €</p><span class="flip-hint">Survolez pour voir le contenu ↻</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Échange préparatoire</li><li>Séance photo</li><li>Sélection et retouche des images</li><li>Galerie privée de livraison</li></ul></div>
+        </div></article>
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">02 · Événement</span><h3>Le reportage</h3><p>Une présence adaptée à la durée de votre événement · Privé, culturel ou professionnel.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Repérage et préparation</li><li>Reportage sur place</li><li>Tri et retouche</li><li>Galerie privée pour partager les images</li></ul></div>
+        </div></article>
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">03 · Professionnel</span><h3>La série d’images</h3><p>Une demi-journée de création · Pour artisans, lieux, marques et équipes.</p><p class="flip-price">À partir de 250 €</p><span class="flip-hint">Survolez pour voir le contenu ↻</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Brief et intentions visuelles</li><li>Séance sur site</li><li>Sélection de photographies retouchées et fichiers prêts à diffuser</li></ul></div>
+        </div></article>
+      </div>
+      <p class="studio-eyebrow studio-eyebrow--note">Tarifs indicatifs, à préciser selon le lieu, la durée et les livrables.</p>
+    </section>
+
+    <section class="redesign-hero redesign-hero--reverse" aria-labelledby="video-title">
+      <div class="flip-card photo-hero-flip" tabindex="0">
+        <div class="flip-card-inner">
+          <figure class="redesign-hero-image flip-card-face">
+            <img src="images/evenementiel/concert-01.jpg" alt="Concert photographié sur scène" loading="lazy">
+            <figcaption class="flip-hint">Survolez pour découvrir ↻</figcaption>
+          </figure>
+          <div class="flip-card-face flip-card-face--back">
+            <span class="studio-eyebrow">Des films pour chacun</span>
+            <h3>Portraits, événements, marques, clips…</h3>
+            <p>Pour les artistes, les organisateurs d’événements, les associations, les entreprises et les lieux qui souhaitent faire vivre leur histoire en mouvement.</p>
+          </div>
+        </div>
+      </div>
+      <div class="redesign-hero-copy">
+        <p class="studio-eyebrow">Vidéo · Alex</p>
+        <h2 id="video-title">La vidéo, pour faire vivre l’instant.</h2>
+        <p>Film de présentation, événement, interview ou création musicale : nous imaginons un format adapté à votre histoire, de la préparation au montage final.</p>
+        <p class="studio-eyebrow studio-eyebrow--note">Portraits filmés · Événements · Films de marque · Clips · Formats courts</p>
+      </div>
+    </section>
+
+    <section class="redesign-section" aria-labelledby="video-offers-title">
+      <p class="studio-eyebrow">Les propositions vidéo</p>
+      <h2 class="studio-section-heading" id="video-offers-title">Du tournage à votre film finalisé.</h2>
+      <div class="flip-card-grid">
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">01 · Format court</span><h3>Le portrait filmé</h3><p>Une demi-journée · Pour une personne ou une petite équipe.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Préparation</li><li>Tournage</li><li>Montage d’un film court</li><li>Habillage simple et livraison numérique</li></ul></div>
+        </div></article>
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">02 · Événement</span><h3>L’aftermovie</h3><p>Une présence de quelques heures · Pour événements publics et privés.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Préparation et repérage</li><li>Captation</li><li>Sélection des séquences</li><li>Montage et livraison d’un film souvenir</li></ul></div>
+        </div></article>
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">03 · Marque</span><h3>Le film de présentation</h3><p>Une journée de création · Pour entreprises, lieux et savoir-faire.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Écriture des intentions</li><li>Tournage</li><li>Montage</li><li>Étalonnage et déclinaisons convenues avec vous</li></ul></div>
+        </div></article>
+      </div>
+      <p class="studio-eyebrow studio-eyebrow--note">Chaque projet fait l’objet d’un devis adapté à sa durée et à ses livrables.</p>
+    </section>
+
+    <section id="drone-photo-video" data-drone-section data-drone-variant="compact" data-drone-flight="local" data-drone-cta="#demande-devis" data-drone-cta-label="Demander un devis" data-drone-text="Les prises de vues aériennes offrent une nouvelle perspective sur vos lieux, vos événements et vos projets. Elles peuvent enrichir un reportage photo ou un film, selon les possibilités du site et les conditions de vol."></section>
+
+    <section class="studio-approach" aria-labelledby="alex-bio-title">
+      <div class="studio-approach-copy">
+        <p class="studio-eyebrow">Alex · Photographe &amp; vidéaste</p>
+        <h2 id="alex-bio-title">Être là, regarder, raconter.</h2>
+        <p>Alex aime saisir ce qui se joue entre les images : un geste, une lumière, une présence. Photographe et vidéaste indépendant, il accompagne chaque projet de la préparation à la livraison, en cherchant la justesse plutôt que l’effet.</p>
+        <p>Son travail navigue entre portraits, événements et récits de lieux, avec une attention constante portée aux personnes et à l’atmosphère.</p>
+      </div>
+      <figure class="studio-approach-photo"><img src="images/photo-alexandre.jpg" alt="Alexandre en séance de prise de vue" loading="lazy"></figure>
+    </section>
+
+    <section class="redesign-section" id="demande-devis" aria-labelledby="photo-contact-title">
+      <div class="redesign-panel redesign-contact-layout">
+        <p class="studio-eyebrow">Un projet photo ou vidéo ?</p>
+        <h2 id="photo-contact-title">Imaginons la suite ensemble.</h2>
+        <p>Décrivez-nous votre idée et recevez une proposition adaptée à votre besoin.</p>
+        <form class="contact-form redesign-contact-form" id="contact-form" novalidate>
+          <input id="contact-service" name="service" type="hidden" value="Photo et vidéo">
+          <div class="contact-form-grid">
+            <div class="contact-field"><label for="contact-name">Nom et prénom <span aria-hidden="true">*</span></label><input id="contact-name" name="name" autocomplete="name" maxlength="100" required></div>
+            <div class="contact-field"><label for="contact-email">Adresse e-mail <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>
+            <div class="contact-field"><label for="contact-phone">Téléphone <span class="contact-optional">(facultatif)</span></label><input id="contact-phone" name="phone" type="tel" autocomplete="tel" maxlength="30"></div>
+            <div class="contact-field"><label for="contact-date">Date ou période <span class="contact-optional">(facultatif)</span></label><input id="contact-date" name="date" type="date"></div>
+            <div class="contact-field"><label for="pref-type">Type de prestation</label><select id="pref-type" name="pref-type" data-extra><option value="">À préciser ensemble</option><option>Séance portrait</option><option>Reportage événementiel</option><option>Série d’images professionnelle</option><option>Portrait filmé</option><option>Aftermovie</option><option>Film de présentation</option><option>Prises de vues aériennes</option><option>Autre projet</option></select></div>
+            <div class="contact-field"><label for="pref-budget">Budget indicatif</label><select id="pref-budget" name="pref-budget" data-extra><option value="">Je ne sais pas encore</option><option>Moins de 300 €</option><option>300 € – 800 €</option><option>800 € – 1 500 €</option><option>Plus de 1 500 €</option></select></div>
+            <fieldset class="contact-chips contact-field--wide"><legend>Ce dont vous avez besoin</legend><label><input type="checkbox" name="pref-livrables" value="Photos"><span>Photos</span></label><label><input type="checkbox" name="pref-livrables" value="Vidéo"><span>Vidéo</span></label><label><input type="checkbox" name="pref-livrables" value="Drone"><span>Drone</span></label><label><input type="checkbox" name="pref-livrables" value="Galerie privée"><span>Galerie privée</span></label><label><input type="checkbox" name="pref-livrables" value="Retouche avancée"><span>Retouche avancée</span></label></fieldset>
+            <div class="contact-field contact-field--wide"><label for="contact-message">Quelques mots sur votre projet <span aria-hidden="true">*</span></label><textarea id="contact-message" name="message" rows="5" maxlength="4000" required></textarea></div>
+            <div class="contact-honeypot" aria-hidden="true"><label for="contact-website">Ne pas remplir ce champ</label><input id="contact-website" name="website" tabindex="-1" autocomplete="off"></div>
+            <div class="contact-consent contact-field--wide"><input id="contact-consent" name="consent" type="checkbox" required><label for="contact-consent">J’accepte que mes informations soient utilisées pour répondre à cette demande. Consultez la <a href="politique-confidentialite.html">politique de confidentialité</a>. <span aria-hidden="true">*</span></label></div>
+          </div>
+          <p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p>
+          <button class="contact-submit" id="contact-submit" type="submit"><span>Envoyer ma demande</span><span aria-hidden="true">↗</span></button>
+        </form>
+      </div>
+    </section>
+
+    <section class="redesign-section" aria-labelledby="photo-portfolio-title">
+      <p class="studio-eyebrow">Portfolio · Sélection</p>
+      <h2 id="photo-portfolio-title">Des images, des histoires.</h2>
+      <div class="portfolio-carousel" data-carousel>
+        <button class="portfolio-arrow portfolio-arrow--previous" type="button" data-carousel-prev aria-label="Projet précédent">←</button>
+        <div class="portfolio-images" data-carousel-images aria-live="polite">
+          <img src="images/portraits/hero-portraits-nb.jpg" alt="Portrait, sélection 1">
+          <img src="images/portraits/hero-portraits-nb.jpg" alt="Portrait, sélection 2">
+          <img src="images/portraits/hero-portraits-nb.jpg" alt="Portrait, sélection 3">
+        </div>
+        <div class="portfolio-description" data-carousel-description><h3>Portraits</h3><p>Une présence simple, des images naturelles et une séance pensée à votre rythme.</p></div>
+        <button class="portfolio-arrow portfolio-arrow--next" type="button" data-carousel-next aria-label="Projet suivant">→</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

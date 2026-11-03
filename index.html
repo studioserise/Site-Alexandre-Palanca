@@ -68,7 +68,7 @@
 
     .intro-sequence {
       position: relative;
-      height: 184vh;
+      height: 170vh;
     }
 
     .hero-stage {
@@ -665,11 +665,13 @@
     }
   </style>
   <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="redesign.css?v=28">
   <link rel="stylesheet" href="site-nav.css?v=black2">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script type="module" src="site-nav.js?v=footer-icons"></script>
   <link rel="stylesheet" href="section-marker.css?v=5">
   <script src="cursor.js?v=3" defer></script>
+  <script src="redesign.js" defer></script>
   <script src="section-marker.js?v=8" defer></script>
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
@@ -703,11 +705,11 @@
 
       <nav aria-label="Navigation principale">
         <ul class="site-nav-links" id="site-nav-links">
-          <li><a class="site-nav-link" href="photos.html">Photos</a></li>
-          <li><a class="site-nav-link" href="video.html">Vidéos</a></li>
-          <li><a class="site-nav-link" href="lieux-marques.html">Lieux &amp; marques</a></li>
+          <li><a class="site-nav-link" href="photo-video.html">Photo &amp; vidéo</a></li>
+          <li><a class="site-nav-link" href="sites-internet.html">Sites internet</a></li>
+          <li><a class="site-nav-link" href="reseaux.html">Contenus réseaux</a></li>
           <li><a class="site-nav-link" href="galerie.html">Galerie</a></li>
-          <li><a class="site-nav-link" href="contact.html">Contact</a></li>
+          <li><a class="site-nav-link" href="#site-footer">Contact</a></li>
         </ul>
       </nav>
     </div>
@@ -768,26 +770,6 @@
 
         </div>
 
-
-        <!-- Introduction qui apparaît au scroll -->
-
-        <div class="hero-introduction" id="hero-introduction">
-
-          <p class="eyebrow">Photographie &amp; vidéo</p>
-
-          <h2>
-            Des images pour vos lieux,
-            vos projets et vos événements.
-          </h2>
-
-          <p class="intro-text">
-            Je crée des images fixes et animées pour les personnes,
-            les événements et les lieux, avec une attention particulière
-            à la lumière, aux gestes et à l'atmosphère.
-          </p>
-
-        </div>
-
         <!-- Réseaux sociaux : remplacer les URL ci-dessous -->
         <nav class="hero-socials" id="hero-socials" aria-label="Réseaux sociaux">
           <a class="hero-social-link" href="https://www.instagram.com/alexpalanca_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/></svg></a>
@@ -813,161 +795,81 @@
     </section>
 
 
-    <!-- =====================
-         LES TROIS AXES
-    ====================== -->
-
-    <section class="work-section" id="univers">
-
-      <div class="work-heading">
-
-        <p class="eyebrow">Mes domaines d'intervention</p>
-
-        <h2>Trois univers, une même attention à l’image.</h2>
-
-        <p>
-          Des projets différents, avec la même exigence de justesse
-          et de soin dans chaque image.
-        </p>
-
+    <section class="studio-about" id="a-propos" aria-labelledby="about-title">
+      <figure class="studio-about-photo">
+        <img src="images/photo-alexandre.jpg" alt="Alexandre en séance de prise de vue" loading="lazy">
+      </figure>
+      <div class="studio-about-copy">
+        <p class="studio-eyebrow">Deux indépendants · Un même studio</p>
+        <h2 id="about-title">À deux, nous donnons forme à vos idées.</h2>
+        <p>Nous sommes Alex et Elisa, indépendants en communication digitale. Alex est photographe et vidéaste ; Elisa, diplômée d’une école d’art, imagine des identités visuelles, des directions artistiques et des créations digitales.</p>
+        <p>Ensemble, nous accompagnons les projets de leur première intention jusqu’aux images et supports qui les font vivre.</p>
       </div>
-
-      <div class="work-grid">
-
-        <!-- Axe 1 -->
-        <article class="work-card" id="portraits">
-
-          <a href="photos.html" aria-label="Découvrir les formules photo">
-
-            <div class="work-image-frame">
-
-              <img
-                class="work-image"
-                src="images/portraits/personnel-01.jpg"
-                alt="Portrait photographique en lumière naturelle"
-                loading="lazy"
-              >
-
-            </div>
-
-            <div class="work-title">
-              <h3>Photos</h3>
-              <span class="work-number">01</span>
-            </div>
-
-          </a>
-
-          <div>
-            <p class="work-description">
-              Portraits et reportages photographiques de personnes,
-              d'activités et d'événements.
-            </p>
-
-            <a class="work-link" href="photos.html">
-              Explorer
-            </a>
-          </div>
-
-        </article>
-
-
-        <!-- Axe 2 -->
-        <article class="work-card" id="evenementiel">
-
-          <a href="video.html" aria-label="Découvrir les formats vidéo">
-
-            <div class="work-image-frame">
-
-              <img
-                class="work-image"
-                src="images/evenementiel/sport-competition-02.jpg"
-                alt="Athlète sur une piste, pendant une course"
-                loading="lazy"
-              >
-
-            </div>
-
-            <div class="work-title">
-              <h3>Vidéos</h3>
-              <span class="work-number">02</span>
-            </div>
-
-          </a>
-
-          <div>
-            <p class="work-description">
-              Des créations vidéo adaptées à vos projets et aux
-              événements que vous souhaitez documenter.
-            </p>
-
-            <a class="work-link" href="video.html">
-              Explorer
-            </a>
-          </div>
-
-        </article>
-
-
-        <!-- Axe 3 -->
-        <article class="work-card" id="lieux-marques">
-
-          <a href="lieux-marques.html" aria-label="Découvrir lieux et marques">
-
-            <div class="work-image-frame">
-
-              <img
-                class="work-image"
-                src="images/Lieux-et-marques/letm-05.png?v=2"
-                alt="Terrasse de restaurant dans une rue en pierre"
-                loading="lazy"
-              >
-
-            </div>
-
-            <div class="work-title">
-              <h3>Lieux & marques</h3>
-              <span class="work-number">03</span>
-            </div>
-
-          </a>
-
-          <div>
-            <p class="work-description">
-              Photographies et vidéos pour présenter les lieux,
-              les savoir-faire, les produits et les activités.
-            </p>
-
-            <a class="work-link" href="lieux-marques.html">
-              Explorer
-            </a>
-          </div>
-
-        </article>
-
-      </div>
-
     </section>
 
-    <section data-drone-section data-drone-flight="local"></section>
-
-    <section class="about-section" id="a-propos" aria-labelledby="about-title">
-      <div class="about-copy">
-        <p class="eyebrow">Photographe &amp; vidéaste</p>
-        <h2 id="about-title">À propos</h2>
-        <p>
-          Je suis Alexandre, photographe et vidéaste indépendant. J’aime observer
-          les personnes dans leur environnement, les gestes d’un métier et
-          l’atmosphère propre à chaque lieu ou événement.
-        </p>
-        <p>
-          Avant chaque prise de vue, je prends le temps d’échanger pour comprendre
-          vos attentes et définir le cadre de la séance ou du tournage. Je m’implique
-          de la préparation à la livraison des images.
-        </p>
+    <section class="studio-services" id="univers" aria-labelledby="studio-services-title">
+      <header class="studio-section-heading">
+        <p class="studio-eyebrow">Nos domaines d’intervention</p>
+        <h2 id="studio-services-title">Trois façons de raconter votre projet.</h2>
+      </header>
+      <div class="studio-service-grid">
+        <a class="studio-service-card" href="photo-video.html">
+          <span class="studio-service-number">01</span>
+          <h3>Photo &amp; vidéo</h3>
+          <p>Des images vivantes pour faire ressentir votre univers, vos événements et vos savoir-faire.</p>
+          <span class="studio-card-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="studio-service-card" href="sites-internet.html">
+          <span class="studio-service-number">02</span>
+          <h3>Sites internet</h3>
+          <p>Des expériences web singulières, pensées pour vos besoins et votre identité.</p>
+          <span class="studio-card-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="studio-service-card" href="reseaux.html">
+          <span class="studio-service-number">03</span>
+          <h3>Contenus réseaux</h3>
+          <p>Des contenus cohérents pour nourrir votre présence et créer du lien avec votre communauté.</p>
+          <span class="studio-card-arrow" aria-hidden="true">↗</span>
+        </a>
       </div>
-      <figure class="about-photo">
-        <img src="images/photo-alexandre.jpg" alt="Alexandre Palanca photographiant avec son appareil, en noir et blanc" loading="lazy">
+    </section>
+
+    <section class="studio-approach" aria-labelledby="studio-approach-title">
+      <div class="studio-approach-copy">
+        <p class="studio-eyebrow">Notre manière de faire</p>
+        <h2 id="studio-approach-title">De l’écoute, du soin et le sens du détail.</h2>
+        <p>Chaque collaboration commence par une conversation. Nous prenons le temps de comprendre ce qui rend votre projet singulier, puis nous construisons une réponse juste, attentive à chaque étape.</p>
+        <p>Nous aimons les échanges simples, les idées qui mûrissent ensemble et les finitions qui font toute la différence.</p>
+      </div>
+      <figure class="studio-approach-photo">
+        <img src="images/Lieux-et-marques/letm-05.png" alt="Détail d’un lieu photographié pour mettre en valeur son atmosphère" loading="lazy">
       </figure>
+    </section>
+
+    <section class="studio-testimonials" aria-labelledby="studio-testimonials-title">
+      <header class="studio-section-heading">
+        <p class="studio-eyebrow">Ils nous font confiance</p>
+        <h2 id="studio-testimonials-title">Les rencontres derrière les projets.</h2>
+      </header>
+      <div class="studio-testimonial-layout">
+        <div class="studio-people" role="group" aria-label="Témoignages de nos clients">
+          <button type="button" class="studio-person is-selected" data-quote="0" aria-pressed="true"><img src="images/evenementiel/cabaret-01.jpg" alt=""><span>Événementiel</span></button>
+          <button type="button" class="studio-person" data-quote="1" aria-pressed="false"><img src="images/Lieux-et-marques/letm-01.jpg" alt=""><span>Hôtellerie</span></button>
+          <button type="button" class="studio-person" data-quote="2" aria-pressed="false"><img src="images/evenementiel/concert-01.jpg" alt=""><span>Culture</span></button>
+        </div>
+        <blockquote class="studio-quote" aria-live="polite">
+          <p id="studio-quote-text">« Votre retour d’expérience apparaîtra ici. »</p>
+          <footer id="studio-quote-author">Témoignage client à ajouter</footer>
+        </blockquote>
+      </div>
+      <div class="studio-trust">
+        <div class="studio-trust-window" aria-label="Logos des clients">
+          <div class="studio-trust-track" aria-hidden="true">
+            <b class="studio-logo-placeholder">Logo à ajouter</b><b class="studio-logo-placeholder">Logo à ajouter</b><b class="studio-logo-placeholder">Logo à ajouter</b><b class="studio-logo-placeholder">Logo à ajouter</b>
+            <b class="studio-logo-placeholder">Logo à ajouter</b><b class="studio-logo-placeholder">Logo à ajouter</b><b class="studio-logo-placeholder">Logo à ajouter</b><b class="studio-logo-placeholder">Logo à ajouter</b>
+          </div>
+        </div>
+      </div>
     </section>
 
   </main>
@@ -1010,7 +912,6 @@
     const blurImage = document.getElementById("hero-blur");
     const overlay = document.getElementById("hero-overlay");
     const brand = document.getElementById("hero-brand");
-    const introduction = document.getElementById("hero-introduction");
     const scrollIndicator = document.getElementById("scroll-indicator");
     const heroSideInfo = document.querySelectorAll(".hero-socials, .hero-meta");
     const siteNav = document.getElementById("site-nav");
@@ -1065,11 +966,13 @@
       */
 
       const darkProgress = smoothstep(
-        clamp(progress / 0.75, 0, 1)
+        clamp(progress / 0.9, 0, 1)
       );
 
+      /* Le voile se fond dans la couleur de fond de la section suivante (sombre ou clair). */
+      const fade = getComputedStyle(document.body).backgroundColor.match(/\d+/g) || [0, 0, 0];
       overlay.style.backgroundColor =
-        `rgba(0, 0, 0, ${darkProgress})`;
+        `rgba(${fade[0]}, ${fade[1]}, ${fade[2]}, ${darkProgress})`;
 
       /*
         Le flou augmente pendant le défilement.
@@ -1082,19 +985,6 @@
       sharpImage.style.opacity = String(
         1 - clamp(progress * 8, 0, 1)
       );
-
-      /*
-        L'introduction apparaît ensuite.
-      */
-
-      const introProgress = smoothstep(
-        clamp((progress - 0.75) / 0.25, 0, 1)
-      );
-
-      introduction.style.opacity = String(introProgress);
-
-      introduction.style.transform =
-        `translateY(${35 - introProgress * 35}px)`;
 
       if (progress > 0) {
         siteNav.classList.add("is-visible");

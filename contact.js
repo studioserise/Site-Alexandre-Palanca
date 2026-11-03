@@ -5,6 +5,16 @@ const contactStatus = document.getElementById("contact-form-status");
 const contactSubmit = document.getElementById("contact-submit");
 const config = getConfig();
 
+const contactService = document.getElementById("contact-service");
+const requestedService = new URLSearchParams(window.location.search).get("service");
+if (requestedService && contactService instanceof HTMLSelectElement && [...contactService.options].some((option) => option.value === requestedService)) {
+  contactService.value = requestedService;
+}
+if (requestedService === "Sites internet") {
+  document.getElementById("contact-title").textContent = "Parlons de votre projet web.";
+  document.getElementById("contact-description").textContent = "Décrivez-nous votre activité et vos besoins pour imaginer un site internet adapté à votre projet.";
+}
+
 contactForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   contactStatus.textContent = "";
@@ -13,13 +23,22 @@ contactForm.addEventListener("submit", async (event) => {
   if (!contactForm.reportValidity()) return;
 
   const formData = new FormData(contactForm);
+  const extras = [];
+  contactForm.querySelectorAll("select[data-extra]").forEach((select) => {
+    if (select.value) extras.push(`${select.labels[0].textContent.trim()} : ${select.value}`);
+  });
+  contactForm.querySelectorAll("fieldset.contact-chips").forEach((group) => {
+    const values = [...group.querySelectorAll("input:checked")].map((input) => input.value);
+    if (values.length) extras.push(`${group.querySelector("legend").textContent.trim()} : ${values.join(", ")}`);
+  });
+  const details = extras.length ? `${formData.get("message")}\n\n— Précisions —\n${extras.join("\n")}` : formData.get("message");
   const payload = {
     name: formData.get("name"),
     email: formData.get("email"),
     phone: formData.get("phone"),
     service: formData.get("service"),
     date: formData.get("date"),
-    message: formData.get("message"),
+    message: details,
     consent: formData.get("consent") === "on",
     website: formData.get("website")
   };

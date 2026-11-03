@@ -1,6 +1,75 @@
+if (!document.querySelector('script[src^="glow.js"]')) {
+  const glowScript = document.createElement("script");
+  glowScript.src = "glow.js?v=1";
+  glowScript.defer = true;
+  document.head.append(glowScript);
+}
+
+if (!document.querySelector('link[href^="redesign.css"]')) {
+  const redesignStyles = document.createElement("link");
+  redesignStyles.rel = "stylesheet";
+  redesignStyles.href = "redesign.css?v=28";
+  document.head.append(redesignStyles);
+}
+
 const siteNav = document.getElementById("site-nav");
 const siteNavToggle = document.getElementById("site-nav-toggle");
 const siteNavLinks = document.getElementById("site-nav-links");
+
+const themePreference = localStorage.getItem("site-theme");
+document.documentElement.dataset.theme = themePreference === "light" ? "light" : "dark";
+
+const publicNavigation = [
+  { label: "Photo & vidéo", href: "photo-video.html", files: ["photo-video.html"] },
+  { label: "Sites internet", href: "sites-internet.html", files: ["sites-internet.html"] },
+  { label: "Contenus réseaux", href: "reseaux.html", files: ["reseaux.html"] },
+  { label: "Galerie", href: "galerie.html", files: ["galerie.html"] },
+  { label: "Contact", href: "#site-footer", files: [] }
+];
+
+if (siteNavLinks) {
+  const currentFile = window.location.pathname.split("/").pop() || "index.html";
+  siteNavLinks.replaceChildren(...publicNavigation.map(({ label, href, files }) => {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.className = "site-nav-link";
+    link.href = href;
+    link.textContent = label;
+    if (files.includes(currentFile)) link.setAttribute("aria-current", "page");
+    item.append(link);
+    return item;
+  }));
+}
+
+if (siteNav && !siteNav.querySelector(".site-theme-toggle")) {
+  const themeToggle = document.createElement("button");
+  themeToggle.className = "site-theme-toggle";
+  themeToggle.type = "button";
+  themeToggle.setAttribute("aria-pressed", String(document.documentElement.dataset.theme === "light"));
+  themeToggle.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m13.2 2-8 11h5.7l-.8 9 9.5-12h-6.1L15 2z"></path>
+      <path class="site-theme-slash" d="M3 21 21 3"></path>
+    </svg>
+  `;
+  const navInner = siteNav.querySelector(".site-nav-inner");
+  navInner.append(themeToggle);
+
+  const syncThemeToggle = () => {
+    const isLight = document.documentElement.dataset.theme === "light";
+    themeToggle.setAttribute("aria-pressed", String(isLight));
+    themeToggle.setAttribute("aria-label", `Activer le mode ${isLight ? "sombre" : "clair"}`);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", isLight ? "#f1eee8" : "#080807");
+  };
+
+  syncThemeToggle();
+  themeToggle.addEventListener("click", () => {
+    const nextTheme = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = nextTheme;
+    localStorage.setItem("site-theme", nextTheme);
+    syncThemeToggle();
+  });
+}
 
 if (siteNav && siteNavToggle && siteNavLinks) {
   function closeMobileNav(restoreFocus = false) {
@@ -29,6 +98,13 @@ if (siteNav && siteNavToggle && siteNavLinks) {
     }
   });
 
+  siteNavLinks.addEventListener("click", (event) => {
+    const link = event.target.closest("a");
+    if (link?.getAttribute("href") === "#site-footer" && !document.getElementById("site-footer")) {
+      window.location.assign("index.html#site-footer");
+    }
+  });
+
   document.addEventListener("pointerdown", (event) => {
     if (!siteNav.contains(event.target)) {
       closeMobileNav();
@@ -51,31 +127,37 @@ if (siteNav && siteNavToggle && siteNavLinks) {
 if (!document.querySelector(".site-footer")) {
   const footer = document.createElement("footer");
   footer.className = "site-footer";
+  footer.id = "site-footer";
   footer.innerHTML = `
     <div class="site-footer-inner">
-      <div class="site-footer-brand">
-        <a href="index.html#accueil">Alexandre Palanca</a>
-        <p>Photographie &amp; vidéo · Sarlat-la-Canéda</p>
+      <div class="site-footer-contact">
+        <p class="site-footer-eyebrow">Un projet à imaginer ?</p>
+        <h2>Parlons de votre prochaine histoire.</h2>
+        <a class="site-footer-email" href="mailto:info@alexandrepalanca.fr">info@alexandrepalanca.fr</a>
+        <a class="site-footer-phone" href="tel:+33679538280">+33 6 79 53 82 80</a>
+        <p>Sarlat-la-Canéda · Dordogne &amp; Périgord</p>
       </div>
-      <div class="site-footer-column">
-        <h2>Contact</h2>
-        <a class="site-footer-icon-link" href="mailto:info@alexandrepalanca.fr"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6.5L20.5 7"/></svg><span>info@alexandrepalanca.fr</span></a>
-        <a class="site-footer-icon-link" href="tel:+33679538280"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><span>+33 6 79 53 82 80</span></a>
-      </div>
-      <div class="site-footer-column">
-        <h2>Réseaux sociaux</h2>
-        <div class="site-footer-socials">
-          <a class="site-footer-icon-link" href="https://www.instagram.com/alexpalanca_/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/></svg><span>Instagram</span></a>
-          <a class="site-footer-icon-link" href="https://www.facebook.com/alexandre.palanca.7" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8.5h2.5V5H14a3.5 3.5 0 0 0-3.5 3.5V11H8v3.5h2.5V21H14v-6.5h2.5l.5-3.5h-3V8.8a.3.3 0 0 1 .3-.3z"/></svg><span>Facebook</span></a>
+      <div class="site-footer-card-wrap">
+      <div class="site-footer-card" tabindex="0" aria-label="Carte de visite Alexandre et Elisa">
+        <div class="site-footer-card-inner">
+          ${[-3, -2, -1, 0, 1, 2, 3].map((z) => `<span class="site-footer-card-slice" style="--z:${z}px" aria-hidden="true"></span>`).join("")}
+          <div class="site-footer-card-face site-footer-card-front">
+            <span class="card-ink card-ink--logo" style="--ink: url(images/logo-accueil-carte.png)"><img src="images/logo-accueil-carte.png" alt="" aria-hidden="true"></span>
+            <span class="card-ink card-ink--text" style="--ink: url(images/texte-accueil-carte.png)"><img src="images/texte-accueil-carte.png" alt="Alex &amp; Elisa"></span>
+          </div>
+          <div class="site-footer-card-face site-footer-card-back">
+            <img src="images/envers%20carte.png" alt="Alexandre Palanca, photographe — 06 79 53 82 80 — instagram alexpalanca — alexpalanca@gmail.com">
+          </div>
         </div>
       </div>
-      <div class="site-footer-column">
-        <h2>Zone d’intervention</h2>
-        <p>Sarlat-la-Canéda, Dordogne &amp; Périgord.</p>
-        <p>Déplacements possibles selon les projets.</p>
+      <p class="site-footer-card-hint">Maintenez le clic et faites glisser pour tourner la carte</p>
+      </div>
+      <div class="site-footer-actions">
+        <a href="photo-video.html#demande-devis">Devis photo &amp; vidéo <span aria-hidden="true">↗</span></a>
+        <a href="sites-internet.html#demande-projet">Devis site internet <span aria-hidden="true">↗</span></a>
       </div>
       <div class="site-footer-legal">
-        <span>© ${new Date().getFullYear()} Alexandre Palanca</span>
+        <span>© ${new Date().getFullYear()} Alex &amp; Elisa</span>
         <a href="mentions-legales.html">Mentions légales</a>
         <a href="politique-confidentialite.html">Politique de confidentialité</a>
       </div>
@@ -88,4 +170,10 @@ if (!document.querySelector(".site-footer")) {
   } else {
     document.body.append(footer);
   }
+}
+
+if (document.querySelector(".site-footer-card") && !document.querySelector('script[src^="footer-card.js"]')) {
+  const cardScript = document.createElement("script");
+  cardScript.src = "footer-card.js?v=1";
+  document.body.append(cardScript);
 }
