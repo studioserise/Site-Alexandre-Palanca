@@ -8,7 +8,7 @@ if (!document.querySelector('script[src^="glow.js"]')) {
 if (!document.querySelector('link[href^="redesign.css"]')) {
   const redesignStyles = document.createElement("link");
   redesignStyles.rel = "stylesheet";
-  redesignStyles.href = "redesign.css?v=28";
+  redesignStyles.href = "redesign.css?v=36";
   document.head.append(redesignStyles);
 }
 

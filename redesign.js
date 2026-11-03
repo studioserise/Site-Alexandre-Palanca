@@ -17,17 +17,33 @@ const quoteButtons = document.querySelectorAll(".studio-person[data-quote]");
 const quoteText = document.getElementById("studio-quote-text");
 const quoteAuthor = document.getElementById("studio-quote-author");
 
+const HOLD_MS = 7000;
+const SELECT_MS = 650;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let typingTimer = 0;
-function typeQuote(quote) {
+let cycleTimer = 0;
+let cycleStarted = false;
+let current = Math.max([...quoteButtons].findIndex((b) => b.classList.contains("is-selected")), 0);
+
+function selectPerson(index) {
+  current = index;
+  quoteButtons.forEach((item, i) => {
+    item.classList.toggle("is-selected", i === index);
+    item.setAttribute("aria-pressed", String(i === index));
+  });
+}
+
+function typeQuote(quote, onDone) {
   clearInterval(typingTimer);
   const full = `« ${quote.text} »`;
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  quoteText.classList.remove("is-selecting");
   quoteAuthor.textContent = "";
   quoteAuthor.style.opacity = "0";
-  if (reduced) {
+  if (reducedMotion.matches) {
     quoteText.textContent = full;
     quoteAuthor.textContent = quote.author;
     quoteAuthor.style.opacity = "1";
+    onDone();
     return;
   }
   quoteText.textContent = "";
@@ -39,24 +55,49 @@ function typeQuote(quote) {
       clearInterval(typingTimer);
       quoteAuthor.textContent = quote.author;
       quoteAuthor.style.opacity = "1";
+      onDone();
     }
-  }, 28);
+  }, 38);
+}
+
+// Frappe, pause de 7 s, sélection du texte, effacement d'un coup, puis témoignage suivant.
+function playQuote(index) {
+  clearTimeout(cycleTimer);
+  selectPerson(index);
+  typeQuote(quotes[index], () => {
+    cycleTimer = setTimeout(() => {
+      quoteText.classList.add("is-selecting");
+      window.getSelection()?.selectAllChildren(quoteText);
+      cycleTimer = setTimeout(() => {
+        quoteText.classList.remove("is-selecting");
+        window.getSelection()?.removeAllRanges();
+        quoteText.textContent = "";
+        quoteAuthor.textContent = "";
+        quoteAuthor.style.opacity = "0";
+        cycleTimer = setTimeout(() => playQuote((index + 1) % quotes.length), 450);
+      }, reducedMotion.matches ? 0 : SELECT_MS);
+    }, HOLD_MS);
+  });
 }
 
 quoteButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const selected = Number(button.dataset.quote);
-    const quote = quotes[selected];
-    if (!quote || button.classList.contains("is-selected")) return;
-
-    quoteButtons.forEach((item) => {
-      const isSelected = item === button;
-      item.classList.toggle("is-selected", isSelected);
-      item.setAttribute("aria-pressed", String(isSelected));
-    });
-    typeQuote(quote);
+    if (!quotes[selected] || !cycleStarted || (selected === current && button.classList.contains("is-selected"))) return;
+    playQuote(selected);
   });
 });
+
+const testimonials = document.querySelector(".studio-testimonials");
+if (quoteText && testimonials) {
+  const startObserver = new IntersectionObserver((entries) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    startObserver.disconnect();
+    cycleStarted = true;
+    playQuote(current);
+  }, { threshold: 0.4 });
+  startObserver.observe(testimonials);
+}
 
 document.querySelectorAll(".flip-card[tabindex]").forEach((card) => {
   const toggle = () => {
@@ -165,11 +206,11 @@ document.querySelectorAll("[data-carousel]").forEach((carousel) => {
   restartTimer();
 });
 
-const pressTargets = ".flip-card, .studio-service-card, .studio-about-photo, .studio-approach-photo, .redesign-hero-image:not(.flip-card-face)";
+const pressTargets = ".flip-card, .studio-service-card, .studio-about-photo, .studio-approach-photo, .redesign-hero-image:not(.flip-card-face), .portfolio-carousel";
 if (window.matchMedia("(hover: hover)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
   document.querySelectorAll(pressTargets).forEach((el) => {
     el.classList.add("press-fx");
-    const max = el.matches(".site-footer-card") ? 9 : 7;
+    const max = el.matches(".site-footer-card") ? 9 : el.matches(".portfolio-carousel") ? 3 : 7;
     el.addEventListener("pointermove", (event) => {
       if (event.pointerType !== "mouse") return;
       const rect = el.getBoundingClientRect();

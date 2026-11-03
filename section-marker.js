@@ -23,7 +23,6 @@
   const PITCH = 14; // espacement visé entre deux graduations (px)
   const INSET = 22; // marge haute et basse de la règle (px)
   const SIGMA_PX = 46; // étendue de l'effet d'agrandissement (px)
-  const RAMP = 0.14; // fondu du numéro, en fraction de la hauteur de fenêtre
 
   const marker = document.createElement("div");
   marker.className = "section-marker";
@@ -100,11 +99,9 @@
     }
   };
 
-  // Le numéro apparaît quand le haut de la section atteint le haut de la fenêtre
-  // et disparaît quand son bas atteint le milieu de la fenêtre.
+  // Le numéro apparaît quand la section est centrée dans la fenêtre.
   const readVisibility = () => {
     const h = window.innerHeight;
-    const ramp = h * RAMP;
     const room = Math.max(document.documentElement.scrollHeight - h - window.scrollY, 0);
     const top = [];
     const bottom = [];
@@ -115,14 +112,14 @@
       bottom[g] = bottom[g] === undefined ? r.bottom : Math.max(bottom[g], r.bottom);
     });
     shown = top.map((t, g) => {
-      // La dernière section ne peut pas toujours remonter jusqu'en haut de la fenêtre.
-      const reach = Math.max(t - room, 0);
-      const appear = Math.min(Math.max(1 - (t - reach) / ramp, 0), 1);
-      // Les sections courtes gardent leur numéro un instant : seuil ramené à 40 % de leur hauteur.
       const height = bottom[g] - top[g];
-      const mid = Math.min(h / 2, height * 0.4);
-      const vanish = Math.min(Math.max((bottom[g] - mid) / Math.min(ramp, height * 0.3), 0), 1);
-      return smooth(Math.min(appear, vanish));
+      const center = (t + bottom[g]) / 2;
+      // Une section plus haute que l'écran reste « centrée » tant qu'elle le couvre.
+      const slack = Math.max((height - h) / 2, 0);
+      // La dernière section ne peut pas toujours remonter jusqu'au centre de la fenêtre.
+      const unreachable = Math.max(center - room - h / 2, 0);
+      const distance = Math.max(Math.abs(center - h / 2) - slack - unreachable, 0);
+      return smooth(Math.min(Math.max(1 - distance / (h * 0.3), 0), 1));
     });
   };
 
@@ -148,7 +145,8 @@
         const a = shown[index] || 0;
         width = 0.3 + 0.1 * g + 0.6 * a;
         alpha = 0.6 + 0.4 * Math.max(g, a);
-        labels[index].style.opacity = a;
+        // Le « 01 » de la première section reste masqué : la numérotation visible commence à 02.
+        labels[index].style.opacity = index === 0 ? 0 : a;
         labels[index].style.translate = `${(1 - a) * -6}px 0`;
       } else {
         width = 0.15 + 0.3 * g;

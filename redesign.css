@@ -251,8 +251,9 @@ button { font: inherit; }
   display: flex;
   width: max-content;
   flex: none;
-  gap: 18px;
-  animation: trust-marquee 26s linear infinite;
+  gap: clamp(56px, 7vw, 96px);
+  padding-right: clamp(56px, 7vw, 96px);
+  animation: trust-marquee 70s linear infinite;
 }
 
 @keyframes trust-marquee {
@@ -623,6 +624,8 @@ html[data-theme="light"] .redesign-development p:not(.studio-eyebrow) { color: #
 html[data-theme="light"] .studio-quote { background: rgba(23, 23, 21, 0.08); color: #171715; }
 html[data-theme="light"] .studio-person { color: #171715; }
 html[data-theme="light"] .studio-trust b { color: #171715; }
+.studio-trust-track img { display: block; width: auto; height: clamp(84px, 9vw, 120px); flex: none; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+html[data-theme="light"] .studio-trust-track img { filter: invert(1); }
 html[data-theme="light"] .redesign-panel,
 html[data-theme="light"] .portfolio-carousel,
 html[data-theme="light"] .web-process article { border-color: rgba(23, 23, 21, 0.15); background-color: rgba(23, 23, 21, 0.06); color: #171715; }
@@ -754,6 +757,7 @@ html[data-theme="light"] .drone-cta { border-color: rgba(23, 23, 21, 0.5); color
   transition: transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1), background 220ms ease;
   will-change: transform;
 }
+.portfolio-carousel.press-fx.is-pointed { --ps: 0.995; }
 .press-fx.is-pointed { --ps: 0.985; --glare: 1; transition: transform 90ms linear, background 220ms ease; }
 .studio-service-card.press-fx.is-pointed { --ps: 1.025; }
 .studio-service-card:hover, .studio-service-card:focus-visible { transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) scale(var(--ps)); }
@@ -761,6 +765,7 @@ html[data-theme="light"] .drone-cta { border-color: rgba(23, 23, 21, 0.5); color
 .studio-approach-photo.press-fx::after,
 .redesign-hero-image.press-fx::after,
 .studio-service-card.press-fx::after,
+.portfolio-carousel.press-fx::after,
 .flip-card-face::after {
   position: absolute;
   inset: 0;
@@ -783,6 +788,18 @@ html[data-theme="light"] .drone-cta { border-color: rgba(23, 23, 21, 0.5); color
 .flip-card-face--back .flip-hint { position: relative; z-index: 4; }
 @media (hover: none) { .press-fx { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .press-fx { transform: none !important; } }
+
+/* Mode sombre : reflet très discret sur les cadres */
+html:not([data-theme="light"]) :is(.studio-about-photo.press-fx, .studio-approach-photo.press-fx, .redesign-hero-image.press-fx, .studio-service-card.press-fx, .portfolio-carousel.press-fx, .flip-card-face:not(.flip-card-face--back))::after {
+  background:
+    radial-gradient(circle at var(--gx) var(--gy), rgba(255, 255, 255, 0.05), transparent 60%),
+    linear-gradient(115deg, transparent calc(var(--gx) - 22%), rgba(255, 255, 255, 0.025) var(--gx), transparent calc(var(--gx) + 22%));
+}
+html:not([data-theme="light"]) .flip-card-face--back::after {
+  background:
+    radial-gradient(circle at var(--mx) var(--gy), rgba(255, 255, 255, 0.04), transparent 60%),
+    linear-gradient(115deg, transparent calc(var(--mx) - 22%), rgba(255, 255, 255, 0.02) var(--mx), transparent calc(var(--mx) + 22%));
+}
 
 /* Pied de page : suit le thème (sombre ou blanc cassé) */
 html body .site-footer { background: var(--studio-bg); color: var(--studio-ink); }
@@ -977,17 +994,7 @@ html[data-theme="light"] .contact-chips input:checked + span { border-color: #17
   position: relative;
   align-self: center;
   padding: clamp(24px, 3.4vw, 44px) clamp(26px, 3.8vw, 50px);
-  border-radius: 26px 26px 26px 6px;
-}
-.studio-quote::before {
-  position: absolute;
-  bottom: 0;
-  left: -14px;
-  width: 22px;
-  height: 22px;
-  background: inherit;
-  clip-path: polygon(100% 0, 100% 100%, 0 100%);
-  content: "";
+  border-radius: 26px;
 }
 .studio-quote p { min-height: 1.5em; }
 .studio-quote p::after {
@@ -1002,7 +1009,8 @@ html[data-theme="light"] .contact-chips input:checked + span { border-color: #17
 }
 .studio-quote footer { min-height: 1em; transition: opacity 400ms ease; }
 @keyframes quote-caret { 50% { opacity: 0; } }
-@media (max-width: 800px) { .studio-quote::before { display: none; } }
+#studio-quote-text::selection { background: rgba(128, 128, 128, 0.5); color: inherit; }
+.studio-quote p.is-selecting::after { display: none; }
 @media (prefers-reduced-motion: reduce) { .studio-quote p::after { animation: none; } }
 
 /* Portfolio : une grande image à gauche, deux images empilées à droite */
@@ -1089,12 +1097,12 @@ html body main > section[data-drone-section] { background: transparent; z-index:
 /* Accueil, section 2 : opaque pour fondre le hero, donc l'aura y est dessinée dans son propre fond */
 .intro-sequence + .studio-about {
   background:
-    radial-gradient(circle 320px at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, calc(0.11 * var(--ga, 0))) 0%, rgba(255, 255, 255, calc(0.05 * var(--ga, 0))) 38%, transparent 100%) fixed,
+    radial-gradient(circle 452.5px at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, calc(0.11 * var(--ga, 0))) 0%, rgba(255, 255, 255, calc(0.05 * var(--ga, 0))) 38%, transparent 70%) fixed,
     linear-gradient(to bottom, transparent 0, var(--studio-bg) 20vh) !important;
 }
 html[data-theme="light"] .intro-sequence + .studio-about {
   background:
-    radial-gradient(circle 320px at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, calc(0.75 * var(--ga, 0))) 0%, rgba(255, 255, 255, calc(0.35 * var(--ga, 0))) 40%, transparent 100%) fixed,
+    radial-gradient(circle 452.5px at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, calc(0.75 * var(--ga, 0))) 0%, rgba(255, 255, 255, calc(0.35 * var(--ga, 0))) 40%, transparent 70%) fixed,
     linear-gradient(to bottom, transparent 0, var(--studio-bg) 20vh) !important;
 }
 
