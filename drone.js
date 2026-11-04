@@ -89,7 +89,7 @@ function renderSection(section) {
   title.id = titleId;
   const cta = el("a", "drone-cta");
   cta.href = section.dataset.droneCta || "#";
-  const arrow = el("span", "", "↗");
+  const arrow = el("span", "", "↗︎");
   arrow.setAttribute("aria-hidden", "true");
   cta.append((section.dataset.droneCtaLabel || content.cta) + " ", arrow);
 

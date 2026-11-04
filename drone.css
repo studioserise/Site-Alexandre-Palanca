@@ -87,7 +87,7 @@
   transition: opacity 0.25s ease, padding-left 0.25s ease;
 }
 
-.drone-features a::after { content: " ↗"; opacity: 0.6; }
+.drone-features a::after { content: " ↗︎"; opacity: 0.6; }
 .drone-features a:hover { padding-left: 10px; opacity: 0.8; }
 
 @media (max-width: 800px) {

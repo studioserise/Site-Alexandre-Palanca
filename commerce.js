@@ -362,8 +362,8 @@ function renderEditor() {
   view.innerHTML = `<div class="com-top"><h2>${draft.id ? "Modifier le brouillon" : "Nouveau devis"}</h2>
     <button class="gallery-quiet-button com-preview-toggle" id="pv-toggle" type="button">Aperçu</button></div>
     <div class="com-layout"><div class="com-panel">${stepsHtml}<div class="com-form" id="step-body"></div>
-    <div class="com-actions"><button class="gallery-quiet-button" id="prev" type="button" ${step === 1 ? "disabled" : ""}>← Précédent</button>
-    ${step < 4 ? '<button class="gallery-primary-button" id="next" type="button">Suivant →</button>' : ""}</div></div>
+    <div class="com-actions"><button class="gallery-quiet-button" id="prev" type="button" ${step === 1 ? "disabled" : ""}>←︎ Précédent</button>
+    ${step < 4 ? '<button class="gallery-primary-button" id="next" type="button">Suivant →︎</button>' : ""}</div></div>
     <aside class="com-preview" id="pv"></aside></div>`;
   const refresh = () => { document.getElementById("pv").innerHTML = previewHtml(); };
   refresh();
@@ -501,7 +501,7 @@ async function quoteDetail(id) {
   const c = q.client_snapshot || {};
   const actions = await documentActions("quote", id, c.email);
   view.innerHTML = `<div class="com-panel com-detail"><div class="com-top"><h2>Devis ${esc(q.number)} ${badge(QUOTE_STATUS, q.status)}</h2>
-    <a class="gallery-quiet-button" href="#" id="back">← Retour</a></div>
+    <a class="gallery-quiet-button" href="#" id="back">←︎ Retour</a></div>
     <dl><dt>Client</dt><dd>${esc(c.name)}</dd><dt>Date</dt><dd>${dateFr(q.issue_date)}</dd><dt>Valable jusqu'au</dt><dd>${dateFr(q.valid_until)}</dd>
     <dt>Total TTC</dt><dd>${money(q.total_ttc_cents)}</dd><dt>Acompte demandé</dt><dd>${money(data.deposit.requestedCents)}</dd>
     <dt>Acompte facturé</dt><dd>${money(data.deposit.invoicedCents)}</dd><dt>Acompte reçu</dt><dd>${money(data.deposit.receivedCents)}</dd></dl>
@@ -540,7 +540,7 @@ async function invoiceDetail(id) {
   const remaining = i.amount_due_cents - i.paid_cents;
   const actions = issued ? await documentActions("invoice", id, c.email) : null;
   view.innerHTML = `<div class="com-panel com-detail"><div class="com-top"><h2>${i.kind === "deposit" ? "Facture d'acompte" : "Facture"} ${esc(i.number || "(brouillon)")} ${badge(INVOICE_STATUS, i.status)}</h2>
-    <a class="gallery-quiet-button" href="#" id="back">← Retour</a></div>
+    <a class="gallery-quiet-button" href="#" id="back">←︎ Retour</a></div>
     <dl><dt>Client</dt><dd>${esc(c.name || "—")}</dd><dt>Devis</dt><dd>${esc(i.quote_number || "—")}</dd><dt>Échéance</dt><dd>${dateFr(i.due_date)}</dd>
     <dt>Total TTC</dt><dd>${money(i.total_ttc_cents)}</dd><dt>Reste à payer</dt><dd>${money(issued ? remaining : i.amount_due_cents)}</dd></dl>
     <div class="com-table-wrap"><table class="com-table"><thead><tr><th>Désignation</th><th class="com-num">Qté</th><th class="com-num">Total HT</th></tr></thead><tbody>

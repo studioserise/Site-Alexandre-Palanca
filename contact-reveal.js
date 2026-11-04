@@ -16,7 +16,7 @@
       collapse.inert = !open;
       button.setAttribute('aria-expanded', String(open));
       label.textContent = open ? 'Réduire le formulaire' : 'Remplir le formulaire';
-      if (arrow) arrow.textContent = open ? '↑' : '↓';
+      if (arrow) arrow.textContent = open ? '↑︎' : '↓︎';
       if (open && scroll) {
         setTimeout(function () {
           collapse.scrollIntoView({ behavior: 'smooth', block: 'start' });

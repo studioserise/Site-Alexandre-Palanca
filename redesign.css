@@ -1271,3 +1271,6 @@ html[data-theme="light"] .gallery-landing .gallery-primary-button:hover { backgr
 
 /* Portfolio : le texte part du haut du cadre pour ne pas sauter d'un projet à l'autre */
 .portfolio-description { align-self: start; }
+
+/* Flèches (↗ ↓ ←…) : toujours en texte, jamais en emoji sur téléphone */
+body { font-variant-emoji: text; }

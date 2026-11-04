@@ -137,8 +137,8 @@ if (!document.querySelector(".site-footer")) {
         <a class="site-footer-phone" href="tel:+33679538280">+33 6 79 53 82 80</a>
         <p>Sarlat-la-Canéda · Dordogne &amp; Périgord</p>
         <div class="site-footer-actions">
-          <a href="photo-video.html#demande-devis">Photo &amp; vidéo <span aria-hidden="true">↗</span></a>
-          <a href="sites-internet.html#demande-projet">Site internet <span aria-hidden="true">↗</span></a>
+          <a href="photo-video.html#demande-devis">Photo &amp; vidéo <span aria-hidden="true">↗︎</span></a>
+          <a href="sites-internet.html#demande-projet">Site internet <span aria-hidden="true">↗︎</span></a>
         </div>
       </div>
       <div class="site-footer-card-wrap">

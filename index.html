@@ -385,6 +385,36 @@
       }
     }
 
+    /* Téléphone : la scène d'accueil descend jusqu'en bas de l'écran, y compris sous la barre
+       du navigateur (100svh s'arrêtait au-dessus et laissait voir un trait de la section suivante).
+       --toolbar-gap remonte les éléments du bas pour qu'ils restent dans la partie visible. */
+    @supports (height: 100lvh) {
+      .hero-stage {
+        --toolbar-gap: calc(100lvh - 100svh);
+        height: 100lvh;
+      }
+
+      .hero-brand,
+      .hero-introduction {
+        bottom: var(--toolbar-gap);
+      }
+
+      .scroll-indicator,
+      .hero-meta {
+        bottom: calc(35px + var(--toolbar-gap));
+      }
+
+      @media (max-width: 800px) {
+        .hero-meta {
+          bottom: calc(72px + var(--toolbar-gap));
+        }
+
+        .hero-meta--place {
+          bottom: calc(94px + var(--toolbar-gap));
+        }
+      }
+    }
+
     /* =========================
        5. LES TROIS AXES
     ========================= */
@@ -527,7 +557,7 @@
     }
 
     .work-link::after {
-      content: " ↗";
+      content: " ↗︎";
     }
 
     .about-section {
@@ -665,18 +695,18 @@
     }
   </style>
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="redesign.css?v=50">
+  <link rel="stylesheet" href="redesign.css?v=51">
   <link rel="stylesheet" href="site-nav.css?v=black2">
   <link rel="stylesheet" href="cursor.css?v=7">
-  <script type="module" src="site-nav.js?v=footer-compact"></script>
+  <script type="module" src="site-nav.js?v=arrows"></script>
   <link rel="stylesheet" href="section-marker.css?v=5">
   <script src="cursor.js?v=3" defer></script>
   <script src="redesign.js?v=5" defer></script>
   <script src="section-marker.js?v=10" defer></script>
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
-  <script type="module" src="drone.js?v=9"></script>
-  <link rel="stylesheet" href="drone.css?v=8">
+  <script type="module" src="drone.js?v=10"></script>
+  <link rel="stylesheet" href="drone.css?v=9">
   <link rel="stylesheet" href="mobile-cta.css?v=2">
 </head>
 
@@ -817,19 +847,19 @@
           <span class="studio-service-number">01</span>
           <h3>Photo &amp; vidéo</h3>
           <p>Des images vivantes pour faire ressentir votre univers, vos événements et vos savoir-faire.</p>
-          <span class="studio-card-arrow" aria-hidden="true">↗</span>
+          <span class="studio-card-arrow" aria-hidden="true">↗︎</span>
         </a>
         <a class="studio-service-card" href="sites-internet.html">
           <span class="studio-service-number">02</span>
           <h3>Sites internet</h3>
           <p>Des expériences web singulières, pensées pour vos besoins et votre identité.</p>
-          <span class="studio-card-arrow" aria-hidden="true">↗</span>
+          <span class="studio-card-arrow" aria-hidden="true">↗︎</span>
         </a>
         <a class="studio-service-card" href="reseaux.html">
           <span class="studio-service-number">03</span>
           <h3>Contenus réseaux</h3>
           <p>Des contenus cohérents pour nourrir votre présence et créer du lien avec votre communauté.</p>
-          <span class="studio-card-arrow" aria-hidden="true">↗</span>
+          <span class="studio-card-arrow" aria-hidden="true">↗︎</span>
         </a>
       </div>
     </section>
