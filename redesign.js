@@ -99,7 +99,46 @@ if (quoteText && testimonials) {
   startObserver.observe(testimonials);
 }
 
-document.querySelectorAll(".flip-card[tabindex]").forEach((card) => {
+// Cartes des formules : un clic renvoie vers le formulaire de contact de la page (qui s'ouvre tout seul).
+// Sur écran tactile, sans survol, le premier toucher retourne la carte et le second mène au formulaire.
+const contactSection = document.querySelector("[data-contact-reveal]")?.closest("section[id]");
+const canHover = window.matchMedia("(hover: hover)").matches;
+const goToContact = () => {
+  const hash = `#${contactSection.id}`;
+  if (location.hash === hash) {
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    contactSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    location.hash = hash;
+  }
+};
+
+document.querySelectorAll(".flip-card-grid .flip-card[tabindex]").forEach((card) => {
+  if (!contactSection) return;
+  card.setAttribute("role", "link");
+  card.setAttribute("aria-label", `${card.querySelector("h3")?.textContent ?? "Cette formule"} — demander un devis`);
+  card.style.cursor = "pointer";
+  const activate = () => {
+    if (!canHover && !card.classList.contains("is-flipped")) {
+      document.querySelectorAll(".flip-card-grid .flip-card.is-flipped").forEach((other) => other.classList.remove("is-flipped"));
+      card.classList.add("is-flipped");
+      return;
+    }
+    card.classList.remove("is-flipped");
+    goToContact();
+  };
+  card.addEventListener("click", activate);
+  card.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      card.classList.remove("is-flipped");
+      goToContact();
+    }
+  });
+  card.dataset.contactLink = "true";
+});
+
+document.querySelectorAll(".flip-card[tabindex]:not([data-contact-link])").forEach((card) => {
   const toggle = () => {
     const isFlipped = card.classList.toggle("is-flipped");
     card.setAttribute("aria-pressed", String(isFlipped));
@@ -115,21 +154,144 @@ document.querySelectorAll(".flip-card[tabindex]").forEach((card) => {
   });
 });
 
+// Portfolio photo et vidéo : alterne un thème photo et un projet vidéo.
+// Un thème photo peut avoir plusieurs séries de 3 images (`sets`) : elles défilent dans les cadres, le texte reste.
+// `id` + numéro de série (0, 1, 2…) relient chaque case des galeries défilantes à sa série
+// (attributs data-portfolio et data-set dans photo-video.html).
+// Pour un projet vidéo, ajouter plus tard `video: "chemin/vers/film.mp4"` : la vidéo remplacera l'image.
 const carouselProjects = [
   {
+    id: "portraits",
+    kind: "Photo",
     title: "Portraits",
     text: "Une présence simple, des images naturelles et une séance pensée à votre rythme.",
-    images: ["images/portraits/hero-portraits-nb.jpg", "images/portraits/hero-portraits-nb.jpg", "images/portraits/hero-portraits-nb.jpg"]
+    sets: [
+      ["images/portraits/personnel-01.jpg", "images/portraits/personnel-02.jpg", "images/portraits/personnel-03.jpg"],
+      ["images/portraits/personnel-11.jpg", "images/portraits/personnel-12.jpg", "images/portraits/personnel-13.jpg"],
+      ["images/portraits/personnel-21.jpg", "images/portraits/personnel-22.jpg", "images/portraits/personnel-23.jpg"]
+    ]
   },
   {
-    title: "Événementiel",
-    text: "Des images au cœur de l’action, pour garder une trace vivante de vos événements.",
-    images: ["images/evenementiel/concert-01.jpg", "images/evenementiel/festival-01.jpg", "images/evenementiel/spectacle-01.jpg"]
+    id: "aftermovie",
+    kind: "Vidéo",
+    title: "Aftermovie",
+    text: "Le film d’un événement, monté pour en retrouver l’énergie et le partager.",
+    sets: [["images/video/aftermovie.jpg"]]
   },
   {
+    id: "concerts",
+    kind: "Photo",
+    title: "Concerts",
+    text: "Des images au cœur de la scène, pour garder l’énergie d’un live.",
+    sets: [
+      ["images/evenementiel/concert-01.jpg", "images/evenementiel/concert-02.jpg", "images/evenementiel/concert-03.jpg"],
+      ["images/evenementiel/concert-11.jpg", "images/evenementiel/concert-12.jpg", "images/evenementiel/concert-13.jpg"],
+      ["images/evenementiel/concert-31.jpg", "images/evenementiel/concert-32.jpg", "images/evenementiel/concert-33.jpg"]
+    ]
+  },
+  {
+    id: "clip",
+    kind: "Vidéo",
+    title: "Clip musical",
+    text: "Une mise en images pensée avec l’artiste, de l’intention au montage final.",
+    sets: [["images/video/clip-musical.jpg"]]
+  },
+  {
+    id: "lieux",
+    kind: "Photo",
     title: "Lieux & savoir-faire",
     text: "Une série cohérente pour révéler les espaces, les gestes et les détails qui vous ressemblent.",
-    images: ["images/Lieux-et-marques/letm-01.jpg", "images/Lieux-et-marques/letm-02.jpg", "images/Lieux-et-marques/letm-03.jpg"]
+    sets: [
+      ["images/Lieux-et-marques/letm-01.jpg", "images/Lieux-et-marques/letm-02.jpg", "images/Lieux-et-marques/letm-03.jpg"]
+    ]
+  },
+  {
+    id: "interview",
+    kind: "Vidéo",
+    title: "Interview filmée",
+    text: "Une parole mise en valeur, avec un cadre et un son soignés.",
+    sets: [["images/video/interview-portrait.jpg"]]
+  },
+  {
+    id: "portrait-pro",
+    kind: "Photo",
+    title: "Portrait professionnel",
+    text: "Des portraits soignés pour présenter votre activité et votre personnalité.",
+    sets: [
+      ["images/portraits/professionnel-01.jpg", "images/portraits/professionnel-02.jpg", "images/portraits/professionnel-03.jpg"],
+      ["images/portraits/professionnel-11.jpg", "images/portraits/professionnel-12.jpg", "images/portraits/professionnel-13.jpg"]
+    ]
+  },
+  {
+    id: "film-presentation",
+    kind: "Vidéo",
+    title: "Film de présentation",
+    text: "Un film qui présente votre activité, votre lieu ou votre savoir-faire.",
+    sets: [["images/video/film-presentation.jpg"]]
+  },
+  {
+    id: "festivals",
+    kind: "Photo",
+    title: "Festivals",
+    text: "L’ambiance d’un festival, de la foule aux instants en coulisses.",
+    sets: [
+      ["images/evenementiel/festival-01.jpg", "images/evenementiel/festival-02.jpg", "images/evenementiel/festival-03.jpg"]
+    ]
+  },
+  {
+    id: "captation",
+    kind: "Vidéo",
+    title: "Captation",
+    text: "Un concert ou un événement filmé tel qu’il s’est vécu.",
+    sets: [["images/video/captation.jpg"]]
+  },
+  {
+    id: "sport",
+    kind: "Photo",
+    title: "Portrait sportif",
+    text: "Le mouvement, l’effort et la concentration, saisis au bon moment.",
+    sets: [
+      ["images/portraits/sportif-01.jpg", "images/portraits/sportif-02.jpg", "images/portraits/sportif-03.jpg"]
+    ]
+  },
+  {
+    id: "formats-courts",
+    kind: "Vidéo",
+    title: "Formats courts",
+    text: "Des vidéos courtes et rythmées, pensées pour les réseaux sociaux.",
+    sets: [["images/video/formats-courts.jpg"]]
+  },
+  {
+    id: "spectacles",
+    kind: "Photo",
+    title: "Spectacles",
+    text: "Des images qui restituent la lumière, le jeu et l’émotion de la scène.",
+    sets: [
+      ["images/evenementiel/spectacle-01.jpg", "images/evenementiel/spectacle-02.jpg", "images/evenementiel/spectacle-03.jpg"]
+    ]
+  },
+  {
+    id: "aerien",
+    kind: "Vidéo",
+    title: "Prises de vues aériennes",
+    text: "Des images en drone pour offrir une autre perspective sur vos lieux et vos événements.",
+    sets: [["images/video/prises-aeriennes.jpg"]]
+  },
+  {
+    id: "cabaret",
+    kind: "Photo",
+    title: "Cabaret",
+    text: "L’élégance et le rythme d’une soirée cabaret, au plus près des artistes.",
+    sets: [
+      ["images/evenementiel/cabaret-01.jpg", "images/evenementiel/cabaret-02.jpg", "images/evenementiel/cabaret-03.jpg"]
+    ]
+  },
+  {
+    id: "evenement",
+    kind: "Vidéo",
+    title: "Tournage d’événement",
+    text: "Des images filmées au plus près de vos invités et de vos temps forts.",
+    sets: [["images/evenementiel/cabaret-02.jpg"]]
   }
 ];
 
@@ -161,22 +323,58 @@ document.querySelectorAll("[data-carousel]").forEach((carousel) => {
       ]
     : carouselProjects;
   let activeProject = 0;
-  let intervalId;
+  let activeSet = 0;
+  let timerId;
   let transitionId;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const SET_DELAY = 3500;     // temps d'affichage d'une série quand un thème en a plusieurs
+  const PROJECT_DELAY = 5000; // temps d'affichage d'un thème qui n'a qu'une série
 
-  const showProject = (index) => {
+  const gallery = carousel.querySelector("[data-carousel-images]");
+  let video = null;
+  const setsOf = (project) => project.sets || [project.images];
+  const clearSwaps = () => gallery.querySelectorAll(".portfolio-swap").forEach((layer) => layer.remove());
+  const altFor = (project, single, index) => (single ? project.title : `${project.title} — image ${index + 1}`);
+
+  // Changement de thème : fondu de la mosaïque, nouveau texte.
+  const showProject = (index, setIndex = 0) => {
     activeProject = (index + projects.length) % projects.length;
     const project = projects[activeProject];
-    const gallery = carousel.querySelector("[data-carousel-images]");
+    const sets = setsOf(project);
+    activeSet = Math.min(Math.max(setIndex, 0), sets.length - 1);
+    const set = sets[activeSet];
     window.clearTimeout(transitionId);
     gallery.classList.add("is-changing");
     transitionId = window.setTimeout(() => {
-      project.images.forEach((src, imageIndex) => {
-        images[imageIndex].src = src;
-        images[imageIndex].alt = `${project.title} — image ${imageIndex + 1}`;
+      clearSwaps();
+      const single = set.length === 1 || Boolean(project.video);
+      gallery.classList.toggle("is-single", single);
+      images.forEach((image, imageIndex) => {
+        const src = set[imageIndex];
+        image.hidden = !src || (imageIndex === 0 && Boolean(project.video));
+        if (!src) return;
+        image.src = src;
+        image.alt = altFor(project, single, imageIndex);
       });
+
+      // Projet vidéo avec un fichier : la vidéo prend la place de l'image.
+      if (video) { video.pause(); video.remove(); video = null; }
+      if (project.video) {
+        video = document.createElement("video");
+        Object.assign(video, { src: project.video, muted: true, loop: true, autoplay: true, playsInline: true });
+        if (set[0]) video.poster = set[0];
+        video.setAttribute("aria-label", project.title);
+        gallery.append(video);
+        video.play().catch(() => {});
+      }
+
       description.replaceChildren();
+      if (project.kind) {
+        const kind = document.createElement("span");
+        kind.className = "studio-eyebrow portfolio-kind";
+        kind.textContent = project.kind;
+        description.append(kind);
+      }
       const title = document.createElement("h3");
       title.textContent = project.title;
       const text = document.createElement("p");
@@ -186,10 +384,52 @@ document.querySelectorAll("[data-carousel]").forEach((carousel) => {
     }, 180);
   };
 
+  // Série suivante du même thème : chaque image se renouvelle dans son propre cadre, le texte ne bouge pas.
+  const showSet = (setIndex) => {
+    const project = projects[activeProject];
+    const sets = setsOf(project);
+    activeSet = (setIndex + sets.length) % sets.length;
+    const set = sets[activeSet];
+    clearSwaps();
+    images.forEach((image, imageIndex) => {
+      const src = set[imageIndex];
+      if (!src || image.hidden) return;
+      const alt = altFor(project, false, imageIndex);
+      if (reduceMotion) { image.src = src; image.alt = alt; return; }
+      const layer = new Image();
+      layer.className = "portfolio-swap";
+      layer.alt = "";
+      layer.src = src;
+      Object.assign(layer.style, {
+        left: `${image.offsetLeft}px`,
+        top: `${image.offsetTop}px`,
+        width: `${image.offsetWidth}px`,
+        height: `${image.offsetHeight}px`,
+        animationDelay: `${imageIndex * 140}ms`
+      });
+      const start = () => {
+        if (projects[activeProject] !== project) return;
+        gallery.append(layer);
+        layer.addEventListener("animationend", () => {
+          image.src = src;
+          image.alt = alt;
+          const done = () => layer.remove();
+          (image.decode ? image.decode() : Promise.resolve()).then(done, done);
+        }, { once: true });
+      };
+      (layer.decode ? layer.decode() : Promise.resolve()).then(start, start);
+    });
+  };
+
   const restartTimer = () => {
-    window.clearInterval(intervalId);
+    window.clearTimeout(timerId);
     if (reduceMotion) return;
-    intervalId = window.setInterval(() => showProject(activeProject + 1), 5000);
+    const sets = setsOf(projects[activeProject]);
+    timerId = window.setTimeout(() => {
+      if (activeSet < sets.length - 1) showSet(activeSet + 1);
+      else showProject(activeProject + 1);
+      restartTimer();
+    }, sets.length > 1 ? SET_DELAY : PROJECT_DELAY);
   };
 
   previous.addEventListener("click", () => {
@@ -200,8 +440,16 @@ document.querySelectorAll("[data-carousel]").forEach((carousel) => {
     showProject(activeProject + 1);
     restartTimer();
   });
-  carousel.addEventListener("mouseenter", () => window.clearInterval(intervalId));
+  carousel.addEventListener("mouseenter", () => window.clearTimeout(timerId));
   carousel.addEventListener("mouseleave", restartTimer);
+  // Clic sur une case de la galerie défilante : affiche son thème, sur la même série.
+  document.addEventListener("portfolio:show", (event) => {
+    const { id, set = 0 } = event.detail || {};
+    const index = projects.findIndex((project) => project.id === id);
+    if (index < 0) return;
+    showProject(index, set);
+    restartTimer();
+  });
   showProject(0);
   restartTimer();
 });

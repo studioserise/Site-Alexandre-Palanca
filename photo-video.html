@@ -10,19 +10,22 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css">
-  <link rel="stylesheet" href="redesign.css?v=36">
+  <link rel="stylesheet" href="redesign.css?v=50">
   <link rel="stylesheet" href="contact.css">
   <link rel="stylesheet" href="drone.css?v=8">
   <link rel="stylesheet" href="cursor.css?v=7">
+  <link rel="stylesheet" href="photo-reel.css?v=3">
   <link rel="stylesheet" href="section-marker.css?v=black">
-  <script src="site-nav.js" defer></script>
-  <script src="redesign.js" defer></script>
+  <script src="site-nav.js?v=footer-compact" defer></script>
+  <script src="redesign.js?v=5" defer></script>
   <script src="cursor.js?v=3" defer></script>
   <script src="section-marker.js?v=10" defer></script>
+  <script src="photo-reel.js?v=3" defer></script>
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
   <script type="module" src="drone.js?v=9"></script>
   <script type="module" src="contact.js"></script>
+  <script src="contact-reveal.js" defer></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -58,9 +61,26 @@
     </section>
 
     <section class="redesign-section" aria-labelledby="photo-offers-title">
+      <div class="photo-reel photo-reel--top" data-photo-reel aria-label="Galerie de photographies">
+        <div class="photo-reel-track">
+          <figure class="photo-reel-tile" data-portfolio="portraits" data-set="0"><img src="images/portraits/personnel-01.jpg" alt="Portraits, image 1" loading="lazy" decoding="async"><img src="images/portraits/personnel-02.jpg" alt="Portraits, image 2" loading="lazy" decoding="async"><img src="images/portraits/personnel-03.jpg" alt="Portraits, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="concerts" data-set="0"><img src="images/evenementiel/concert-01.jpg" alt="Concerts, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/concert-02.jpg" alt="Concerts, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/concert-03.jpg" alt="Concerts, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="lieux" data-set="0"><img src="images/Lieux-et-marques/letm-01.jpg" alt="Lieux &amp; savoir-faire, image 1" loading="lazy" decoding="async"><img src="images/Lieux-et-marques/letm-02.jpg" alt="Lieux &amp; savoir-faire, image 2" loading="lazy" decoding="async"><img src="images/Lieux-et-marques/letm-03.jpg" alt="Lieux &amp; savoir-faire, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="portrait-pro" data-set="0"><img src="images/portraits/professionnel-01.jpg" alt="Portrait professionnel, image 1" loading="lazy" decoding="async"><img src="images/portraits/professionnel-02.jpg" alt="Portrait professionnel, image 2" loading="lazy" decoding="async"><img src="images/portraits/professionnel-03.jpg" alt="Portrait professionnel, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="festivals" data-set="0"><img src="images/evenementiel/festival-01.jpg" alt="Festivals, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/festival-02.jpg" alt="Festivals, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/festival-03.jpg" alt="Festivals, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="portraits" data-set="1"><img src="images/portraits/personnel-11.jpg" alt="Portraits, image 1" loading="lazy" decoding="async"><img src="images/portraits/personnel-12.jpg" alt="Portraits, image 2" loading="lazy" decoding="async"><img src="images/portraits/personnel-13.jpg" alt="Portraits, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="concerts" data-set="1"><img src="images/evenementiel/concert-11.jpg" alt="Concerts, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/concert-12.jpg" alt="Concerts, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/concert-13.jpg" alt="Concerts, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="sport" data-set="0"><img src="images/portraits/sportif-01.jpg" alt="Portrait sportif, image 1" loading="lazy" decoding="async"><img src="images/portraits/sportif-02.jpg" alt="Portrait sportif, image 2" loading="lazy" decoding="async"><img src="images/portraits/sportif-03.jpg" alt="Portrait sportif, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="spectacles" data-set="0"><img src="images/evenementiel/spectacle-01.jpg" alt="Spectacles, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/spectacle-02.jpg" alt="Spectacles, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/spectacle-03.jpg" alt="Spectacles, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="portrait-pro" data-set="1"><img src="images/portraits/professionnel-11.jpg" alt="Portrait professionnel, image 1" loading="lazy" decoding="async"><img src="images/portraits/professionnel-12.jpg" alt="Portrait professionnel, image 2" loading="lazy" decoding="async"><img src="images/portraits/professionnel-13.jpg" alt="Portrait professionnel, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="portraits" data-set="2"><img src="images/portraits/personnel-21.jpg" alt="Portraits, image 1" loading="lazy" decoding="async"><img src="images/portraits/personnel-22.jpg" alt="Portraits, image 2" loading="lazy" decoding="async"><img src="images/portraits/personnel-23.jpg" alt="Portraits, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="cabaret" data-set="0"><img src="images/evenementiel/cabaret-01.jpg" alt="Cabaret, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/cabaret-02.jpg" alt="Cabaret, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/cabaret-03.jpg" alt="Cabaret, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="concerts" data-set="2"><img src="images/evenementiel/concert-31.jpg" alt="Concerts, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/concert-32.jpg" alt="Concerts, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/concert-33.jpg" alt="Concerts, image 3" loading="lazy" decoding="async"></figure>
+        </div>
+      </div>
       <p class="studio-eyebrow">Les propositions photo</p>
       <h2 class="studio-section-heading" id="photo-offers-title">Des séances pensées selon votre projet.</h2>
-      <div class="flip-card-grid">
+      <div class="flip-card-grid flip-card-grid--aligned">
         <article class="flip-card" tabindex="0"><div class="flip-card-inner">
           <div class="flip-card-face"><span class="flip-hint">01 · Essentiel</span><h3>L'instant</h3><p>Une séance photo pour réaliser une sélection d'images naturelles et soignées.</p><p>Durée : environ 1 h <br>Pour : portraits individuels, couples et petites familles.</p><p class="flip-price">À partir de 120 €</p><span class="flip-hint">Survolez pour voir le contenu ↻</span></div>
           <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Échange préparatoire</li><li>Séance photo</li><li>Sélection et retouche des images</li><li>Galerie privée de livraison</li></ul></div>
@@ -100,9 +120,21 @@
     </section>
 
     <section class="redesign-section" aria-labelledby="video-offers-title">
+      <div class="photo-reel photo-reel--top" data-photo-reel aria-label="Galerie de vidéos">
+        <div class="photo-reel-track">
+          <figure class="photo-reel-tile" data-portfolio="aftermovie" data-set="0"><img src="images/video/aftermovie.jpg" alt="Aftermovie, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/concert-11.jpg" alt="Aftermovie, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/festival-02.jpg" alt="Aftermovie, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="clip" data-set="0"><img src="images/video/clip-musical.jpg" alt="Clip musical, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/concert-31.jpg" alt="Clip musical, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/concert-32.jpg" alt="Clip musical, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="interview" data-set="0"><img src="images/video/interview-portrait.jpg" alt="Interview filmée, image 1" loading="lazy" decoding="async"><img src="images/portraits/professionnel-11.jpg" alt="Interview filmée, image 2" loading="lazy" decoding="async"><img src="images/portraits/professionnel-12.jpg" alt="Interview filmée, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="film-presentation" data-set="0"><img src="images/video/film-presentation.jpg" alt="Film de présentation, image 1" loading="lazy" decoding="async"><img src="images/Lieux-et-marques/editorial-01.jpg" alt="Film de présentation, image 2" loading="lazy" decoding="async"><img src="images/Lieux-et-marques/hero-lieux-et-marques-poster.jpg" alt="Film de présentation, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="captation" data-set="0"><img src="images/video/captation.jpg" alt="Captation, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/concert-12.jpg" alt="Captation, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/concert-13.jpg" alt="Captation, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="formats-courts" data-set="0"><img src="images/video/formats-courts.jpg" alt="Formats courts, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/sport-competition-02.jpg" alt="Formats courts, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/sport-competition-03.jpg" alt="Formats courts, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="aerien" data-set="0"><img src="images/video/prises-aeriennes.jpg" alt="Prises de vues aériennes, image 1" loading="lazy" decoding="async"><img src="images/video/ouverture.jpg" alt="Prises de vues aériennes, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/sport-competition-01.jpg" alt="Prises de vues aériennes, image 3" loading="lazy" decoding="async"></figure>
+          <figure class="photo-reel-tile" data-portfolio="evenement" data-set="0"><img src="images/evenementiel/cabaret-02.jpg" alt="Tournage d'événement, image 1" loading="lazy" decoding="async"><img src="images/evenementiel/cabaret-03.jpg" alt="Tournage d'événement, image 2" loading="lazy" decoding="async"><img src="images/evenementiel/prive-02.jpg" alt="Tournage d'événement, image 3" loading="lazy" decoding="async"></figure>
+        </div>
+      </div>
       <p class="studio-eyebrow">Les propositions vidéo</p>
       <h2 class="studio-section-heading" id="video-offers-title">Du tournage à votre film finalisé.</h2>
-      <div class="flip-card-grid">
+      <div class="flip-card-grid flip-card-grid--aligned">
         <article class="flip-card" tabindex="0"><div class="flip-card-inner">
           <div class="flip-card-face"><span class="flip-hint">01 · Essentiel</span><h3>La captation</h3><p>Un tournage ciblé pour obtenir des séquences vidéo prêtes à être exploitées.</p><p>Durée : environ 2 à 3 h<br>Pour : événements, interviews, artistes et contenus courts.</p><p class="flip-price">à partir de 250 €</p><span class="flip-hint">Survolez pour voir le contenu ↻</span></div>
           <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Préparation technique</li><li>Tournage sur site</li><li>Prise de son selon les besoins</li><li>Sélection et organisation des séquences</li><li>Livraison des fichiers vidéo bruts</li></ul></div>
@@ -121,6 +153,34 @@
 
     <section id="drone-photo-video" data-drone-section data-drone-variant="compact" data-drone-flight="local" data-drone-cta="#demande-devis" data-drone-cta-label="Demander un devis" data-drone-text="Les prises de vues aériennes offrent une nouvelle perspective sur vos lieux, vos événements et vos projets. Elles peuvent enrichir un reportage photo ou un film, selon les possibilités du site et les conditions de vol."></section>
 
+    <section class="redesign-section" id="demande-devis" aria-labelledby="photo-contact-title">
+      <div class="redesign-panel redesign-contact-layout">
+        <p class="studio-eyebrow">Un projet photo ou vidéo ?</p>
+        <h2 id="photo-contact-title">Imaginons la suite ensemble.</h2>
+        <p>Décrivez-nous votre idée et recevez une proposition adaptée à votre besoin.</p>
+        <button class="contact-submit contact-reveal" type="button" data-contact-reveal aria-expanded="false" aria-controls="contact-collapse"><span>Remplir le formulaire</span><span aria-hidden="true">↓</span></button>
+        <div class="contact-collapse is-closed" id="contact-collapse"><div class="contact-collapse-inner">
+        <form class="contact-form redesign-contact-form" id="contact-form" novalidate>
+          <input id="contact-service" name="service" type="hidden" value="Photo et vidéo">
+          <div class="contact-form-grid">
+            <div class="contact-field"><label for="contact-name">Nom et prénom <span aria-hidden="true">*</span></label><input id="contact-name" name="name" autocomplete="name" maxlength="100" required></div>
+            <div class="contact-field"><label for="contact-email">Adresse e-mail <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>
+            <div class="contact-field"><label for="contact-phone">Téléphone <span class="contact-optional">(facultatif)</span></label><input id="contact-phone" name="phone" type="tel" autocomplete="tel" maxlength="30"></div>
+            <div class="contact-field"><label for="contact-date">Date ou période <span class="contact-optional">(facultatif)</span></label><input id="contact-date" name="date" type="date"></div>
+            <div class="contact-field"><label for="pref-type">Type de prestation</label><select id="pref-type" name="pref-type" data-extra><option value="">À préciser ensemble</option><option>Séance portrait</option><option>Reportage événementiel</option><option>Série d’images professionnelle</option><option>Portrait filmé</option><option>Aftermovie</option><option>Film de présentation</option><option>Prises de vues aériennes</option><option>Autre projet</option></select></div>
+            <div class="contact-field"><label for="pref-budget">Budget indicatif</label><select id="pref-budget" name="pref-budget" data-extra><option value="">Je ne sais pas encore</option><option>Moins de 300 €</option><option>300 € – 800 €</option><option>800 € – 1 500 €</option><option>Plus de 1 500 €</option></select></div>
+            <fieldset class="contact-chips contact-field--wide"><legend>Ce dont vous avez besoin</legend><label><input type="checkbox" name="pref-livrables" value="Photos"><span>Photos</span></label><label><input type="checkbox" name="pref-livrables" value="Vidéo"><span>Vidéo</span></label><label><input type="checkbox" name="pref-livrables" value="Drone"><span>Drone</span></label><label><input type="checkbox" name="pref-livrables" value="Retouche avancée"><span>Retouche avancée</span></label></fieldset>
+            <div class="contact-field contact-field--wide"><label for="contact-message">Quelques mots sur votre projet <span aria-hidden="true">*</span></label><textarea id="contact-message" name="message" rows="5" maxlength="4000" required></textarea></div>
+            <div class="contact-honeypot" aria-hidden="true"><label for="contact-website">Ne pas remplir ce champ</label><input id="contact-website" name="website" tabindex="-1" autocomplete="off"></div>
+            <div class="contact-consent contact-field--wide"><input id="contact-consent" name="consent" type="checkbox" required><label for="contact-consent">J’accepte que mes informations soient utilisées pour répondre à cette demande. Consultez la <a href="politique-confidentialite.html">politique de confidentialité</a>. <span aria-hidden="true">*</span></label></div>
+          </div>
+          <p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p>
+          <button class="contact-submit" id="contact-submit" type="submit"><span>Envoyer ma demande</span><span aria-hidden="true">↗</span></button>
+        </form>
+        </div></div>
+      </div>
+    </section>
+
     <section class="studio-approach" aria-labelledby="alex-bio-title">
       <div class="studio-approach-copy">
         <p class="studio-eyebrow">Alex · Photographe &amp; vidéaste</p>
@@ -133,43 +193,18 @@
       <figure class="studio-approach-photo"><img src="images/photo-alexandre.jpg" alt="Alexandre en séance de prise de vue" loading="lazy"></figure>
     </section>
 
-    <section class="redesign-section" id="demande-devis" aria-labelledby="photo-contact-title">
-      <div class="redesign-panel redesign-contact-layout">
-        <p class="studio-eyebrow">Un projet photo ou vidéo ?</p>
-        <h2 id="photo-contact-title">Imaginons la suite ensemble.</h2>
-        <p>Décrivez-nous votre idée et recevez une proposition adaptée à votre besoin.</p>
-        <form class="contact-form redesign-contact-form" id="contact-form" novalidate>
-          <input id="contact-service" name="service" type="hidden" value="Photo et vidéo">
-          <div class="contact-form-grid">
-            <div class="contact-field"><label for="contact-name">Nom et prénom <span aria-hidden="true">*</span></label><input id="contact-name" name="name" autocomplete="name" maxlength="100" required></div>
-            <div class="contact-field"><label for="contact-email">Adresse e-mail <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>
-            <div class="contact-field"><label for="contact-phone">Téléphone <span class="contact-optional">(facultatif)</span></label><input id="contact-phone" name="phone" type="tel" autocomplete="tel" maxlength="30"></div>
-            <div class="contact-field"><label for="contact-date">Date ou période <span class="contact-optional">(facultatif)</span></label><input id="contact-date" name="date" type="date"></div>
-            <div class="contact-field"><label for="pref-type">Type de prestation</label><select id="pref-type" name="pref-type" data-extra><option value="">À préciser ensemble</option><option>Séance portrait</option><option>Reportage événementiel</option><option>Série d’images professionnelle</option><option>Portrait filmé</option><option>Aftermovie</option><option>Film de présentation</option><option>Prises de vues aériennes</option><option>Autre projet</option></select></div>
-            <div class="contact-field"><label for="pref-budget">Budget indicatif</label><select id="pref-budget" name="pref-budget" data-extra><option value="">Je ne sais pas encore</option><option>Moins de 300 €</option><option>300 € – 800 €</option><option>800 € – 1 500 €</option><option>Plus de 1 500 €</option></select></div>
-            <fieldset class="contact-chips contact-field--wide"><legend>Ce dont vous avez besoin</legend><label><input type="checkbox" name="pref-livrables" value="Photos"><span>Photos</span></label><label><input type="checkbox" name="pref-livrables" value="Vidéo"><span>Vidéo</span></label><label><input type="checkbox" name="pref-livrables" value="Drone"><span>Drone</span></label><label><input type="checkbox" name="pref-livrables" value="Galerie privée"><span>Galerie privée</span></label><label><input type="checkbox" name="pref-livrables" value="Retouche avancée"><span>Retouche avancée</span></label></fieldset>
-            <div class="contact-field contact-field--wide"><label for="contact-message">Quelques mots sur votre projet <span aria-hidden="true">*</span></label><textarea id="contact-message" name="message" rows="5" maxlength="4000" required></textarea></div>
-            <div class="contact-honeypot" aria-hidden="true"><label for="contact-website">Ne pas remplir ce champ</label><input id="contact-website" name="website" tabindex="-1" autocomplete="off"></div>
-            <div class="contact-consent contact-field--wide"><input id="contact-consent" name="consent" type="checkbox" required><label for="contact-consent">J’accepte que mes informations soient utilisées pour répondre à cette demande. Consultez la <a href="politique-confidentialite.html">politique de confidentialité</a>. <span aria-hidden="true">*</span></label></div>
-          </div>
-          <p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p>
-          <button class="contact-submit" id="contact-submit" type="submit"><span>Envoyer ma demande</span><span aria-hidden="true">↗</span></button>
-        </form>
-      </div>
-    </section>
-
-    <section class="redesign-section" aria-labelledby="photo-portfolio-title">
+    <section class="redesign-section" id="portfolio" aria-labelledby="photo-portfolio-title">
       <p class="studio-eyebrow">Portfolio · Sélection</p>
       <h2 id="photo-portfolio-title">Des images, des histoires.</h2>
       <div class="portfolio-carousel" data-carousel>
-        <button class="portfolio-arrow portfolio-arrow--previous" type="button" data-carousel-prev aria-label="Projet précédent">←</button>
+        <button class="portfolio-arrow portfolio-arrow--previous" type="button" data-carousel-prev aria-label="Projet précédent"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 4 7 12 15 20"/></svg></button>
         <div class="portfolio-images" data-carousel-images aria-live="polite">
-          <img src="images/portraits/hero-portraits-nb.jpg" alt="Portrait, sélection 1">
-          <img src="images/portraits/hero-portraits-nb.jpg" alt="Portrait, sélection 2">
-          <img src="images/portraits/hero-portraits-nb.jpg" alt="Portrait, sélection 3">
+          <img src="images/portraits/personnel-01.jpg" alt="Portraits — image 1">
+          <img src="images/portraits/personnel-02.jpg" alt="Portraits — image 2">
+          <img src="images/portraits/personnel-03.jpg" alt="Portraits — image 3">
         </div>
-        <div class="portfolio-description" data-carousel-description><h3>Portraits</h3><p>Une présence simple, des images naturelles et une séance pensée à votre rythme.</p></div>
-        <button class="portfolio-arrow portfolio-arrow--next" type="button" data-carousel-next aria-label="Projet suivant">→</button>
+        <div class="portfolio-description" data-carousel-description><span class="studio-eyebrow portfolio-kind">Photo</span><h3>Portraits</h3><p>Une présence simple, des images naturelles et une séance pensée à votre rythme.</p></div>
+        <button class="portfolio-arrow portfolio-arrow--next" type="button" data-carousel-next aria-label="Projet suivant"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 4 17 12 9 20"/></svg></button>
       </div>
     </section>
   </main>

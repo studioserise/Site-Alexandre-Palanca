@@ -136,6 +136,10 @@ if (!document.querySelector(".site-footer")) {
         <a class="site-footer-email" href="mailto:info@alexandrepalanca.fr">info@alexandrepalanca.fr</a>
         <a class="site-footer-phone" href="tel:+33679538280">+33 6 79 53 82 80</a>
         <p>Sarlat-la-Canéda · Dordogne &amp; Périgord</p>
+        <div class="site-footer-actions">
+          <a href="photo-video.html#demande-devis">Photo &amp; vidéo <span aria-hidden="true">↗</span></a>
+          <a href="sites-internet.html#demande-projet">Site internet <span aria-hidden="true">↗</span></a>
+        </div>
       </div>
       <div class="site-footer-card-wrap">
       <div class="site-footer-card" tabindex="0" aria-label="Carte de visite Alexandre et Elisa">
@@ -151,10 +155,6 @@ if (!document.querySelector(".site-footer")) {
         </div>
       </div>
       <p class="site-footer-card-hint">Maintenez le clic et faites glisser pour tourner la carte</p>
-      </div>
-      <div class="site-footer-actions">
-        <a href="photo-video.html#demande-devis">Devis photo &amp; vidéo <span aria-hidden="true">↗</span></a>
-        <a href="sites-internet.html#demande-projet">Devis site internet <span aria-hidden="true">↗</span></a>
       </div>
       <div class="site-footer-legal">
         <span>© ${new Date().getFullYear()} Alex &amp; Elisa</span>

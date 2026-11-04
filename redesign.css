@@ -1026,6 +1026,15 @@ html[data-theme="light"] .contact-chips input:checked + span { border-color: #17
 @media (max-width: 1100px) { .portfolio-carousel { grid-template-columns: auto minmax(0, 1fr) auto; } }
 @media (max-width: 560px) { .portfolio-images { aspect-ratio: 1; } }
 
+/* Portfolio : projet vidéo, une seule image (ou vidéo) à la place de la mosaïque */
+.portfolio-images.is-single img:first-child,
+.portfolio-images.is-single video { grid-column: 1 / -1; grid-row: 1 / -1; }
+.portfolio-images img[hidden],
+.portfolio-images.is-single img:not(:first-child) { display: none; }
+.portfolio-images video { width: 100%; height: 100%; min-height: 0; border-radius: 9px; object-fit: cover; transition: opacity 250ms ease; }
+.portfolio-images.is-changing video { opacity: 0.2; }
+.portfolio-kind { display: block; margin-bottom: 14px; }
+
 /* Apparitions au défilement */
 .rv {
   opacity: 0;
@@ -1108,18 +1117,19 @@ html[data-theme="light"] .intro-sequence + .studio-about {
 
 /* Formulaires plus compacts */
 .redesign-contact-form.contact-form { margin-top: 22px; padding: clamp(18px, 2.4vw, 28px); }
-.redesign-contact-form .contact-form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 14px; }
-.redesign-contact-form .contact-field { gap: 6px; }
+.redesign-contact-form .contact-form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 18px; }
+.redesign-contact-form .contact-field { gap: 9px; }
 .redesign-contact-form .contact-field--wide { grid-column: 1 / -1; }
-.redesign-contact-form .contact-field label { font-size: 0.7rem; }
+.redesign-contact-form .contact-field label { font-size: 0.92rem; }
+.redesign-contact-form .contact-optional { font-size: 0.82rem; }
 .redesign-contact-form .contact-field input,
-.redesign-contact-form .contact-field select { min-height: 40px; padding: 9px 12px; font-size: 0.82rem; }
-.redesign-contact-form .contact-field textarea { min-height: 84px; padding: 10px 12px; font-size: 0.82rem; line-height: 1.5; }
-.redesign-contact-form .contact-chips { gap: 7px; }
-.redesign-contact-form .contact-chips legend { margin-bottom: 8px; font-size: 0.66rem; }
-.redesign-contact-form .contact-chips span { padding: 6px 13px; font-size: 0.76rem; }
-.redesign-contact-form .contact-consent label { font-size: 0.7rem; line-height: 1.45; }
-.redesign-contact-form .contact-submit { min-height: 44px; margin-top: 4px; }
+.redesign-contact-form .contact-field select { min-height: 52px; padding: 12px 15px; font-size: 1rem; }
+.redesign-contact-form .contact-field textarea { min-height: 130px; padding: 13px 15px; font-size: 1rem; line-height: 1.6; }
+.redesign-contact-form .contact-chips { gap: 9px; }
+.redesign-contact-form .contact-chips legend { margin-bottom: 10px; font-size: 0.82rem; }
+.redesign-contact-form .contact-chips span { padding: 9px 17px; font-size: 0.95rem; }
+.redesign-contact-form .contact-consent label { font-size: 0.86rem; line-height: 1.55; }
+.redesign-contact-form .contact-submit { min-height: 52px; margin-top: 8px; font-size: 0.78rem; }
 .redesign-contact-form .contact-form-status:empty { display: none; }
 @media (max-width: 900px) {
   .redesign-contact-form .contact-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1149,3 +1159,115 @@ html[data-theme="light"] :is(.gallery-landing, .gallery-error-page) :is(.gallery
 html[data-theme="light"] .gallery-demo-note code { color: #171715; font-weight: 700; }
 html[data-theme="light"] .gallery-landing .gallery-primary-button { border: 1px solid rgba(23, 23, 21, 0.6); background: transparent; color: #171715; min-height: 52px; }
 html[data-theme="light"] .gallery-landing .gallery-primary-button:hover { background: #fff; color: #171715; }
+
+/* Cartes des formules : la hauteur suit le contenu (recto ou verso, le plus long l'emporte)
+   et les lignes sont alignées d'une carte à l'autre (étiquette, titre, description, durée, prix, indice). */
+.flip-card-grid--aligned { row-gap: 20px; }
+.flip-card-grid--aligned > .flip-card {
+  display: grid;
+  grid-row: span 6;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  min-height: 0;
+}
+.flip-card-grid--aligned .flip-card-inner {
+  display: grid;
+  grid-row: 1 / -1;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  height: auto;
+  min-height: 0;
+}
+.flip-card-grid--aligned .flip-card-face {
+  position: relative;
+  inset: auto;
+  grid-row: 1 / -1;
+  grid-column: 1;
+}
+.flip-card-grid--aligned .flip-card-face:not(.flip-card-face--back) {
+  display: grid;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  align-items: start;
+}
+.flip-card-grid--aligned .flip-card-face:not(.flip-card-face--back) h3 { margin: 22px 0 4px; }
+.flip-card-grid--aligned .flip-card-face:not(.flip-card-face--back) .flip-price { margin-top: 20px; }
+.flip-card-grid--aligned .flip-card-face:not(.flip-card-face--back) > .flip-hint:last-child { margin-top: 22px; align-self: end; }
+
+/* Formulaire de contact replié derrière « Remplir le formulaire » */
+.contact-reveal { margin-top: 28px; font-size: 0.78rem; }
+.contact-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 700ms cubic-bezier(.22, .61, .36, 1), opacity 500ms ease;
+}
+.contact-collapse.is-closed { grid-template-rows: 0fr; opacity: 0; }
+.contact-collapse-inner { min-height: 0; overflow: hidden; }
+.contact-collapse.is-open .contact-collapse-inner { overflow: visible; }
+@media (prefers-reduced-motion: reduce) { .contact-collapse { transition-duration: 1ms; } }
+
+/* Page photo et vidéo : 100px de moins entre le formulaire et la présentation d'Alex
+   (jamais moins de 24px, pour les petits écrans) */
+#demande-devis:has(+ .studio-approach) { padding-bottom: max(24px, calc(clamp(76px, 10vw, 148px) - 100px)); }
+
+/* Pied de page compact : environ deux fois moins haut */
+.site-footer { padding: clamp(36px, 4.5vw, 60px) var(--studio-pad) 20px; }
+.site-footer .site-footer-inner { gap: 18px clamp(32px, 6vw, 90px); align-items: center; }
+.site-footer-eyebrow { margin-bottom: 12px; }
+.site-footer-contact h2 { font-size: clamp(1.7rem, 3vw, 2.6rem); }
+.site-footer-email { margin-top: 16px; }
+.site-footer-phone { margin-top: 8px; }
+.site-footer-contact > p:not(.site-footer-eyebrow) { margin: 10px 0 0; }
+.site-footer-card-wrap { width: min(100%, 340px); gap: 10px; }
+.site-footer-actions { justify-content: flex-start; grid-column: auto; margin: 22px 0 0; }
+.site-footer-actions a { padding: 11px 14px; }
+@media (max-width: 900px) {
+  .site-footer-card-wrap { width: min(100%, 300px); }
+}
+
+/* Portfolio : flèches en chevrons < >, sans cercle, rapprochées des bords du cadre */
+.portfolio-arrow {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.75;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.portfolio-arrow svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.portfolio-arrow:hover { background: transparent; opacity: 1; }
+.portfolio-arrow--previous:hover { transform: translateX(-3px); }
+.portfolio-arrow--next:hover { transform: translateX(3px); }
+@media (min-width: 561px) {
+  .portfolio-arrow--previous { margin-left: calc(18px - clamp(24px, 4vw, 52px)); }
+  .portfolio-arrow--next { margin-right: calc(18px - clamp(24px, 4vw, 52px)); }
+}
+
+/* Portfolio : série suivante d'un même thème, révélée dans chaque cadre */
+.portfolio-images { position: relative; }
+.portfolio-images .portfolio-swap {
+  position: absolute;
+  z-index: 1;
+  min-height: 0;
+  aspect-ratio: auto;
+  border-radius: 9px;
+  object-fit: cover;
+  opacity: 1;
+  animation: portfolio-swap-in 950ms cubic-bezier(.22, .61, .36, 1) both;
+}
+@keyframes portfolio-swap-in {
+  from { clip-path: inset(100% 0 0 0 round 9px); }
+  to { clip-path: inset(0 0 0 0 round 9px); }
+}
+
+/* Page photo et vidéo : 100px de moins entre la section drone et le formulaire */
+[data-drone-section] + #demande-devis { padding-top: max(24px, calc(clamp(76px, 10vw, 148px) - 100px)); }
+
+/* Portfolio : le texte part du haut du cadre pour ne pas sauter d'un projet à l'autre */
+.portfolio-description { align-self: start; }

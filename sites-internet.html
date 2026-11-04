@@ -10,15 +10,16 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css">
-  <link rel="stylesheet" href="redesign.css?v=36">
+  <link rel="stylesheet" href="redesign.css?v=50">
   <link rel="stylesheet" href="contact.css">
   <link rel="stylesheet" href="cursor.css?v=7">
   <link rel="stylesheet" href="section-marker.css?v=black">
-  <script src="site-nav.js" defer></script>
-  <script src="redesign.js" defer></script>
+  <script src="site-nav.js?v=footer-compact" defer></script>
+  <script src="redesign.js?v=5" defer></script>
   <script src="cursor.js?v=3" defer></script>
   <script src="section-marker.js?v=10" defer></script>
   <script type="module" src="contact.js"></script>
+  <script src="contact-reveal.js" defer></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -73,6 +74,8 @@
         <p class="studio-eyebrow">Votre projet web</p>
         <h2 id="web-contact-title">Parlons de votre site.</h2>
         <p>Quelques mots suffisent pour commencer à imaginer votre présence en ligne.</p>
+        <button class="contact-submit contact-reveal" type="button" data-contact-reveal aria-expanded="false" aria-controls="contact-collapse"><span>Remplir le formulaire</span><span aria-hidden="true">↓</span></button>
+        <div class="contact-collapse is-closed" id="contact-collapse"><div class="contact-collapse-inner">
         <form class="contact-form redesign-contact-form" id="contact-form" novalidate>
           <input id="contact-service" name="service" type="hidden" value="Sites internet">
           <div class="contact-form-grid">
@@ -91,6 +94,7 @@
           <p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p>
           <button class="contact-submit" id="contact-submit" type="submit"><span>Envoyer ma demande</span><span aria-hidden="true">↗</span></button>
         </form>
+        </div></div>
       </div>
     </section>
 
@@ -101,21 +105,21 @@
         <p>Issue d’une école d’art, Elisa explore les images, les couleurs et les formes pour construire des univers singuliers. Elle imagine des identités visuelles et des directions artistiques qui traduisent l’esprit de chaque projet.</p>
         <p>Du premier croquis à l’expérience digitale, elle veille à la cohérence de chaque détail et à la façon dont votre univers se raconte.</p>
       </div>
-      <figure class="studio-approach-photo"><img src="images/Lieux-et-marques/letm-05.png" alt="Détail d’un univers visuel photographié pour un projet de lieu" loading="lazy"></figure>
+      <figure class="studio-approach-photo"><img src="images/Lieux-et-marques/letm-05.jpg" alt="Détail d’un univers visuel photographié pour un projet de lieu" loading="lazy"></figure>
     </section>
 
     <section class="redesign-section" aria-labelledby="web-portfolio-title">
       <p class="studio-eyebrow">Réalisations · Sélection</p>
       <h2 id="web-portfolio-title">Des univers pensés pour le web.</h2>
       <div class="portfolio-carousel" data-carousel>
-        <button class="portfolio-arrow portfolio-arrow--previous" type="button" data-carousel-prev aria-label="Projet précédent">←</button>
+        <button class="portfolio-arrow portfolio-arrow--previous" type="button" data-carousel-prev aria-label="Projet précédent"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 4 7 12 15 20"/></svg></button>
         <div class="portfolio-images" data-carousel-images aria-live="polite">
           <img src="images/hero-accueil-web.jpg" alt="Aperçu de réalisation web 1">
           <img src="images/hero-accueil-web.jpg" alt="Aperçu de réalisation web 2">
           <img src="images/hero-accueil-web.jpg" alt="Aperçu de réalisation web 3">
         </div>
         <div class="portfolio-description" data-carousel-description><h3>Projet web</h3><p>Mockups et descriptifs des projets à compléter avec les réalisations finales.</p></div>
-        <button class="portfolio-arrow portfolio-arrow--next" type="button" data-carousel-next aria-label="Projet suivant">→</button>
+        <button class="portfolio-arrow portfolio-arrow--next" type="button" data-carousel-next aria-label="Projet suivant"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 4 17 12 9 20"/></svg></button>
       </div>
     </section>
   </main>
