@@ -459,22 +459,44 @@ if (window.matchMedia("(hover: hover)").matches && !window.matchMedia("(prefers-
   document.querySelectorAll(pressTargets).forEach((el) => {
     el.classList.add("press-fx");
     const max = el.matches(".site-footer-card") ? 9 : el.matches(".portfolio-carousel") ? 3 : 7;
-    el.addEventListener("pointermove", (event) => {
-      if (event.pointerType !== "mouse") return;
-      const rect = el.getBoundingClientRect();
-      const x = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
-      const y = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+    // Le cadre est mesuré une seule fois, à l'arrivée de la souris : mesuré pendant l'inclinaison,
+    // il changeait à chaque mouvement et la photo tremblait (surtout près des bords, où elle
+    // rétrécissait sous la souris, « sortait » puis « rentrait » en boucle).
+    let box = null;
+    let restUntil = 0; // laisse le cadre se redresser avant de pouvoir réarmer l'effet
+    const update = (event) => {
+      if (!box) return;
+      const inside = event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
+      if (!inside) { release(); return; }
+      const x = (event.clientX - box.left) / box.width;
+      const y = (event.clientY - box.top) / box.height;
       el.classList.add("is-pointed");
       el.style.setProperty("--rx", `${((0.5 - y) * 2 * max).toFixed(2)}deg`);
       el.style.setProperty("--ry", `${((x - 0.5) * 2 * max).toFixed(2)}deg`);
       el.style.setProperty("--gx", `${(x * 100).toFixed(1)}%`);
       el.style.setProperty("--mx", `${((1 - x) * 100).toFixed(1)}%`);
       el.style.setProperty("--gy", `${(y * 100).toFixed(1)}%`);
-    });
-    el.addEventListener("pointerleave", () => {
+    };
+    const release = () => {
+      if (!box) return;
+      box = null;
+      restUntil = performance.now() + 550;
+      document.removeEventListener("pointermove", update);
+      window.removeEventListener("scroll", release);
       el.classList.remove("is-pointed");
       ["--rx", "--ry"].forEach((name) => el.style.setProperty(name, "0deg"));
-    });
+    };
+    const arm = (event) => {
+      if (event.pointerType !== "mouse" || box || performance.now() < restUntil) return;
+      box = el.getBoundingClientRect();
+      // Suivi au niveau de la page : la souris peut passer hors du cadre incliné sans le quitter vraiment.
+      document.addEventListener("pointermove", update, { passive: true });
+      window.addEventListener("scroll", release, { passive: true });
+      update(event);
+    };
+    // pointermove réarme l'effet après un défilement, sans attendre que la souris ressorte.
+    el.addEventListener("pointerenter", arm);
+    el.addEventListener("pointermove", arm);
   });
 }
 

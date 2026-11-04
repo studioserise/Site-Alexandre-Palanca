@@ -1106,12 +1106,12 @@ html body main > section[data-drone-section] { background: transparent; z-index:
 /* Accueil, section 2 : opaque pour fondre le hero, donc l'aura y est dessinée dans son propre fond */
 .intro-sequence + .studio-about {
   background:
-    radial-gradient(circle 452.5px at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, calc(0.11 * var(--ga, 0))) 0%, rgba(255, 255, 255, calc(0.05 * var(--ga, 0))) 38%, transparent 70%) fixed,
+    radial-gradient(circle 452.5px at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, calc(0.11 * var(--ga, 0))) 0%, rgba(255, 255, 255, calc(0.05 * var(--ga, 0))) 38%, transparent 70%),
     linear-gradient(to bottom, transparent 0, var(--studio-bg) 20vh) !important;
 }
 html[data-theme="light"] .intro-sequence + .studio-about {
   background:
-    radial-gradient(circle 452.5px at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, calc(0.75 * var(--ga, 0))) 0%, rgba(255, 255, 255, calc(0.35 * var(--ga, 0))) 40%, transparent 70%) fixed,
+    radial-gradient(circle 452.5px at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, calc(0.75 * var(--ga, 0))) 0%, rgba(255, 255, 255, calc(0.35 * var(--ga, 0))) 40%, transparent 70%),
     linear-gradient(to bottom, transparent 0, var(--studio-bg) 20vh) !important;
 }
 
@@ -1242,8 +1242,10 @@ html[data-theme="light"] .gallery-landing .gallery-primary-button:hover { backgr
 }
 .portfolio-arrow svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 .portfolio-arrow:hover { background: transparent; opacity: 1; }
-.portfolio-arrow--previous:hover { transform: translateX(-3px); }
-.portfolio-arrow--next:hover { transform: translateX(3px); }
+.portfolio-arrow svg { transition: transform 180ms ease; }
+/* Seul le chevron glisse : si le bouton entier bougeait, il échapperait à la souris et tremblerait */
+.portfolio-arrow--previous:hover svg { transform: translateX(-3px); }
+.portfolio-arrow--next:hover svg { transform: translateX(3px); }
 @media (min-width: 561px) {
   .portfolio-arrow--previous { margin-left: calc(18px - clamp(24px, 4vw, 52px)); }
   .portfolio-arrow--next { margin-right: calc(18px - clamp(24px, 4vw, 52px)); }
@@ -1274,3 +1276,8 @@ html[data-theme="light"] .gallery-landing .gallery-primary-button:hover { backgr
 
 /* Flèches (↗ ↓ ←…) : toujours en texte, jamais en emoji sur téléphone */
 body { font-variant-emoji: text; }
+
+/* Cartes retournables avec effet d'inclinaison : le retournement suit l'état mesuré par le script
+   (souris dans le cadre d'origine), pas le survol de la carte inclinée, qui clignotait près des bords. */
+.flip-card.press-fx:hover:not(.is-pointed):not(:focus-within):not(.is-flipped) .flip-card-inner { transform: none; }
+.flip-card.press-fx.is-pointed .flip-card-inner { transform: rotateY(180deg); }

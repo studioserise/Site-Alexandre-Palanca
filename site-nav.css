@@ -3,7 +3,8 @@
   position: fixed;
   z-index: 20;
   inset: 0 0 auto;
-  padding: 20px var(--site-nav-edge-spacing) 32px;
+  /* env(safe-area-inset-top) : le menu passe sous les caméras de l'iPhone sans que son contenu y soit caché */
+  padding: calc(20px + env(safe-area-inset-top, 0px)) var(--site-nav-edge-spacing) 32px;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -241,7 +242,7 @@ textarea {
   }
 
   .site-nav {
-    padding: var(--site-nav-edge-spacing) var(--site-nav-edge-spacing) 24px;
+    padding: calc(var(--site-nav-edge-spacing) + env(safe-area-inset-top, 0px)) var(--site-nav-edge-spacing) 24px;
   }
 
   .site-nav-inner {

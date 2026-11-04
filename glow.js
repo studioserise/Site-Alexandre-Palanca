@@ -8,8 +8,18 @@
   glow.setAttribute("aria-hidden", "true");
   document.body.appendChild(glow);
 
-  const root = document.documentElement;
   const hero = document.querySelector(".intro-sequence");
+  // Seule la section qui suit l'accueil dessine l'aura dans son propre fond : les variables
+  // ne sont posées que sur elle (sur <html>, elles forçaient le navigateur à recalculer
+  // toute la page à chaque mouvement de souris).
+  const auraSection = hero && hero.nextElementSibling;
+  const setAura = (name, value) => { if (auraSection) auraSection.style.setProperty(name, value); };
+  const placeAura = () => {
+    if (!auraSection) return;
+    const box = auraSection.getBoundingClientRect();
+    setAura("--gx", `${x - box.left}px`);
+    setAura("--gy", `${y - box.top}px`);
+  };
   let tx = innerWidth / 2, ty = innerHeight / 2, x = tx, y = ty;
   let active = false, running = false;
 
@@ -17,8 +27,7 @@
     x += (tx - x) * 0.08;
     y += (ty - y) * 0.08;
     glow.style.transform = `translate3d(${x - 320}px, ${y - 320}px, 0)`;
-    root.style.setProperty("--gx", `${x}px`);
-    root.style.setProperty("--gy", `${y}px`);
+    placeAura();
     if (Math.abs(tx - x) + Math.abs(ty - y) > 0.5) requestAnimationFrame(tick);
     else running = false;
   };
@@ -34,13 +43,15 @@
     if (show !== active) {
       active = show;
       glow.classList.toggle("is-on", show);
-      root.style.setProperty("--ga", show ? "1" : "0");
+      setAura("--ga", show ? "1" : "0");
     }
     if (!running) {
       running = true;
       requestAnimationFrame(tick);
     }
   }, { passive: true });
-  document.addEventListener("pointerleave", () => { glow.classList.remove("is-on"); root.style.setProperty("--ga", "0"); });
-  document.addEventListener("pointerenter", () => { if (active) { glow.classList.add("is-on"); root.style.setProperty("--ga", "1"); } });
+  document.addEventListener("pointerleave", () => { glow.classList.remove("is-on"); setAura("--ga", "0"); });
+  document.addEventListener("pointerenter", () => { if (active) { glow.classList.add("is-on"); setAura("--ga", "1"); } });
+  // L'aura reste sous la souris quand la page défile.
+  if (auraSection) window.addEventListener("scroll", () => { if (active) placeAura(); }, { passive: true });
 })();

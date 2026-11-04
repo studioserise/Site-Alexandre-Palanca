@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/favicon.png?v=3">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
+  <link rel="preload" as="image" href="images/hero-accueil-web.jpg?v=1" fetchpriority="high">
   <script src="page-transition.js?v=5"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#000">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Photographe et vidéaste indépendant à Sarlat-la-Canéda, en Dordogne et dans le Périgord. Portraits, événements, lieux et marques.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Alexandre Palanca">
@@ -88,7 +88,6 @@
       background-image: url("images/hero-accueil-web.jpg?v=1");
       background-size: cover;
       background-position: center;
-      will-change: filter;
       transform: scale(1.03);
     }
 
@@ -96,6 +95,14 @@
 
     .hero-image--blur {
       filter: blur(3px);
+    }
+
+    /* Calque très flou : seule son opacité change au défilement (beaucoup plus léger
+       que recalculer le flou de toute l'image à chaque image d'animation). */
+    .hero-image--deep {
+      filter: blur(20px);
+      opacity: 0;
+      will-change: opacity;
     }
 
     /* Copie nette révélée autour du curseur */
@@ -348,7 +355,7 @@
 
     @media (max-width: 800px) {
       .hero-socials {
-        top: 22px;
+        top: calc(22px + env(safe-area-inset-top, 0px));
         right: auto;
         left: 50%;
         flex-direction: row;
@@ -390,7 +397,7 @@
        --toolbar-gap remonte les éléments du bas pour qu'ils restent dans la partie visible. */
     @supports (height: 100lvh) {
       .hero-stage {
-        --toolbar-gap: calc(100lvh - 100svh);
+        --toolbar-gap: calc(100lvh - 100svh + env(safe-area-inset-bottom, 0px));
         height: 100lvh;
       }
 
@@ -695,13 +702,13 @@
     }
   </style>
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="redesign.css?v=51">
-  <link rel="stylesheet" href="site-nav.css?v=black2">
+  <link rel="stylesheet" href="redesign.css?v=53">
+  <link rel="stylesheet" href="site-nav.css?v=safe">
   <link rel="stylesheet" href="cursor.css?v=7">
-  <script type="module" src="site-nav.js?v=arrows"></script>
+  <script type="module" src="site-nav.js?v=perf"></script>
   <link rel="stylesheet" href="section-marker.css?v=5">
   <script src="cursor.js?v=3" defer></script>
-  <script src="redesign.js?v=5" defer></script>
+  <script src="redesign.js?v=6" defer></script>
   <script src="section-marker.js?v=10" defer></script>
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
@@ -760,6 +767,14 @@
         <div
           class="hero-image hero-image--blur"
           id="hero-blur"
+          aria-hidden="true">
+        </div>
+
+        <!-- Image très floue, révélée en fondu au défilement -->
+
+        <div
+          class="hero-image hero-image--deep"
+          id="hero-deep"
           aria-hidden="true">
         </div>
 
@@ -883,9 +898,9 @@
       </header>
       <div class="studio-testimonial-layout">
         <div class="studio-people" role="group" aria-label="Témoignages de nos clients">
-          <button type="button" class="studio-person is-selected" data-quote="0" aria-pressed="true"><img src="images/evenementiel/cabaret-01.jpg" alt=""><span>Événementiel</span></button>
-          <button type="button" class="studio-person" data-quote="1" aria-pressed="false"><img src="images/Lieux-et-marques/letm-01.jpg" alt=""><span>Hôtellerie</span></button>
-          <button type="button" class="studio-person" data-quote="2" aria-pressed="false"><img src="images/evenementiel/concert-01.jpg" alt=""><span>Culture</span></button>
+          <button type="button" class="studio-person is-selected" data-quote="0" aria-pressed="true"><img src="images/evenementiel/cabaret-01.jpg" alt="" loading="lazy" decoding="async"><span>Événementiel</span></button>
+          <button type="button" class="studio-person" data-quote="1" aria-pressed="false"><img src="images/Lieux-et-marques/letm-01.jpg" alt="" loading="lazy" decoding="async"><span>Hôtellerie</span></button>
+          <button type="button" class="studio-person" data-quote="2" aria-pressed="false"><img src="images/evenementiel/concert-01.jpg" alt="" loading="lazy" decoding="async"><span>Culture</span></button>
         </div>
         <blockquote class="studio-quote" aria-live="polite">
           <p id="studio-quote-text">« Votre retour d’expérience apparaîtra ici. »</p>
@@ -895,10 +910,10 @@
       <div class="studio-trust">
         <div class="studio-trust-window" aria-label="Logos des clients">
           <div class="studio-trust-track" aria-hidden="true">
-            <img src="images/2.png" alt=""><img src="images/3.png" alt=""><img src="images/4.png" alt=""><img src="images/5.png" alt=""><img src="images/6.png" alt="">
-            <img src="images/2.png" alt=""><img src="images/3.png" alt=""><img src="images/4.png" alt=""><img src="images/5.png" alt=""><img src="images/6.png" alt="">
-            <img src="images/2.png" alt=""><img src="images/3.png" alt=""><img src="images/4.png" alt=""><img src="images/5.png" alt=""><img src="images/6.png" alt="">
-            <img src="images/2.png" alt=""><img src="images/3.png" alt=""><img src="images/4.png" alt=""><img src="images/5.png" alt=""><img src="images/6.png" alt="">
+            <img src="images/2.png" alt="" loading="lazy" decoding="async"><img src="images/3.png" alt="" loading="lazy" decoding="async"><img src="images/4.png" alt="" loading="lazy" decoding="async"><img src="images/5.png" alt="" loading="lazy" decoding="async"><img src="images/6.png" alt="" loading="lazy" decoding="async">
+            <img src="images/2.png" alt="" loading="lazy" decoding="async"><img src="images/3.png" alt="" loading="lazy" decoding="async"><img src="images/4.png" alt="" loading="lazy" decoding="async"><img src="images/5.png" alt="" loading="lazy" decoding="async"><img src="images/6.png" alt="" loading="lazy" decoding="async">
+            <img src="images/2.png" alt="" loading="lazy" decoding="async"><img src="images/3.png" alt="" loading="lazy" decoding="async"><img src="images/4.png" alt="" loading="lazy" decoding="async"><img src="images/5.png" alt="" loading="lazy" decoding="async"><img src="images/6.png" alt="" loading="lazy" decoding="async">
+            <img src="images/2.png" alt="" loading="lazy" decoding="async"><img src="images/3.png" alt="" loading="lazy" decoding="async"><img src="images/4.png" alt="" loading="lazy" decoding="async"><img src="images/5.png" alt="" loading="lazy" decoding="async"><img src="images/6.png" alt="" loading="lazy" decoding="async">
           </div>
         </div>
       </div>
@@ -941,7 +956,7 @@
     ========================= */
 
     const sequence = document.querySelector(".intro-sequence");
-    const blurImage = document.getElementById("hero-blur");
+    const deepImage = document.getElementById("hero-deep");
     const overlay = document.getElementById("hero-overlay");
     const brand = document.getElementById("hero-brand");
     const scrollIndicator = document.getElementById("scroll-indicator");
@@ -956,6 +971,18 @@
 
     const clamp = (value, min, max) =>
       Math.min(Math.max(value, min), max);
+
+    let cachedFade = null;
+    const fadeColor = () => {
+      if (!cachedFade) {
+        cachedFade = getComputedStyle(document.body).backgroundColor.match(/\d+/g) || [0, 0, 0];
+      }
+      return cachedFade;
+    };
+    new MutationObserver(() => {
+      cachedFade = null;
+      requestScrollUpdate();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
 
     const smoothstep = (value) =>
       value * value * (3 - 2 * value);
@@ -1002,17 +1029,15 @@
       );
 
       /* Le voile se fond dans la couleur de fond de la section suivante (sombre ou clair). */
-      const fade = getComputedStyle(document.body).backgroundColor.match(/\d+/g) || [0, 0, 0];
+      const fade = fadeColor();
       overlay.style.backgroundColor =
         `rgba(${fade[0]}, ${fade[1]}, ${fade[2]}, ${darkProgress})`;
 
       /*
-        Le flou augmente pendant le défilement.
+        Le flou augmente pendant le défilement (fondu vers le calque très flou).
       */
 
-      const blurAmount = 3 + darkProgress * 17;
-
-      blurImage.style.filter = `blur(${blurAmount}px)`;
+      deepImage.style.opacity = String(darkProgress);
 
       sharpImage.style.opacity = String(
         1 - clamp(progress * 8, 0, 1)

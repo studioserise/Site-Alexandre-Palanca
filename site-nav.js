@@ -1,6 +1,6 @@
 if (!document.querySelector('script[src^="glow.js"]')) {
   const glowScript = document.createElement("script");
-  glowScript.src = "glow.js?v=1";
+  glowScript.src = "glow.js?v=2";
   glowScript.defer = true;
   document.head.append(glowScript);
 }
