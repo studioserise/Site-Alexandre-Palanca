@@ -676,7 +676,9 @@ html[data-theme="light"] :is(.contact-intro, .portraits-intro, .video-hero-copy,
 }
 
 @media (max-width: 800px) {
-  .site-theme-toggle { position: absolute; top: 4px; right: 54px; z-index: 2; padding: 8px; }
+  /* Mobile : le bouton clair / sombre est la dernière ligne du menu déroulant, sous « Contact » */
+  .site-nav-theme-item { display: flex; justify-content: flex-end; width: 100%; }
+  .site-nav-links .site-theme-toggle { position: static; padding: 12px 0; }
   .site-theme-toggle svg { width: 22px; height: 22px; }
   .site-footer .site-footer-inner { grid-template-columns: 1fr; }
   .site-footer-card-wrap { max-width: 520px; justify-self: center; }

@@ -161,6 +161,8 @@
     }
 
     .hero-signature-row {
+      position: relative;
+      top: calc(-1 * var(--logo-lift, 0px)); /* remontée calculée pour que les plans avant ne cachent pas le logo */
       --intro-logo-size: clamp(60px, 10.5vw, 150px);
       --intro-text-size: clamp(128px, 31.2vw, 448px);
       --intro-gap: clamp(10px, 2.2vw, 32px);
@@ -424,6 +426,43 @@
       }
     }
 
+    /* Téléphones et tablettes (écran tactile) :
+       - l'accueil s'arrête au-dessus de la barre de recherche : Safari (iPhone) colorait sa barre du bas
+         avec le bas de ce bloc collant, d'où une bande. En dessous, le fond de la page continue à l'identique.
+       - un dégradé part du haut de l'écran pour fondre l'image dans la zone de la caméra. */
+    @media (hover: none) and (pointer: coarse) {
+      .hero-stage {
+        --toolbar-gap: 0px;
+        height: 100svh;
+      }
+
+    }
+
+    /* Mobile : logo animé 100px plus bas que sur ordinateur (centré 30px sous le milieu au lieu de 70px au-dessus) */
+    @media (max-width: 800px) {
+      .hero-brand {
+        padding-top: 84px;
+        padding-bottom: 24px;
+      }
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+
+      .hero-stage::before {
+        position: absolute;
+        inset: 0 0 auto;
+        z-index: 2;
+        height: calc(env(safe-area-inset-top, 0px) + 110px);
+        content: "";
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.55) 40%, rgba(0, 0, 0, 0.18) 75%, rgba(0, 0, 0, 0) 100%);
+        pointer-events: none;
+      }
+
+      html[data-theme="light"] .hero-stage::before {
+        background: linear-gradient(to bottom, rgba(241, 238, 232, 0.9) 0%, rgba(241, 238, 232, 0.55) 40%, rgba(241, 238, 232, 0.18) 75%, rgba(241, 238, 232, 0) 100%);
+      }
+    }
+
     /* =========================
        5. LES TROIS AXES
     ========================= */
@@ -656,9 +695,10 @@
 
     @media (max-width: 600px) {
       .hero-signature-row {
-        --intro-logo-size: clamp(48px, 15vw, 90px);
-        --intro-text-size: clamp(104px, 38.4vw, 216px);
-        --intro-gap: clamp(8px, 2.5vw, 15px);
+        /* 20 % plus large qu'avant sur mobile */
+        --intro-logo-size: clamp(58px, 18vw, 108px);
+        --intro-text-size: clamp(125px, 46.08vw, 259px);
+        --intro-gap: clamp(10px, 3vw, 18px);
       }
     }
 
@@ -696,10 +736,10 @@
     }
   </style>
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="redesign.css?v=65">
+  <link rel="stylesheet" href="redesign.css?v=66">
   <link rel="stylesheet" href="site-nav.css?v=fondu">
   <link rel="stylesheet" href="cursor.css?v=7">
-  <script type="module" src="site-nav.js?v=carte"></script>
+  <script type="module" src="site-nav.js?v=theme"></script>
   <link rel="stylesheet" href="section-marker.css?v=bord">
   <script src="cursor.js?v=3" defer></script>
   <script src="redesign.js?v=22" defer></script>
@@ -1150,6 +1190,129 @@
 
     updateScrollAnimation();
     startSignatureAnimation();
+
+    /* =========================
+       3. LOGO TOUJOURS LISIBLE AU DÉPART
+       Le logo est glissé entre les plans : les plans 2 et 1 passent devant lui.
+       À l'ouverture (avant tout défilement), ils ne doivent pas cacher plus de 10 % de sa hauteur,
+       quelle que soit la taille de l'écran. On compare, colonne par colonne, le bas réel des lettres
+       et du logo (leurs pixels visibles) avec le haut des plans avant, calés exactement comme ils
+       s'affichent (recadrage « cover », calé en bas). Si besoin, le logo remonte juste ce qu'il faut ;
+       sinon il reste à sa place.
+    ========================= */
+    (() => {
+      const stage = document.getElementById("hero-stage");
+      const row = brand.querySelector(".hero-signature-row");
+      const logoBox = brand.querySelector(".logo-position");
+      const signature = brand.querySelector(".hero-signature");
+      const MAX_HIDDEN = 0.1;
+      const LOGO_START_SCALE = 1.625; // le logo apparaît seul, en plus grand, avant de se placer
+
+      const loadImage = (src) => new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+
+      // Pour chaque colonne d'une image : premier (top) ou dernier (bottom) pixel visible.
+      const readAlpha = (images) => {
+        const w = images[0].naturalWidth, h = images[0].naturalHeight;
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        images.forEach((image) => context.drawImage(image, 0, 0, w, h));
+        const data = context.getImageData(0, 0, w, h).data;
+        const top = new Float32Array(w).fill(-1), bottom = new Float32Array(w).fill(-1);
+        let minY = h, maxY = -1;
+        for (let x = 0; x < w; x++) {
+          for (let y = 0; y < h; y++) {
+            if (data[(y * w + x) * 4 + 3] > 128) {
+              if (top[x] < 0) top[x] = y;
+              bottom[x] = y + 1;
+            }
+          }
+          if (top[x] >= 0) { minY = Math.min(minY, top[x]); maxY = Math.max(maxY, bottom[x]); }
+        }
+        return { w, h, top, bottom, minY, maxY };
+      };
+
+      let front = null, text = null, mark = null;
+
+      // Haut des plans avant à l'écran, à l'abscisse x.
+      const frontTop = (x, stageBox) => {
+        const scale = Math.max(stageBox.width / front.w, stageBox.height / front.h);
+        const offsetX = (stageBox.width - front.w * scale) / 2;
+        const offsetY = stageBox.height - front.h * scale;
+        const column = Math.floor((x - stageBox.left - offsetX) / scale);
+        if (column < 0 || column >= front.w) return Infinity;
+        const top = front.top[column];
+        return top < 0 ? Infinity : stageBox.top + offsetY + top * scale;
+      };
+
+      // Remontée nécessaire pour qu'une image (dessinée dans le cadre box) soit cachée de 10 % au plus.
+      const liftFor = (shape, box, stageBox) => {
+        const sx = box.width / shape.w, sy = box.height / shape.h;
+        const visibleHeight = (shape.maxY - shape.minY) * sy;
+        let lift = 0;
+        for (let x = Math.ceil(box.left); x < box.left + box.width; x++) {
+          const column = Math.floor((x - box.left) / sx);
+          if (column < 0 || column >= shape.w || shape.bottom[column] < 0) continue;
+          const glyphBottom = box.top + shape.bottom[column] * sy;
+          lift = Math.max(lift, glyphBottom - visibleHeight * MAX_HIDDEN - frontTop(x, stageBox));
+        }
+        return lift;
+      };
+
+      const placeLogo = () => {
+        if (!front) return;
+        brand.style.setProperty("--logo-lift", "0px");
+        const stageBox = stage.getBoundingClientRect();
+        const rowBox = row.getBoundingClientRect();
+
+        // Position finale des lettres (sans les décalages de l'animation)
+        const textBox = {
+          left: rowBox.left + signature.offsetLeft, top: rowBox.top + signature.offsetTop,
+          width: signature.offsetWidth, height: signature.offsetHeight
+        };
+        // Le logo est une image 16:9 trois fois et un tiers plus large que sa case carrée, centrée dessus.
+        const size = logoBox.offsetWidth;
+        const logoAt = (centerX, centerY, scale) => {
+          const width = size * 3.33333 * scale;
+          const height = width * 9 / 16;
+          return { left: centerX - width / 2, top: centerY - height / 2, width, height };
+        };
+        const finalLogo = logoAt(rowBox.left + logoBox.offsetLeft + size / 2, rowBox.top + logoBox.offsetTop + size / 2, 1);
+        const startLogo = logoAt(rowBox.left + rowBox.width / 2, rowBox.top + rowBox.height / 2, LOGO_START_SCALE);
+
+        let lift = Math.max(
+          liftFor(text, textBox, stageBox),
+          liftFor(mark, finalLogo, stageBox),
+          liftFor(mark, startLogo, stageBox)
+        );
+        // Ne pas monter sous le menu : au moins 12 % de l'écran au-dessus du logo.
+        const room = Math.min(rowBox.top, startLogo.top + (mark.minY / mark.h) * startLogo.height) - stageBox.top - stageBox.height * 0.12;
+        lift = Math.max(0, Math.min(lift, room));
+        brand.style.setProperty("--logo-lift", `${Math.round(lift)}px`);
+      };
+
+      Promise.all([
+        Promise.all(["images/accueil-plans/plan-2-1200.webp?v=2", "images/accueil-plans/plan-1-1200.webp?v=2"].map(loadImage)),
+        loadImage(signature.currentSrc || signature.src),
+        loadImage(brand.querySelector(".hero-logo").currentSrc || brand.querySelector(".hero-logo").src)
+      ]).then(([frontImages, textImage, logoImage]) => {
+        front = readAlpha(frontImages);
+        text = readAlpha([textImage]);
+        mark = readAlpha([logoImage]);
+        placeLogo();
+      }).catch(() => {});
+
+      let resizeTimer = null;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(placeLogo, 150);
+      });
+    })();
   </script>
 
 </body>

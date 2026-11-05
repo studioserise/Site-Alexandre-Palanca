@@ -8,7 +8,7 @@ if (!document.querySelector('script[src^="glow.js"]')) {
 if (!document.querySelector('link[href^="redesign.css"]')) {
   const redesignStyles = document.createElement("link");
   redesignStyles.rel = "stylesheet";
-  redesignStyles.href = "redesign.css?v=65";
+  redesignStyles.href = "redesign.css?v=66";
   document.head.append(redesignStyles);
 }
 
@@ -16,7 +16,11 @@ const siteNav = document.getElementById("site-nav");
 const siteNavToggle = document.getElementById("site-nav-toggle");
 const siteNavLinks = document.getElementById("site-nav-links");
 
-const themePreference = localStorage.getItem("site-theme");
+// Mode sombre par défaut (ordinateur et mobile). Le choix du visiteur est mémorisé ensuite.
+// Nouvelle clé « site-theme-v2 » : les anciens choix « clair » sont oubliés, tout le monde repart en sombre.
+const THEME_KEY = "site-theme-v2";
+let themePreference = null;
+try { themePreference = localStorage.getItem(THEME_KEY); } catch (error) { /* stockage indisponible */ }
 document.documentElement.dataset.theme = themePreference === "light" ? "light" : "dark";
 
 const publicNavigation = [
@@ -53,7 +57,21 @@ if (siteNav && !siteNav.querySelector(".site-theme-toggle")) {
     </svg>
   `;
   const navInner = siteNav.querySelector(".site-nav-inner");
-  navInner.append(themeToggle);
+  // Ordinateur : à droite du menu. Mobile : dans le menu déroulant, sous « Contact ».
+  const themeItem = document.createElement("li");
+  themeItem.className = "site-nav-theme-item";
+  const mobileNav = window.matchMedia("(max-width: 800px)");
+  const placeThemeToggle = () => {
+    if (mobileNav.matches && siteNavLinks) {
+      themeItem.append(themeToggle);
+      siteNavLinks.append(themeItem);
+    } else {
+      themeItem.remove();
+      navInner.append(themeToggle);
+    }
+  };
+  placeThemeToggle();
+  mobileNav.addEventListener("change", placeThemeToggle);
 
   const syncThemeToggle = () => {
     const isLight = document.documentElement.dataset.theme === "light";
@@ -66,7 +84,7 @@ if (siteNav && !siteNav.querySelector(".site-theme-toggle")) {
   themeToggle.addEventListener("click", () => {
     const nextTheme = document.documentElement.dataset.theme === "light" ? "dark" : "light";
     document.documentElement.dataset.theme = nextTheme;
-    localStorage.setItem("site-theme", nextTheme);
+    try { localStorage.setItem(THEME_KEY, nextTheme); } catch (error) { /* stockage indisponible */ }
     syncThemeToggle();
   });
 }
