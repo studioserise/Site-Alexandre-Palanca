@@ -140,7 +140,7 @@
 
 .drone-layer {
   position: fixed;
-  inset: 0;
+  inset: 1px 0; /* 1px du bord : évite que Safari (iPhone) colore ses barres avec ce calque */
   z-index: 15;
   overflow: hidden;
   pointer-events: none;

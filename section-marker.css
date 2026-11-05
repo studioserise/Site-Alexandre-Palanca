@@ -1,8 +1,9 @@
 .section-marker {
   --sm-color: 242, 239, 232;
   position: fixed;
-  top: 0;
-  bottom: 0;
+  /* 1px du bord : sur iPhone, Safari ne prend pas ce repère pour une barre collée en haut / en bas */
+  top: 1px;
+  bottom: 1px;
   left: clamp(18px, 2vw, 30px);
   z-index: 15;
   width: 80px;

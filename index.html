@@ -69,6 +69,7 @@
     .intro-sequence {
       position: relative;
       z-index: 1;
+      background: var(--black);
       height: 220vh;
     }
 
@@ -80,7 +81,9 @@
       min-height: 500px;
       overflow: hidden;
       isolation: isolate;
-      background: var(--black);
+      /* Pas de fond ici : sur iPhone, Safari colore ses barres avec le fond des blocs collés au bord
+         de l'écran. Le fond est porté par la section (.intro-sequence) à la place. */
+      background: transparent;
     }
 
     /* Paysage en 5 plans superposés (arrière-plan → plan 1).
@@ -125,7 +128,6 @@
 
     /* Version claire : fond clair, logos du centre inversés (noirs) et textes foncés */
     html[data-theme="light"] :is(.hero-logo, .hero-signature) { filter: invert(1); }
-    html[data-theme="light"] .hero-stage { background: #f1eee8; }
     html[data-theme="light"] .hero-socials,
     html[data-theme="light"] .scroll-indicator { color: #171715; }
     html[data-theme="light"] .hero-meta { color: rgba(23, 23, 21, 0.85); text-shadow: 0 1px 8px rgba(241, 238, 232, 0.6); }
@@ -698,14 +700,14 @@
   <link rel="stylesheet" href="site-nav.css?v=fondu">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script type="module" src="site-nav.js?v=carte"></script>
-  <link rel="stylesheet" href="section-marker.css?v=5">
+  <link rel="stylesheet" href="section-marker.css?v=bord">
   <script src="cursor.js?v=3" defer></script>
   <script src="redesign.js?v=22" defer></script>
   <script src="section-marker.js?v=10" defer></script>
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
   <script type="module" src="drone.js?v=11"></script>
-  <link rel="stylesheet" href="drone.css?v=9">
+  <link rel="stylesheet" href="drone.css?v=13">
   <link rel="stylesheet" href="mobile-cta.css?v=2">
 </head>
 
