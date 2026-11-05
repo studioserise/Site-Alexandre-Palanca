@@ -8,16 +8,27 @@
   <link rel="preload" as="image" href="images/accueil-plans/plan-0-arriere.jpg?v=3" imagesrcset="images/accueil-plans/plan-0-arriere-1200.jpg?v=3 1200w, images/accueil-plans/plan-0-arriere.jpg?v=3 2400w" imagesizes="100vw" fetchpriority="high">
   <script src="page-transition.js?v=5"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Photographe et vidéaste indépendant à Sarlat-la-Canéda, en Dordogne et dans le Périgord. Portraits, événements, lieux et marques.">
+  <title>Alexandre Palanca | Photographe, vidéaste et création digitale en Dordogne</title>
+  <meta name="description" content="Photographie, vidéo et création de sites internet à Sarlat et en Dordogne. Découvrez nos prestations pour les particuliers, entreprises, artisans et lieux.">
+  <link rel="canonical" href="https://alexandrepalanca.fr/">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+
+  <!-- Partage sur les réseaux sociaux -->
   <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
   <meta property="og:site_name" content="Alexandre Palanca">
-  <meta property="og:title" content="Alexandre Palanca — Photographe & vidéaste à Sarlat">
-  <meta property="og:description" content="Photographe et vidéaste indépendant à Sarlat-la-Canéda, en Dordogne et dans le Périgord. Portraits, événements, lieux et marques.">
+  <meta property="og:url" content="https://alexandrepalanca.fr/">
+  <meta property="og:title" content="Alexandre Palanca | Photographe, vidéaste et création digitale en Dordogne">
+  <meta property="og:description" content="Photographie, vidéo et création de sites internet à Sarlat et en Dordogne. Découvrez nos prestations pour les particuliers, entreprises, artisans et lieux.">
   <meta property="og:image" content="https://alexandrepalanca.fr/images/photo-alexandre.jpg">
+  <meta property="og:image:width" content="1067">
+  <meta property="og:image:height" content="1600">
+  <meta property="og:image:alt" content="Alexandre Palanca, photographe et vidéaste en Dordogne">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Alexandre Palanca | Photographe, vidéaste et création digitale en Dordogne">
+  <meta name="twitter:description" content="Photographie, vidéo et création de sites internet à Sarlat et en Dordogne. Découvrez nos prestations pour les particuliers, entreprises, artisans et lieux.">
   <meta name="twitter:image" content="https://alexandrepalanca.fr/images/photo-alexandre.jpg">
 
-  <title>Alexandre Palanca — Photographe & vidéaste à Sarlat</title>
 
   <style>
     /* =========================
@@ -180,7 +191,8 @@
       width: var(--intro-logo-size);
       aspect-ratio: 1;
       overflow: hidden;
-      transform: translateX(calc((var(--intro-text-size) + var(--intro-gap)) / 2)) scale(1.625);
+      /* Départ : logo seul, en grand, au centre de l'écran (--row-shift compense la ligne calée à gauche sur ordinateur) */
+      transform: translateX(calc((var(--intro-text-size) + var(--intro-gap)) / 2 + var(--row-shift, 0px))) scale(var(--logo-start-scale, 1.625));
       transform-origin: center;
       will-change: transform;
     }
@@ -200,6 +212,32 @@
       max-width: none;
       transform-origin: center;
       will-change: transform;
+    }
+
+    /* Le titre principal prend exactement la place de l'image : l'affichage ne change pas. */
+    .hero-title {
+      flex: 0 0 var(--intro-text-size);
+      width: var(--intro-text-size);
+      margin: 0;
+      font-size: inherit;
+      font-weight: inherit;
+      line-height: 0;
+    }
+
+    .hero-title .hero-signature {
+      display: block;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .hero-signature {
@@ -436,6 +474,24 @@
         height: 100svh;
       }
 
+    }
+
+    /* Ordinateur : en fin d'animation, le logo et « Alexandre Palanca » sont calés à gauche,
+       alignés sur le logo du menu (le logo démarre quand même au centre de l'écran). */
+    @media (min-width: 801px) {
+      .hero-brand {
+        justify-content: flex-start;
+        padding-left: clamp(24px, 6.95vw, 100px);
+      }
+
+      /* Ordinateur : logo et texte de fin d'animation 26 % plus grands que la taille d'origine.
+         Le logo de départ garde sa taille d'origine (1,625 / 1,26 = 1,29 fois la nouvelle taille). */
+      .hero-signature-row {
+        --logo-start-scale: 1.29;
+        --intro-logo-size: clamp(76px, 13.23vw, 189px);
+        --intro-text-size: clamp(161px, 39.31vw, 564px);
+        --intro-gap: clamp(13px, 2.77vw, 40px);
+      }
     }
 
     /* Mobile : logo animé 100px plus bas que sur ordinateur (centré 30px sous le milieu au lieu de 70px au-dessus) */
@@ -817,11 +873,15 @@
                 </div>
               </div>
 
-              <img
-                src="images/texte-accueil.png"
-                alt="Alexandre Palanca"
-                class="hero-signature"
-              >
+              <!-- Titre principal de la page : l'image « Alexandre Palanca » déjà affichée,
+                   complétée d'un texte lu seulement par Google et les lecteurs d'écran -->
+              <h1 class="hero-title">
+                <img
+                  src="images/texte-accueil.png"
+                  alt="Alexandre Palanca"
+                  class="hero-signature"
+                ><span class="visually-hidden">, photographe et vidéaste en Dordogne</span>
+              </h1>
             </div>
 
           </div>
@@ -1009,16 +1069,7 @@
         1
       );
 
-      if (
-        !scrollingDown &&
-        progress < 0.18 &&
-        signatureAnimationComplete &&
-        siteNav.classList.contains("is-visible")
-      ) {
-        siteNav.classList.remove("is-visible");
-        resetSignatureAnimation();
-        startSignatureAnimation();
-      }
+      // L'animation du logo ne se joue qu'à l'ouverture de la page : en remontant, il reste dans sa forme finale.
 
       /*
         Le voile apparaît progressivement.
@@ -1188,17 +1239,29 @@
       });
     }
 
+    // Écart entre le centre de l'écran et le centre de la ligne logo + texte (0 quand la ligne est centrée).
+    const signatureRow = brand.querySelector(".hero-signature-row");
+    const placeRowShift = () => {
+      brand.style.setProperty("--row-shift", "0px");
+      const stageBox = document.getElementById("hero-stage").getBoundingClientRect();
+      const rowBox = signatureRow.getBoundingClientRect();
+      const shift = (stageBox.left + stageBox.width / 2) - (rowBox.left + rowBox.width / 2);
+      brand.style.setProperty("--row-shift", `${Math.round(shift)}px`);
+    };
+    placeRowShift();
+    window.addEventListener("resize", placeRowShift);
+
     updateScrollAnimation();
     startSignatureAnimation();
 
     /* =========================
        3. LOGO TOUJOURS LISIBLE AU DÉPART
        Le logo est glissé entre les plans : les plans 2 et 1 passent devant lui.
-       À l'ouverture (avant tout défilement), ils ne doivent pas cacher plus de 10 % de sa hauteur,
-       quelle que soit la taille de l'écran. On compare, colonne par colonne, le bas réel des lettres
-       et du logo (leurs pixels visibles) avec le haut des plans avant, calés exactement comme ils
-       s'affichent (recadrage « cover », calé en bas). Si besoin, le logo remonte juste ce qu'il faut ;
-       sinon il reste à sa place.
+       À l'ouverture (avant tout défilement), ils ne peuvent toucher que ses bords : au plus 10 % de sa
+       largeur sur un côté, ou 10 % de sa hauteur par le bas, quelle que soit la taille de l'écran.
+       On compare le contour réel du logo (ses pixels visibles) avec le haut des plans avant, calés
+       exactement comme ils s'affichent (recadrage « cover », calé en bas). Si besoin, le logo remonte
+       juste ce qu'il faut ; sinon il reste à sa place.
     ========================= */
     (() => {
       const stage = document.getElementById("hero-stage");
@@ -1206,7 +1269,8 @@
       const logoBox = brand.querySelector(".logo-position");
       const signature = brand.querySelector(".hero-signature");
       const MAX_HIDDEN = 0.1;
-      const LOGO_START_SCALE = 1.625; // le logo apparaît seul, en plus grand, avant de se placer
+      // le logo apparaît seul, en plus grand, avant de se placer
+      const startScale = () => parseFloat(getComputedStyle(row).getPropertyValue("--logo-start-scale")) || 1.625;
 
       const loadImage = (src) => new Promise((resolve, reject) => {
         const image = new Image();
@@ -1234,7 +1298,10 @@
           }
           if (top[x] >= 0) { minY = Math.min(minY, top[x]); maxY = Math.max(maxY, bottom[x]); }
         }
-        return { w, h, top, bottom, minY, maxY };
+        let minX = 0, maxX = w;
+        while (minX < w && top[minX] < 0) minX++;
+        while (maxX > 0 && top[maxX - 1] < 0) maxX--;
+        return { w, h, top, bottom, minX, maxX, minY, maxY };
       };
 
       let front = null, text = null, mark = null;
@@ -1250,16 +1317,27 @@
         return top < 0 ? Infinity : stageBox.top + offsetY + top * scale;
       };
 
-      // Remontée nécessaire pour qu'une image (dessinée dans le cadre box) soit cachée de 10 % au plus.
-      const liftFor = (shape, box, stageBox) => {
-        const sx = box.width / shape.w, sy = box.height / shape.h;
-        const visibleHeight = (shape.maxY - shape.minY) * sy;
+      // Contour réel (pixels visibles) d'une image dessinée dans le cadre box, à l'écran.
+      const outline = (shape, box) => ({
+        left: box.left + (shape.minX / shape.w) * box.width,
+        right: box.left + (shape.maxX / shape.w) * box.width,
+        top: box.top + (shape.minY / shape.h) * box.height,
+        bottom: box.top + (shape.maxY / shape.h) * box.height
+      });
+      const union = (a, b) => ({
+        left: Math.min(a.left, b.left), right: Math.max(a.right, b.right),
+        top: Math.min(a.top, b.top), bottom: Math.max(a.bottom, b.bottom)
+      });
+
+      // Les plans avant peuvent seulement « grignoter » les bords du logo :
+      // au plus 10 % de sa largeur sur chaque côté, et 10 % de sa hauteur par le bas.
+      // Le cœur du logo (au-delà de ces 10 %) doit rester entièrement visible.
+      const liftFor = (area, stageBox) => {
+        const width = area.right - area.left, height = area.bottom - area.top;
+        const limit = area.bottom - height * MAX_HIDDEN;
         let lift = 0;
-        for (let x = Math.ceil(box.left); x < box.left + box.width; x++) {
-          const column = Math.floor((x - box.left) / sx);
-          if (column < 0 || column >= shape.w || shape.bottom[column] < 0) continue;
-          const glyphBottom = box.top + shape.bottom[column] * sy;
-          lift = Math.max(lift, glyphBottom - visibleHeight * MAX_HIDDEN - frontTop(x, stageBox));
+        for (let x = Math.ceil(area.left + width * MAX_HIDDEN); x <= area.right - width * MAX_HIDDEN; x++) {
+          lift = Math.max(lift, limit - frontTop(x, stageBox));
         }
         return lift;
       };
@@ -1283,13 +1361,12 @@
           return { left: centerX - width / 2, top: centerY - height / 2, width, height };
         };
         const finalLogo = logoAt(rowBox.left + logoBox.offsetLeft + size / 2, rowBox.top + logoBox.offsetTop + size / 2, 1);
-        const startLogo = logoAt(rowBox.left + rowBox.width / 2, rowBox.top + rowBox.height / 2, LOGO_START_SCALE);
+        const rowShift = parseFloat(getComputedStyle(brand).getPropertyValue("--row-shift")) || 0;
+        const startLogo = logoAt(rowBox.left + rowBox.width / 2 + rowShift, rowBox.top + rowBox.height / 2, startScale());
 
-        let lift = Math.max(
-          liftFor(text, textBox, stageBox),
-          liftFor(mark, finalLogo, stageBox),
-          liftFor(mark, startLogo, stageBox)
-        );
+        const finalArea = union(outline(text, textBox), outline(mark, finalLogo)); // logo + « Alexandre Palanca »
+        const startArea = outline(mark, startLogo);                                 // logo seul, au début
+        let lift = Math.max(liftFor(finalArea, stageBox), liftFor(startArea, stageBox));
         // Ne pas monter sous le menu : au moins 12 % de l'écran au-dessus du logo.
         const room = Math.min(rowBox.top, startLogo.top + (mark.minY / mark.h) * startLogo.height) - stageBox.top - stageBox.height * 0.12;
         lift = Math.max(0, Math.min(lift, room));
