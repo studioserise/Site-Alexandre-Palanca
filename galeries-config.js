@@ -1,7 +1,7 @@
 window.GALERIES_CONFIG = {
   supabaseUrl: "https://rrytedgilrwsczoqeyzx.supabase.co",
   supabaseAnonKey: "sb_publishable_MpZh8QKptURrOt0JqfRULA_eZHpVhO2",
-  demoMode: true,
+  demoMode: false,
   demoAccessCode: "DEMO2026",
   demoClosedAccessCode: "DEMOFERMEE",
   demoPricing: {

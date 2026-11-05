@@ -197,29 +197,12 @@ const carouselProjects = [
     sets: [["images/video/clip-musical.jpg"]]
   },
   {
-    id: "lieux",
+    id: "festivals",
     kind: "Photo",
-    title: "Lieux & savoir-faire",
-    text: "Une série cohérente pour révéler les espaces, les gestes et les détails qui vous ressemblent.",
+    title: "Festivals",
+    text: "L’ambiance d’un festival, de la foule aux instants en coulisses.",
     sets: [
-      ["images/Lieux-et-marques/letm-01.jpg", "images/Lieux-et-marques/letm-02.jpg", "images/Lieux-et-marques/letm-03.jpg"]
-    ]
-  },
-  {
-    id: "interview",
-    kind: "Vidéo",
-    title: "Interview filmée",
-    text: "Une parole mise en valeur, avec un cadre et un son soignés.",
-    sets: [["images/video/interview-portrait.jpg"]]
-  },
-  {
-    id: "portrait-pro",
-    kind: "Photo",
-    title: "Portrait professionnel",
-    text: "Des portraits soignés pour présenter votre activité et votre personnalité.",
-    sets: [
-      ["images/portraits/professionnel-01.jpg", "images/portraits/professionnel-02.jpg", "images/portraits/professionnel-03.jpg"],
-      ["images/portraits/professionnel-11.jpg", "images/portraits/professionnel-12.jpg", "images/portraits/professionnel-13.jpg"]
+      ["images/evenementiel/festival-01.jpg", "images/evenementiel/festival-02.jpg", "images/evenementiel/festival-03.jpg"]
     ]
   },
   {
@@ -230,28 +213,13 @@ const carouselProjects = [
     sets: [["images/video/film-presentation.jpg"]]
   },
   {
-    id: "festivals",
-    kind: "Photo",
-    title: "Festivals",
-    text: "L’ambiance d’un festival, de la foule aux instants en coulisses.",
-    sets: [
-      ["images/evenementiel/festival-01.jpg", "images/evenementiel/festival-02.jpg", "images/evenementiel/festival-03.jpg"]
-    ]
-  },
-  {
-    id: "captation",
-    kind: "Vidéo",
-    title: "Captation",
-    text: "Un concert ou un événement filmé tel qu’il s’est vécu.",
-    sets: [["images/video/captation.jpg"]]
-  },
-  {
     id: "sport",
     kind: "Photo",
-    title: "Portrait sportif",
+    title: "Sport & compétition",
     text: "Le mouvement, l’effort et la concentration, saisis au bon moment.",
     sets: [
-      ["images/portraits/sportif-01.jpg", "images/portraits/sportif-02.jpg", "images/portraits/sportif-03.jpg"]
+      ["images/evenementiel/sport-competition-01.jpg", "images/evenementiel/sport-competition-02.jpg", "images/evenementiel/sport-competition-03.jpg"],
+      ["images/evenementiel/sport-competition-11.jpg", "images/evenementiel/sport-competition-12.jpg", "images/evenementiel/sport-competition-13.jpg"]
     ]
   },
   {
@@ -259,23 +227,9 @@ const carouselProjects = [
     kind: "Vidéo",
     title: "Formats courts",
     text: "Des vidéos courtes et rythmées, pensées pour les réseaux sociaux.",
-    sets: [["images/video/formats-courts.jpg"]]
-  },
-  {
-    id: "spectacles",
-    kind: "Photo",
-    title: "Spectacles",
-    text: "Des images qui restituent la lumière, le jeu et l’émotion de la scène.",
-    sets: [
-      ["images/evenementiel/spectacle-01.jpg", "images/evenementiel/spectacle-02.jpg", "images/evenementiel/spectacle-03.jpg"]
-    ]
-  },
-  {
-    id: "aerien",
-    kind: "Vidéo",
-    title: "Prises de vues aériennes",
-    text: "Des images en drone pour offrir une autre perspective sur vos lieux et vos événements.",
-    sets: [["images/video/prises-aeriennes.jpg"]]
+    sets: [["images/video/formats-courts.jpg"]],
+    video: "images/video/formats-courts.mp4",
+    videoPosition: "right center" // cadrage de la vidéo dans le portfolio
   },
   {
     id: "cabaret",
@@ -283,15 +237,20 @@ const carouselProjects = [
     title: "Cabaret",
     text: "L’élégance et le rythme d’une soirée cabaret, au plus près des artistes.",
     sets: [
-      ["images/evenementiel/cabaret-01.jpg", "images/evenementiel/cabaret-02.jpg", "images/evenementiel/cabaret-03.jpg"]
+      ["images/evenementiel/cabaret-31.jpg", "images/evenementiel/cabaret-32.jpg", "images/evenementiel/cabaret-33.jpg"],
+      ["images/evenementiel/cabaret-11.jpg", "images/evenementiel/cabaret-12.jpg", "images/evenementiel/cabaret-13.jpg"],
+      ["images/evenementiel/cabaret-01.jpg", "images/evenementiel/cabaret-02.jpg", "images/evenementiel/cabaret-03.jpg"],
+      ["images/evenementiel/cabaret-21.jpg", "images/evenementiel/cabaret-22.jpg", "images/evenementiel/cabaret-23.jpg"],
+      ["images/portraits/professionnel-11.jpg", "images/portraits/professionnel-12.jpg", "images/portraits/professionnel-13.jpg"]
     ]
   },
   {
-    id: "evenement",
+    id: "aerien",
     kind: "Vidéo",
-    title: "Tournage d’événement",
-    text: "Des images filmées au plus près de vos invités et de vos temps forts.",
-    sets: [["images/evenementiel/cabaret-02.jpg"]]
+    title: "Prises de vues aériennes",
+    text: "Des images en drone pour offrir une autre perspective sur vos lieux et vos événements.",
+    sets: [["images/video/prises-aeriennes.jpg"]],
+    video: "images/video/prises-aeriennes.mp4"
   }
 ];
 
@@ -326,8 +285,9 @@ document.querySelectorAll("[data-carousel]").forEach((carousel) => {
   let activeSet = 0;
   let timerId;
   let transitionId;
+  let fromReel = false; // arrivé depuis une case de la galerie : on enchaîne les séries de ce thème
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const SET_DELAY = 3500;     // temps d'affichage d'une série quand un thème en a plusieurs
+  const SET_DELAY = 4000;     // temps d'affichage d'une série quand un thème en a plusieurs
   const PROJECT_DELAY = 5000; // temps d'affichage d'un thème qui n'a qu'une série
 
   const gallery = carousel.querySelector("[data-carousel-images]");
@@ -361,11 +321,20 @@ document.querySelectorAll("[data-carousel]").forEach((carousel) => {
       if (video) { video.pause(); video.remove(); video = null; }
       if (project.video) {
         video = document.createElement("video");
-        Object.assign(video, { src: project.video, muted: true, loop: true, autoplay: true, playsInline: true });
+        // La vidéo est lue une fois en entier, puis on passe à la case suivante.
+        // Certains navigateurs (dont l'aperçu de VS Code) ne lisent pas le .mp4 : on prend alors la version .webm.
+        const mp4Ok = video.canPlayType('video/mp4; codecs="avc1.64001F"');
+        const src = !mp4Ok && /\.mp4$/i.test(project.video) ? project.video.replace(/\.mp4$/i, ".webm") : project.video;
+        Object.assign(video, { src, muted: true, loop: false, autoplay: true, playsInline: true });
+        video.addEventListener("ended", goNext);
+        if (project.videoPosition) video.style.objectPosition = project.videoPosition;
         if (set[0]) video.poster = set[0];
         video.setAttribute("aria-label", project.title);
         gallery.append(video);
-        video.play().catch(() => {});
+        // Si la vidéo ne peut pas se lire (lecture auto bloquée, fichier manquant), on ne reste pas bloqué.
+        const fallback = () => { if (video && !video.ended) { window.clearTimeout(timerId); timerId = window.setTimeout(goNext, PROJECT_DELAY); } };
+        video.addEventListener("error", fallback);
+        video.play().catch(fallback);
       }
 
       description.replaceChildren();
@@ -421,32 +390,51 @@ document.querySelectorAll("[data-carousel]").forEach((carousel) => {
     });
   };
 
+  let hovering = false;
+  // Passe au cadre suivant (fin d'une vidéo) ; si la souris est sur le portfolio,
+  // le cadre suivant reste affiché jusqu'à ce qu'elle sorte, comme d'habitude.
+  const goNext = () => {
+    showProject(activeProject + 1);
+    if (hovering && !fromReel) window.clearTimeout(timerId);
+    else restartTimer();
+  };
   const restartTimer = () => {
     window.clearTimeout(timerId);
+    // Projet vidéo : pas de minuterie, on attend la fin de la vidéo
+    // (si elle s'est terminée pendant le survol, on repart dès que la souris sort).
+    if (projects[activeProject].video) {
+      if (video && video.ended) timerId = window.setTimeout(goNext, 600);
+      return;
+    }
     if (reduceMotion) return;
     const sets = setsOf(projects[activeProject]);
     timerId = window.setTimeout(() => {
-      if (activeSet < sets.length - 1) showSet(activeSet + 1);
+      if (fromReel && sets.length > 1) showSet(activeSet + 1);
+      else if (activeSet < sets.length - 1) showSet(activeSet + 1);
       else showProject(activeProject + 1);
       restartTimer();
     }, sets.length > 1 ? SET_DELAY : PROJECT_DELAY);
   };
 
   previous.addEventListener("click", () => {
+    fromReel = false;
     showProject(activeProject - 1);
     restartTimer();
   });
   next.addEventListener("click", () => {
+    fromReel = false;
     showProject(activeProject + 1);
     restartTimer();
   });
-  carousel.addEventListener("mouseenter", () => window.clearTimeout(timerId));
-  carousel.addEventListener("mouseleave", restartTimer);
+  // Survol : pause, sauf si on vient de la galerie (les séries continuent de défiler).
+  carousel.addEventListener("mouseenter", () => { hovering = true; if (!fromReel) window.clearTimeout(timerId); });
+  carousel.addEventListener("mouseleave", () => { hovering = false; if (!fromReel) restartTimer(); });
   // Clic sur une case de la galerie défilante : affiche son thème, sur la même série.
   document.addEventListener("portfolio:show", (event) => {
     const { id, set = 0 } = event.detail || {};
     const index = projects.findIndex((project) => project.id === id);
     if (index < 0) return;
+    fromReel = true;
     showProject(index, set);
     restartTimer();
   });
@@ -456,45 +444,76 @@ document.querySelectorAll("[data-carousel]").forEach((carousel) => {
 
 const pressTargets = ".flip-card, .studio-service-card, .studio-about-photo, .studio-approach-photo, .redesign-hero-image:not(.flip-card-face), .portfolio-carousel";
 if (window.matchMedia("(hover: hover)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  // Survol « carte en main » : légère inclinaison vers la souris, petit soulèvement et reflet.
+  // - Mouvement lissé image par image (pas de transition CSS relancée à chaque mouvement).
+  // - Le cadre est mesuré une seule fois à l'arrivée de la souris : mesuré pendant l'inclinaison,
+  //   il changeait sans cesse et la carte vibrait.
+  // - Un court repos après la sortie empêche la carte de se réarmer en boucle sur un bord.
   document.querySelectorAll(pressTargets).forEach((el) => {
     el.classList.add("press-fx");
-    const max = el.matches(".site-footer-card") ? 9 : el.matches(".portfolio-carousel") ? 3 : 7;
-    // Le cadre est mesuré une seule fois, à l'arrivée de la souris : mesuré pendant l'inclinaison,
-    // il changeait à chaque mouvement et la photo tremblait (surtout près des bords, où elle
-    // rétrécissait sous la souris, « sortait » puis « rentrait » en boucle).
+    const max = el.matches(".portfolio-carousel") ? 1.5 : 4; // inclinaison maximale en degrés
+    const lift = el.matches(".portfolio-carousel") ? 1.004 : 1.012;
+    const current = { rx: 0, ry: 0, ps: 1 };
+    const target = { rx: 0, ry: 0, ps: 1 };
     let box = null;
-    let restUntil = 0; // laisse le cadre se redresser avant de pouvoir réarmer l'effet
+    let frame = 0;
+    let restUntil = 0;
+    // Valeurs de départ posées sur la carte : les anciennes règles CSS ne peuvent plus imposer d'à-coup.
+    el.style.setProperty("--rx", "0deg");
+    el.style.setProperty("--ry", "0deg");
+    el.style.setProperty("--ps", "1");
+
+    const step = () => {
+      frame = 0;
+      let moving = false;
+      for (const key of ["rx", "ry", "ps"]) {
+        const gap = target[key] - current[key];
+        if (Math.abs(gap) > (key === "ps" ? 0.0002 : 0.01)) {
+          current[key] += gap * 0.14;
+          moving = true;
+        } else {
+          current[key] = target[key];
+        }
+      }
+      el.style.setProperty("--rx", `${current.rx.toFixed(3)}deg`);
+      el.style.setProperty("--ry", `${current.ry.toFixed(3)}deg`);
+      el.style.setProperty("--ps", current.ps.toFixed(4));
+      if (moving) frame = requestAnimationFrame(step);
+    };
+    const animate = () => { if (!frame) frame = requestAnimationFrame(step); };
+
     const update = (event) => {
       if (!box) return;
       const inside = event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
       if (!inside) { release(); return; }
       const x = (event.clientX - box.left) / box.width;
       const y = (event.clientY - box.top) / box.height;
-      el.classList.add("is-pointed");
-      el.style.setProperty("--rx", `${((0.5 - y) * 2 * max).toFixed(2)}deg`);
-      el.style.setProperty("--ry", `${((x - 0.5) * 2 * max).toFixed(2)}deg`);
+      target.rx = (0.5 - y) * 2 * max;
+      target.ry = (x - 0.5) * 2 * max;
+      target.ps = lift;
       el.style.setProperty("--gx", `${(x * 100).toFixed(1)}%`);
       el.style.setProperty("--mx", `${((1 - x) * 100).toFixed(1)}%`);
       el.style.setProperty("--gy", `${(y * 100).toFixed(1)}%`);
+      animate();
     };
     const release = () => {
       if (!box) return;
       box = null;
-      restUntil = performance.now() + 550;
+      restUntil = performance.now() + 450;
       document.removeEventListener("pointermove", update);
       window.removeEventListener("scroll", release);
       el.classList.remove("is-pointed");
-      ["--rx", "--ry"].forEach((name) => el.style.setProperty(name, "0deg"));
+      Object.assign(target, { rx: 0, ry: 0, ps: 1 });
+      animate();
     };
     const arm = (event) => {
       if (event.pointerType !== "mouse" || box || performance.now() < restUntil) return;
       box = el.getBoundingClientRect();
-      // Suivi au niveau de la page : la souris peut passer hors du cadre incliné sans le quitter vraiment.
+      el.classList.add("is-pointed");
       document.addEventListener("pointermove", update, { passive: true });
       window.addEventListener("scroll", release, { passive: true });
       update(event);
     };
-    // pointermove réarme l'effet après un défilement, sans attendre que la souris ressorte.
     el.addEventListener("pointerenter", arm);
     el.addEventListener("pointermove", arm);
   });

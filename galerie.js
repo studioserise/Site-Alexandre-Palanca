@@ -1,4 +1,4 @@
-import { getConfig } from "./galeries-config.js";
+import { getConfig } from "./galeries-config.js?v=2";
 import { callGalleryFunction, isBackendConfigured } from "./galeries-api.js";
 
 const config = getConfig();
@@ -32,7 +32,7 @@ form.addEventListener("submit", async (event) => {
   }
 
   if (!isBackendConfigured()) {
-    message.textContent = "Code invalide, ou galerie privée non configurée. Essayez le code de démonstration indiqué ci-dessous.";
+    message.textContent = "Les galeries privées sont momentanément indisponibles. Contactez-nous pour accéder à vos photos.";
     return;
   }
 

@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/favicon.png?v=3">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
-  <link rel="preload" as="image" href="images/hero-accueil-web.jpg?v=1" fetchpriority="high">
+  <link rel="preload" as="image" href="images/accueil-plans/plan-0-arriere.jpg?v=3" imagesrcset="images/accueil-plans/plan-0-arriere-1200.jpg?v=3 1200w, images/accueil-plans/plan-0-arriere.jpg?v=3 2400w" imagesizes="100vw" fetchpriority="high">
   <script src="page-transition.js?v=5"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Photographe et vidéaste indépendant à Sarlat-la-Canéda, en Dordogne et dans le Périgord. Portraits, événements, lieux et marques.">
@@ -68,7 +68,8 @@
 
     .intro-sequence {
       position: relative;
-      height: 170vh;
+      z-index: 1;
+      height: 220vh;
     }
 
     .hero-stage {
@@ -82,54 +83,52 @@
       background: var(--black);
     }
 
-    .hero-image {
+    /* Paysage en 5 plans superposés (arrière-plan → plan 1).
+       Au défilement, chaque plan glisse vers le haut (avec un léger zoom), d'autant plus qu'il est proche :
+       les plans avant montent légèrement sur ceux de derrière, comme en 3D. */
+    .hero-layers {
       position: absolute;
-      inset: -20px;
-      background-image: url("images/hero-accueil-web.jpg?v=1");
-      background-size: cover;
-      background-position: center;
-      transform: scale(1.03);
+      inset: 0;
+      overflow: hidden;
     }
 
-    /* Image de fond légèrement floue */
-
-    .hero-image--blur {
-      filter: blur(3px);
+    .hero-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      object-fit: cover;
+      object-position: center bottom;
+      transform-origin: 50% 100%;
+      will-change: transform;
     }
 
-    /* Calque très flou : seule son opacité change au défilement (beaucoup plus léger
-       que recalculer le flou de toute l'image à chaque image d'animation). */
-    .hero-image--deep {
-      filter: blur(20px);
-      opacity: 0;
-      will-change: opacity;
+    /* Fondu du bas du plan 1 vers la section suivante : aucun plan ne dépasse en dessous. */
+    .hero-fade {
+      position: absolute;
+      inset: auto 0 0;
+      z-index: 2;
+      height: 28%;
+      --fade-color: 0, 0, 0;
+      background: linear-gradient(to bottom, rgba(var(--fade-color), 0), rgb(var(--fade-color)) var(--fade-solid, 100%));
+      pointer-events: none;
     }
+    html[data-theme="light"] .hero-fade { --fade-color: 241, 238, 232; }
 
-    /* Copie nette révélée autour du curseur */
+    /* Voile de 20 % sur les plans (le logo, glissé entre les plans, reste net) :
+       noir en version sombre, blanc en version claire. */
+    .hero-layer { filter: brightness(0.8); }
+    html[data-theme="light"] .hero-layer { filter: invert(1) brightness(0.8) invert(1); }
+    .hero-layers { z-index: 1; }
+    .hero-layers .hero-brand { z-index: auto; }
 
-    .hero-image--sharp {
-      filter: none;
-
-      -webkit-mask-image: radial-gradient(
-        circle 150px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(0, 0, 0, 1) 0,
-        rgba(0, 0, 0, 0.98) 65px,
-        rgba(0, 0, 0, 0.80) 95px,
-        rgba(0, 0, 0, 0.38) 125px,
-        transparent 150px
-      );
-
-      mask-image: radial-gradient(
-        circle 150px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(0, 0, 0, 1) 0,
-        rgba(0, 0, 0, 0.98) 65px,
-        rgba(0, 0, 0, 0.80) 95px,
-        rgba(0, 0, 0, 0.38) 125px,
-        transparent 150px
-      );
-
-      will-change: mask-image;
-    }
+    /* Version claire : fond clair, logos du centre inversés (noirs) et textes foncés */
+    html[data-theme="light"] :is(.hero-logo, .hero-signature) { filter: invert(1); }
+    html[data-theme="light"] .hero-stage { background: #f1eee8; }
+    html[data-theme="light"] .hero-socials,
+    html[data-theme="light"] .scroll-indicator { color: #171715; }
+    html[data-theme="light"] .hero-meta { color: rgba(23, 23, 21, 0.85); text-shadow: 0 1px 8px rgba(241, 238, 232, 0.6); }
 
     /* Voile piloté par le défilement */
 
@@ -154,6 +153,7 @@
       align-items: center;
       justify-content: center;
       padding: 24px;
+      padding-bottom: 164px; /* 140px de plus en bas : le logo est centré 70px plus haut */
       pointer-events: none;
       will-change: opacity, transform;
     }
@@ -622,14 +622,6 @@
         --reveal-size: 220px;
       }
 
-      .hero-image--sharp {
-        display: none;
-      }
-
-      .hero-image--blur {
-        filter: blur(1px);
-      }
-
       .hero-introduction {
         padding-inline: 28px;
       }
@@ -702,17 +694,17 @@
     }
   </style>
   <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="redesign.css?v=53">
-  <link rel="stylesheet" href="site-nav.css?v=safe">
+  <link rel="stylesheet" href="redesign.css?v=65">
+  <link rel="stylesheet" href="site-nav.css?v=fondu">
   <link rel="stylesheet" href="cursor.css?v=7">
-  <script type="module" src="site-nav.js?v=perf"></script>
+  <script type="module" src="site-nav.js?v=carte"></script>
   <link rel="stylesheet" href="section-marker.css?v=5">
   <script src="cursor.js?v=3" defer></script>
-  <script src="redesign.js?v=6" defer></script>
+  <script src="redesign.js?v=22" defer></script>
   <script src="section-marker.js?v=10" defer></script>
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
-  <script type="module" src="drone.js?v=10"></script>
+  <script type="module" src="drone.js?v=11"></script>
   <link rel="stylesheet" href="drone.css?v=9">
   <link rel="stylesheet" href="mobile-cta.css?v=2">
 </head>
@@ -762,59 +754,47 @@
 
       <div class="hero-stage" id="hero-stage">
 
-        <!-- Image floue -->
+        <!-- Paysage en plans superposés, de l'arrière-plan au plan 1 -->
 
-        <div
-          class="hero-image hero-image--blur"
-          id="hero-blur"
-          aria-hidden="true">
+        <div class="hero-layers">
+          <img class="hero-layer" data-depth="0" src="images/accueil-plans/plan-0-arriere.jpg?v=3" srcset="images/accueil-plans/plan-0-arriere-1200.jpg?v=3 1200w, images/accueil-plans/plan-0-arriere.jpg?v=3 2400w" sizes="100vw" alt="" fetchpriority="high">
+          <img class="hero-layer" data-depth="1" src="images/accueil-plans/plan-4.webp?v=2" srcset="images/accueil-plans/plan-4-1200.webp?v=2 1200w, images/accueil-plans/plan-4.webp?v=2 2400w" sizes="100vw" alt="">
+          <img class="hero-layer" data-depth="2" src="images/accueil-plans/plan-3.webp?v=2" srcset="images/accueil-plans/plan-3-1200.webp?v=2 1200w, images/accueil-plans/plan-3.webp?v=2 2400w" sizes="100vw" alt="">
+          <!-- Signature animée : entre le plan 3 et le plan 2, les plans avant passent devant -->
+
+          <div class="hero-brand" id="hero-brand">
+
+            <div class="hero-signature-row">
+              <div class="logo-position">
+                <div class="hero-logo-canvas">
+                  <img
+                    src="images/logo-accueil.png"
+                    alt=""
+                    class="hero-logo"
+                  >
+                </div>
+              </div>
+
+              <img
+                src="images/texte-accueil.png"
+                alt="Alexandre Palanca"
+                class="hero-signature"
+              >
+            </div>
+
+          </div>
+
+          <img class="hero-layer" data-depth="3" src="images/accueil-plans/plan-2.webp?v=2" srcset="images/accueil-plans/plan-2-1200.webp?v=2 1200w, images/accueil-plans/plan-2.webp?v=2 2400w" sizes="100vw" alt="">
+          <img class="hero-layer" data-depth="4" src="images/accueil-plans/plan-1.webp?v=2" srcset="images/accueil-plans/plan-1-1200.webp?v=2 1200w, images/accueil-plans/plan-1.webp?v=2 2400w" sizes="100vw" alt="">
         </div>
 
-        <!-- Image très floue, révélée en fondu au défilement -->
-
-        <div
-          class="hero-image hero-image--deep"
-          id="hero-deep"
-          aria-hidden="true">
-        </div>
-
-        <!-- Image nette révélée par la souris -->
-
-        <div
-          class="hero-image hero-image--sharp"
-          id="hero-sharp"
-          aria-hidden="true">
-        </div>
+        <div class="hero-fade" aria-hidden="true"></div>
 
         <!-- Voile sombre progressif -->
 
         <div class="hero-overlay" id="hero-overlay"></div>
 
         
-        <!-- Signature animée -->
-
-        <div class="hero-brand" id="hero-brand">
-
-          <div class="hero-signature-row">
-            <div class="logo-position">
-              <div class="hero-logo-canvas">
-                <img
-                  src="images/logo-accueil.png"
-                  alt=""
-                  class="hero-logo"
-                >
-              </div>
-            </div>
-
-            <img
-              src="images/texte-accueil.png"
-              alt="Alexandre Palanca"
-              class="hero-signature"
-            >
-          </div>
-
-        </div>
-
         <!-- Réseaux sociaux : remplacer les URL ci-dessous -->
         <nav class="hero-socials" id="hero-socials" aria-label="Réseaux sociaux">
           <a class="hero-social-link" href="https://www.instagram.com/alexpalanca_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/></svg></a>
@@ -823,12 +803,12 @@
 
         <!-- Coordonnées (bas gauche) : remplacer le texte de chaque ligne -->
         <p class="hero-meta hero-meta--contact" id="hero-meta-contact">
-          <span>À compléter – coordonnées</span>
+          <span>42,75690° N, 0,50208° E</span>
         </p>
 
         <!-- Lieu de la photo (bas droite) : remplacer le texte -->
         <p class="hero-meta hero-meta--place" id="hero-meta-place">
-          <span>À compléter – lieu</span>
+          <span>Litourcade et Fouedo, 31110 Oô, France</span>
         </p>
 
         <div class="scroll-indicator" id="scroll-indicator">
@@ -924,39 +904,18 @@
 
   <script>
     /* =========================
-       1. LOUPE SUIVANT LA SOURIS
-    ========================= */
-
-    const hero = document.getElementById("hero-stage");
-    const sharpImage = document.getElementById("hero-sharp");
-
-    let mouseFrame = null;
-
-    hero.addEventListener("pointermove", (event) => {
-      if (event.pointerType !== "mouse") return;
-
-      if (mouseFrame) {
-        cancelAnimationFrame(mouseFrame);
-      }
-
-      mouseFrame = requestAnimationFrame(() => {
-        const rect = hero.getBoundingClientRect();
-
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-
-        sharpImage.style.setProperty("--mouse-x", `${x}px`);
-        sharpImage.style.setProperty("--mouse-y", `${y}px`);
-      });
-    });
-
-
-    /* =========================
        2. TRANSITION AU SCROLL
     ========================= */
 
     const sequence = document.querySelector(".intro-sequence");
-    const deepImage = document.getElementById("hero-deep");
+    const heroLayers = [...document.querySelectorAll(".hero-layer")];
+    // Agrandissement de chaque plan en fin de défilement (arrière-plan → plan 1)
+    const heroFade = document.querySelector(".hero-fade");
+    // L'arrière-plan descend un peu pendant que les plans montent : plus d'écart entre lui et le plan 4.
+    // (son léger zoom compense sa descente, pour qu'aucun vide n'apparaisse en haut)
+    const LAYER_GROWTH = [0.05, 0.03, 0.06, 0.09, 0.12]; // léger zoom
+    const LAYER_RISE = [-4, 8, 12, 17, 22];               // montée en % de la hauteur de l'écran (négatif = descend)
+    const FADE_HEIGHT = 28;                          // hauteur du fondu du bas, en %
     const overlay = document.getElementById("hero-overlay");
     const brand = document.getElementById("hero-brand");
     const scrollIndicator = document.getElementById("scroll-indicator");
@@ -1024,8 +983,9 @@
         L'image reste visible derrière le texte.
       */
 
+      // Le voile arrive après le début de la cascade, pour qu'on la voie.
       const darkProgress = smoothstep(
-        clamp(progress / 0.9, 0, 1)
+        clamp((progress - 0.45) / 0.5, 0, 1)
       );
 
       /* Le voile se fond dans la couleur de fond de la section suivante (sombre ou clair). */
@@ -1033,15 +993,17 @@
       overlay.style.backgroundColor =
         `rgba(${fade[0]}, ${fade[1]}, ${fade[2]}, ${darkProgress})`;
 
-      /*
-        Le flou augmente pendant le défilement (fondu vers le calque très flou).
-      */
-
-      deepImage.style.opacity = String(darkProgress);
-
-      sharpImage.style.opacity = String(
-        1 - clamp(progress * 8, 0, 1)
-      );
+      /* Cascade des plans : plus un plan est proche, plus il grandit et remonte. */
+      const layerProgress = smoothstep(progress);
+      heroLayers.forEach((layer, index) => {
+        const scale = 1 + LAYER_GROWTH[index] * layerProgress;
+        const rise = LAYER_RISE[index] * layerProgress;
+        layer.style.transform = `translate3d(0, ${-rise}%, 0) scale(${scale})`;
+      });
+      // Le fondu du bas suit le plan 1 qui monte : en dessous, seulement la couleur de la section suivante.
+      const frontRise = LAYER_RISE[LAYER_RISE.length - 1] * layerProgress;
+      heroFade.style.height = `${FADE_HEIGHT + frontRise}%`;
+      heroFade.style.setProperty("--fade-solid", `${(100 * FADE_HEIGHT) / (FADE_HEIGHT + frontRise)}%`);
 
       if (progress > 0) {
         siteNav.classList.add("is-visible");

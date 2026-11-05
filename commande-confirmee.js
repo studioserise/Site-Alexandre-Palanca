@@ -1,4 +1,4 @@
-import { getConfig } from "./galeries-config.js";
+import { getConfig } from "./galeries-config.js?v=2";
 import {
   callGalleryFunction,
   downloadGalleryPhotosZip,

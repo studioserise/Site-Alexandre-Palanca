@@ -8,15 +8,31 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(8, 8, 8, 0.94) 0%,
-    rgba(8, 8, 8, 0.64) 52%,
-    rgba(8, 8, 8, 0) 100%
-  );
+  /* Fond du haut de page dessiné par ::before, plus haut que le menu, pour un fondu très progressif */
+  --site-nav-fade: 8, 8, 8;
   transition:
     opacity 500ms ease,
     visibility 0s linear 500ms;
+}
+
+.site-nav::before {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: calc(100% + 90px);
+  content: "";
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--site-nav-fade), 0.9) 0%,
+    rgba(var(--site-nav-fade), 0.8) 14%,
+    rgba(var(--site-nav-fade), 0.65) 28%,
+    rgba(var(--site-nav-fade), 0.48) 42%,
+    rgba(var(--site-nav-fade), 0.32) 56%,
+    rgba(var(--site-nav-fade), 0.18) 70%,
+    rgba(var(--site-nav-fade), 0.08) 84%,
+    rgba(var(--site-nav-fade), 0) 100%
+  );
+  pointer-events: none;
 }
 
 button,

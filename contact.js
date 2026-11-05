@@ -1,4 +1,4 @@
-import { getConfig } from "./galeries-config.js";
+import { getConfig } from "./galeries-config.js?v=2";
 
 const contactForm = document.getElementById("contact-form");
 const contactStatus = document.getElementById("contact-form-status");

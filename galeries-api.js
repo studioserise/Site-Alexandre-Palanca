@@ -1,4 +1,4 @@
-import { getConfig } from "./galeries-config.js";
+import { getConfig } from "./galeries-config.js?v=2";
 import { createZipBlob } from "./gallery-zip.js?v=free-gallery-zip";
 
 export function isBackendConfigured() {

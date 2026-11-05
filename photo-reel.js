@@ -3,15 +3,53 @@
 (function () {
   'use strict';
 
-  var SPEED = 14;        // pixels par seconde
+  var SPEED = 52;        // pixels par seconde
+  var HOVER_SPEED = 0.2; // au survol, la galerie ralentit à 20 % de sa vitesse (sans s'arrêter)
+  var EASE = 2.5;        // rapidité du ralentissement / de la reprise
   var SLIDE_DELAY = 1600; // temps entre deux images dans une case survolée
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Certains navigateurs (dont l'aperçu de VS Code) ne lisent pas le .mp4 : on prend alors la version .webm.
+  function playableSource(video, src) {
+    if (/\.mp4$/i.test(src) && !video.canPlayType('video/mp4; codecs="avc1.64001F"')) return src.replace(/\.mp4$/i, '.webm');
+    return src;
+  }
 
   function setupTile(tile) {
     var images = tile.querySelectorAll('img');
     var index = 0;
     var timer = null;
+    var videoSrc = tile.getAttribute('data-video');
+    var video = null;
     if (images[0]) images[0].classList.add('is-active');
+
+    // Case vidéo : une image au repos, la vidéo se lance au survol (créée seulement à ce moment-là).
+    if (videoSrc) {
+      return {
+        start: function () {
+          tile.classList.add('is-hovered');
+          if (!video) {
+            video = document.createElement('video');
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
+            video.preload = 'auto';
+            video.setAttribute('aria-hidden', 'true');
+            video.poster = images[0] ? images[0].src : '';
+            video.src = playableSource(video, videoSrc);
+            tile.appendChild(video);
+          }
+          video.currentTime = 0;
+          var playing = video.play();
+          if (playing) playing.catch(function () {});
+          tile.classList.add('is-playing');
+        },
+        stop: function () {
+          tile.classList.remove('is-hovered', 'is-playing');
+          if (video) video.pause();
+        }
+      };
+    }
 
     function show(next) {
       images[index].classList.remove('is-active');
@@ -53,6 +91,7 @@
     var visible = false;
     var offset = 0;
     var last = 0;
+    var speedFactor = 1; // 1 = vitesse normale, glisse en douceur vers HOVER_SPEED au survol
 
     Array.prototype.forEach.call(track.children, function (tile) {
       var control = setupTile(tile);
@@ -127,8 +166,11 @@
 
     function frame(time) {
       if (!visible) { last = 0; return; }
-      if (last && !paused && !dragging && !reduceMotion) {
-        offset += SPEED * Math.min(time - last, 100) / 1000;
+      if (last && !dragging && !reduceMotion) {
+        var dt = Math.min(time - last, 100) / 1000;
+        var wanted = paused ? HOVER_SPEED : 1;
+        speedFactor += (wanted - speedFactor) * Math.min(1, dt * EASE);
+        offset += SPEED * speedFactor * dt;
         wrap();
         render();
       }

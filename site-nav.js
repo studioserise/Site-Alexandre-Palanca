@@ -1,6 +1,6 @@
 if (!document.querySelector('script[src^="glow.js"]')) {
   const glowScript = document.createElement("script");
-  glowScript.src = "glow.js?v=2";
+  glowScript.src = "glow.js?v=3";
   glowScript.defer = true;
   document.head.append(glowScript);
 }
@@ -8,7 +8,7 @@ if (!document.querySelector('script[src^="glow.js"]')) {
 if (!document.querySelector('link[href^="redesign.css"]')) {
   const redesignStyles = document.createElement("link");
   redesignStyles.rel = "stylesheet";
-  redesignStyles.href = "redesign.css?v=36";
+  redesignStyles.href = "redesign.css?v=65";
   document.head.append(redesignStyles);
 }
 
@@ -162,6 +162,7 @@ if (!document.querySelector(".site-footer")) {
         <a href="politique-confidentialite.html">Politique de confidentialité</a>
       </div>
     </div>
+    <div class="site-footer-ground" aria-hidden="true"></div>
   `;
 
   const main = document.querySelector("main");
@@ -174,6 +175,6 @@ if (!document.querySelector(".site-footer")) {
 
 if (document.querySelector(".site-footer-card") && !document.querySelector('script[src^="footer-card.js"]')) {
   const cardScript = document.createElement("script");
-  cardScript.src = "footer-card.js?v=1";
+  cardScript.src = "footer-card.js?v=4";
   document.body.append(cardScript);
 }

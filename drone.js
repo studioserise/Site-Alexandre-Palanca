@@ -318,7 +318,21 @@ function mountFlight(section, target, flightMode, flip) {
   measure();
   gsap.ticker.add(frame);
 
+  // Recalcule le trajet dès que la hauteur de la page change après coup (police, images,
+  // formulaire déplié, texte du portfolio…) : sinon le drone visait l'ancienne position de son cadre.
+  let refreshTimer;
+  let lastHeight = document.documentElement.scrollHeight;
+  const resizeWatcher = new ResizeObserver(() => {
+    const height = document.documentElement.scrollHeight;
+    if (height === lastHeight) return;
+    lastHeight = height;
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 200);
+  });
+  resizeWatcher.observe(document.body);
+
   const destroy = () => {
+    resizeWatcher.disconnect();
     gsap.ticker.remove(frame);
     trigger.kill();
     layer.remove();

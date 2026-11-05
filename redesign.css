@@ -608,9 +608,7 @@ html[data-theme="light"] {
 }
 
 html[data-theme="light"] body { background: #f1eee8; color: #171715; }
-html[data-theme="light"] .site-nav {
-  background: linear-gradient(to bottom, rgba(241, 238, 232, 0.97), rgba(241, 238, 232, 0.72) 55%, transparent);
-}
+html[data-theme="light"] .site-nav { --site-nav-fade: 241, 238, 232; }
 html[data-theme="light"] .site-nav-link,
 html[data-theme="light"] .site-theme-toggle { color: #171715; }
 html[data-theme="light"] .site-nav-links { background-color: rgba(241, 238, 232, 0.94); }
@@ -1048,11 +1046,14 @@ html[data-theme="light"] .contact-chips input:checked + span { border-color: #17
 }
 
 /* Aura lumineuse suivant la souris */
+/* Posée par-dessus toute la page (sous le menu), en mode « lumière » : elle passe sur tous les fonds
+   sans être coupée par une section opaque, donc sans trait de délimitation. */
 .cursor-glow {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 0;
+  z-index: 15;
+  mix-blend-mode: screen;
   width: 640px;
   height: 640px;
   border-radius: 50%;
@@ -1064,6 +1065,7 @@ html[data-theme="light"] .contact-chips input:checked + span { border-color: #17
 }
 .cursor-glow.is-on { opacity: 1; }
 html[data-theme="light"] .cursor-glow {
+  mix-blend-mode: soft-light;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.35) 40%, transparent 70%);
 }
 
@@ -1103,15 +1105,13 @@ html body main > section:last-child { padding-bottom: clamp(76px, 10vw, 148px); 
 /* Section drone : fond transparent pour laisser passer l'aura, sans toucher à son empilement */
 html body main > section[data-drone-section] { background: transparent; z-index: 1; }
 
-/* Accueil, section 2 : opaque pour fondre le hero, donc l'aura y est dessinée dans son propre fond */
+/* Accueil, section 2 : fond qui se fond dans le hero */
 .intro-sequence + .studio-about {
   background:
-    radial-gradient(circle 452.5px at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, calc(0.11 * var(--ga, 0))) 0%, rgba(255, 255, 255, calc(0.05 * var(--ga, 0))) 38%, transparent 70%),
     linear-gradient(to bottom, transparent 0, var(--studio-bg) 20vh) !important;
 }
 html[data-theme="light"] .intro-sequence + .studio-about {
   background:
-    radial-gradient(circle 452.5px at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, calc(0.75 * var(--ga, 0))) 0%, rgba(255, 255, 255, calc(0.35 * var(--ga, 0))) 40%, transparent 70%),
     linear-gradient(to bottom, transparent 0, var(--studio-bg) 20vh) !important;
 }
 
@@ -1277,7 +1277,83 @@ html[data-theme="light"] .gallery-landing .gallery-primary-button:hover { backgr
 /* Flèches (↗ ↓ ←…) : toujours en texte, jamais en emoji sur téléphone */
 body { font-variant-emoji: text; }
 
-/* Cartes retournables avec effet d'inclinaison : le retournement suit l'état mesuré par le script
-   (souris dans le cadre d'origine), pas le survol de la carte inclinée, qui clignotait près des bords. */
+
+/* « Ils nous font confiance » resserrée : moins de vide autour des bulles, de la citation et des logos */
+html body main > section.studio-testimonials { padding-block: clamp(56px, 6vw, 90px) clamp(48px, 5vw, 80px); }
+.studio-testimonials .studio-section-heading { margin-bottom: clamp(20px, 2.5vw, 36px); }
+.studio-testimonials .studio-section-heading h2 { font-size: clamp(2rem, 3.6vw, 3.4rem); }
+.studio-testimonials .studio-people { min-height: clamp(250px, 22vw, 300px); }
+.studio-person:nth-child(1) { --bx: 2%;  --by: 0%; }
+.studio-person:nth-child(2) { --bx: 66%; --by: 6%; }
+.studio-person:nth-child(3) { --bx: 36%; --by: 50%; }
+.studio-testimonials .studio-quote { padding: clamp(22px, 3vw, 40px); }
+.studio-testimonials .studio-quote p { font-size: clamp(1.15rem, 2vw, 1.7rem); }
+.studio-testimonials .studio-trust { margin-top: clamp(28px, 3.5vw, 48px); padding-top: 18px; }
+.studio-trust-track img { height: clamp(60px, 6vw, 84px); }
+/* Téléphone : bulles en rangée au-dessus de la citation */
+@media (max-width: 800px) {
+  .studio-testimonials .studio-testimonial-layout { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .studio-testimonials .studio-people { display: flex; min-height: 0; justify-content: center; align-items: flex-end; gap: 22px; }
+  .studio-testimonials .studio-person { position: static; }
+  .studio-testimonials .studio-person img { width: 72px; height: 72px; }
+  .studio-testimonials .studio-person.is-selected img { width: 104px; height: 104px; }
+}
+
+/* Survol « carte en main » : inclinaison et soulèvement pilotés image par image par redesign.js
+   (variables --rx, --ry, --ps), donc sans transition CSS sur la transformation. */
+html .press-fx,
+html .studio-service-card:hover,
+html .studio-service-card:focus-visible {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--ps, 1));
+  will-change: transform;
+}
+html .press-fx,
+html .press-fx.is-pointed { transition: box-shadow 420ms ease, background 220ms ease; }
+html .press-fx.is-pointed { --glare: 1; box-shadow: 0 22px 48px rgba(0, 0, 0, 0.32); }
+html .flip-card.press-fx.is-pointed { box-shadow: none; }
+/* Cartes retournables : le retournement suit l'état mesuré par le script, pas le survol de la carte inclinée */
 .flip-card.press-fx:hover:not(.is-pointed):not(:focus-within):not(.is-flipped) .flip-card-inner { transform: none; }
 .flip-card.press-fx.is-pointed .flip-card-inner { transform: rotateY(180deg); }
+/* Photos : léger zoom dans le cadre */
+:is(.studio-about-photo, .studio-approach-photo, .redesign-hero-image).press-fx img {
+  transition: transform 900ms cubic-bezier(.22, .61, .36, 1);
+}
+:is(.studio-about-photo, .studio-approach-photo, .redesign-hero-image).press-fx.is-pointed img {
+  transform: scale(1.03);
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.studio-about-photo, .studio-approach-photo, .redesign-hero-image).press-fx.is-pointed img { transform: none; }
+}
+@media (hover: none) { html .press-fx { transform: none; } }
+
+/* Grandes cartes photo / vidéo : au dos, la même photo vue « à travers » la carte
+   (retournée comme en miroir, pour suivre le mouvement) à 20 % sur la couleur de la carte. */
+.photo-hero-flip .flip-card-face--back::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  background: var(--back-photo) center / cover no-repeat;
+  opacity: 0.2;
+  transform: scaleX(-1);
+  pointer-events: none;
+}
+.photo-hero-flip .flip-card-face--back > * { position: relative; z-index: 1; }
+
+/* Bas de page : le plan 1 de l'accueil, retourné, collé tout en bas de la page sur toute la largeur.
+   Il passe sous le pied de page (texte et carte par-dessus), avec un voile de 60 %
+   (foncé en version sombre, blanc en version claire) appliqué seulement sur l'herbe. */
+.site-footer { position: relative; overflow: hidden; }
+.site-footer .site-footer-inner { position: relative; z-index: 1; }
+.site-footer-ground {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 0;
+  height: clamp(90px, 23vw, 330px);
+  /* image décalée de 50px vers le bas : son bas est coupé */
+  background: url("images/accueil-plans/plan-1-bas.webp?v=3") center calc(100% + 50px) / cover no-repeat;
+  transform: scaleX(-1);
+  filter: brightness(0.4);
+  pointer-events: none;
+}
+html[data-theme="light"] .site-footer-ground { filter: invert(1) brightness(0.4) invert(1); }

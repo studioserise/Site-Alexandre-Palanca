@@ -212,3 +212,17 @@
   .drone-section--compact { grid-template-columns: 1fr; }
   .drone-section--compact .drone-target { width: min(100%, 480px); margin: -12% 0 -18%; }
 }
+
+/* Page photo et vidéo : photo aérienne en fond, en noir et blanc à 25 %, qui s'efface en fondu en haut et en bas de la section. */
+#drone-photo-video::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background: url("images/video/prises-aeriennes.jpg") center / cover no-repeat;
+  opacity: 0.25;
+  filter: grayscale(1);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 28%, #000 72%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 28%, #000 72%, transparent 100%);
+  pointer-events: none;
+}
