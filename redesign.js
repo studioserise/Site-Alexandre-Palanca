@@ -100,7 +100,7 @@ if (quoteText && testimonials) {
 }
 
 // Cartes des formules : un clic renvoie vers le formulaire de contact de la page (qui s'ouvre tout seul).
-// Sur écran tactile, sans survol, le premier toucher retourne la carte et le second mène au formulaire.
+// Sur écran tactile, un seul toucher mène au formulaire (le contenu des deux faces est déjà visible).
 const contactSection = document.querySelector("[data-contact-reveal]")?.closest("section[id]");
 const canHover = window.matchMedia("(hover: hover)").matches;
 const goToContact = () => {
@@ -118,12 +118,8 @@ document.querySelectorAll(".flip-card-grid .flip-card[tabindex]").forEach((card)
   card.setAttribute("role", "link");
   card.setAttribute("aria-label", `${card.querySelector("h3")?.textContent ?? "Cette formule"} — demander un devis`);
   card.style.cursor = "pointer";
+  // Sur écran tactile, la carte affiche déjà tout son contenu (touch.css) : un toucher mène directement au formulaire.
   const activate = () => {
-    if (!canHover && !card.classList.contains("is-flipped")) {
-      document.querySelectorAll(".flip-card-grid .flip-card.is-flipped").forEach((other) => other.classList.remove("is-flipped"));
-      card.classList.add("is-flipped");
-      return;
-    }
     card.classList.remove("is-flipped");
     goToContact();
   };
@@ -139,6 +135,8 @@ document.querySelectorAll(".flip-card-grid .flip-card[tabindex]").forEach((card)
 });
 
 document.querySelectorAll(".flip-card[tabindex]:not([data-contact-link])").forEach((card) => {
+  // Écran tactile : pas de retournement, le texte du verso est affiché sous la photo (touch.css).
+  if (!canHover) { card.removeAttribute("tabindex"); return; }
   const toggle = () => {
     const isFlipped = card.classList.toggle("is-flipped");
     card.setAttribute("aria-pressed", String(isFlipped));
@@ -429,6 +427,22 @@ document.querySelectorAll("[data-carousel]").forEach((carousel) => {
   // Survol : pause, sauf si on vient de la galerie (les séries continuent de défiler).
   carousel.addEventListener("mouseenter", () => { hovering = true; if (!fromReel) window.clearTimeout(timerId); });
   carousel.addEventListener("mouseleave", () => { hovering = false; if (!fromReel) restartTimer(); });
+  // Écran tactile : glisser le doigt vers la gauche ou la droite change de projet (en plus des flèches).
+  let swipe = null;
+  carousel.addEventListener("touchstart", (event) => {
+    const touch = event.touches[0];
+    swipe = event.touches.length === 1 ? { x: touch.clientX, y: touch.clientY } : null;
+  }, { passive: true });
+  carousel.addEventListener("touchend", (event) => {
+    if (!swipe) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - swipe.x, dy = touch.clientY - swipe.y;
+    swipe = null;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return; // geste trop court ou plutôt vertical (défilement)
+    fromReel = false;
+    showProject(activeProject + (dx < 0 ? 1 : -1));
+    restartTimer();
+  }, { passive: true });
   // Clic sur une case de la galerie défilante : affiche son thème, sur la même série.
   document.addEventListener("portfolio:show", (event) => {
     const { id, set = 0 } = event.detail || {};

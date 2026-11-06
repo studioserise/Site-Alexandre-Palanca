@@ -57,7 +57,10 @@
         stop: function () {
           tile.classList.remove('is-hovered', 'is-playing');
           if (video) video.pause();
-        }
+        },
+        // Écran tactile : la case au centre passe en couleur, sans lancer la vidéo (pas de téléchargement imposé).
+        focus: function () { tile.classList.add('is-hovered'); },
+        blur: function () { tile.classList.remove('is-hovered'); }
       };
     }
 
@@ -104,18 +107,41 @@
     var last = 0;
     var speedFactor = 1; // 1 = vitesse normale, glisse en douceur vers HOVER_SPEED au survol
 
-    Array.prototype.forEach.call(track.children, function (tile) {
+    var tiles = Array.prototype.slice.call(track.children);
+    var controls = tiles.map(function (tile) {
       var control = setupTile(tile);
       tile.addEventListener('pointerenter', function (event) {
         if (event.pointerType === 'touch') return;
         paused = true;
         control.start();
       });
-      tile.addEventListener('pointerleave', function () {
+      tile.addEventListener('pointerleave', function (event) {
+        if (event.pointerType === 'touch') return;
         paused = false;
         control.stop();
       });
+      return control;
     });
+
+    // Écran tactile (pas de survol) : la case la plus proche du centre passe d'elle-même en couleur
+    // et fait défiler ses images, comme une case survolée à la souris. La galerie continue de défiler.
+    var focused = -1;
+    function focusCenter() {
+      if (!visible) return;
+      var box = reel.getBoundingClientRect();
+      var center = box.left + box.width / 2;
+      var best = -1, bestDistance = Infinity;
+      tiles.forEach(function (tile, i) {
+        var r = tile.getBoundingClientRect();
+        var distance = Math.abs(r.left + r.width / 2 - center);
+        if (distance < bestDistance) { bestDistance = distance; best = i; }
+      });
+      if (best === focused) return;
+      if (focused >= 0) (controls[focused].blur || controls[focused].stop)();
+      focused = best;
+      (controls[best].focus || controls[best].start)();
+    }
+    if (window.matchMedia('(hover: none)').matches) setInterval(focusCenter, 400);
 
     function loopWidth() {
       var tiles = track.children;

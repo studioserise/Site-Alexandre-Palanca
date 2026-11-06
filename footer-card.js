@@ -59,7 +59,30 @@ document.querySelectorAll(".site-footer-card").forEach((card) => {
     run();
   };
   card.addEventListener("dragstart", (event) => event.preventDefault());
+  // Écran tactile : glisser le doigt servait aussi à faire défiler la page, la carte partait dans tous les sens.
+  // Ici, un simple toucher la retourne (recto / verso) ; le doigt garde le défilement de la page.
+  let tap = null;
+  const hint = card.closest(".site-footer-card-wrap")?.querySelector(".site-footer-card-hint");
+  if (window.matchMedia("(hover: none)").matches && hint) hint.textContent = "Touchez la carte pour la retourner";
   card.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "touch") return;
+    tap = { x: event.clientX, y: event.clientY, time: event.timeStamp };
+  });
+  card.addEventListener("pointerup", (event) => {
+    if (event.pointerType !== "touch" || !tap) return;
+    const moved = Math.hypot(event.clientX - tap.x, event.clientY - tap.y);
+    const quick = event.timeStamp - tap.time < 600;
+    tap = null;
+    if (moved < 12 && quick) {
+      target.rx = 0;
+      target.ry = Math.round(target.ry / 180) * 180 + 180;
+      run();
+    }
+  });
+  card.addEventListener("pointercancel", () => { tap = null; });
+
+  card.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "touch") return; // le toucher est géré juste au-dessus
     if (event.pointerType === "mouse" && event.button !== 0) return; // clic gauche seulement
     dragging = { x: event.clientX, y: event.clientY, ry: target.ry, rx: target.rx, id: event.pointerId };
     card.classList.add("is-dragging");

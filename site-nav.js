@@ -193,6 +193,6 @@ if (!document.querySelector(".site-footer")) {
 
 if (document.querySelector(".site-footer-card") && !document.querySelector('script[src^="footer-card.js"]')) {
   const cardScript = document.createElement("script");
-  cardScript.src = "footer-card.js?v=4";
+  cardScript.src = "footer-card.js?v=5";
   document.body.append(cardScript);
 }
