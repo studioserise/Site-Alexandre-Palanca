@@ -37,6 +37,7 @@ contactForm.addEventListener("submit", async (event) => {
     email: formData.get("email"),
     phone: formData.get("phone"),
     service: formData.get("service"),
+    type: formData.get("type") || "",
     date: formData.get("date"),
     message: details,
     consent: formData.get("consent") === "on",

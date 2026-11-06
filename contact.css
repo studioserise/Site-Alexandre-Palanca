@@ -322,3 +322,16 @@ body {
   .contact-intro h1 { font-size: clamp(2.16rem, 10.26vw, 3.67rem); }
   .contact-intro > p:not(.contact-eyebrow) { font-size: 0.89rem; }
 }
+
+/* Champ date : sur iPhone, Safari lui impose une largeur minimale et son propre style, il débordait du cadre */
+.contact-field input[type="date"] {
+  display: block;
+  max-width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  color-scheme: dark;
+  text-align: left;
+}
+.contact-field input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+.contact-field input[type="date"]::-webkit-calendar-picker-indicator { margin-left: auto; opacity: 0.7; }
+html[data-theme="light"] .contact-field input[type="date"] { color-scheme: light; }

@@ -7,7 +7,30 @@ import {
   sha256
 } from "../_shared/http.ts";
 
+// Rubriques du site et types de prestation proposés dans chaque formulaire.
+// Les anciennes catégories restent acceptées (pages encore en cache chez un visiteur).
+const typesByService: Record<string, string[]> = {
+  "Photo et vidéo": [
+    "Portrait (solo, couple, famille)",
+    "Portrait professionnel",
+    "Événement privé ou d’entreprise",
+    "Concert, spectacle ou festival",
+    "Sport et compétition",
+    "Lieu, commerce ou savoir-faire",
+    "Clip ou projet artistique",
+    "Contenus pour les réseaux sociaux",
+    "Autre projet"
+  ],
+  "Sites internet": [
+    "Site une page",
+    "Site vitrine (plusieurs pages)",
+    "Site sur mesure",
+    "Refonte d’un site existant",
+    "Autre projet"
+  ]
+};
 const services = new Set([
+  ...Object.keys(typesByService),
   "Portraits",
   "Événementiel",
   "Vidéos",
@@ -75,6 +98,7 @@ async function sendContactEmail(data: {
   email: string;
   phone: string;
   service: string;
+  type: string;
   date: string;
   message: string;
 }) {
@@ -91,20 +115,21 @@ async function sendContactEmail(data: {
       from: requiredEnv("ORDER_EMAIL_FROM"),
       to: [requiredEnv("CONTACT_EMAIL_TO")],
       reply_to: data.email,
-      subject: `Demande de devis — ${data.service}`,
+      subject: `Demande de devis — ${data.service}${data.type ? ` · ${data.type}` : ""}`,
       text: [
         "Nouvelle demande de devis reçue depuis le site.",
         "",
         `Nom : ${data.name}`,
         `E-mail : ${data.email}`,
         `Téléphone : ${data.phone || "Non renseigné"}`,
-        `Prestation : ${data.service}`,
+        `Rubrique : ${data.service}`,
+        `Type de prestation : ${data.type || "À préciser ensemble"}`,
         `Date / période souhaitée : ${data.date || "Non renseignée"}`,
         "",
         "Projet :",
         data.message
       ].join("\n"),
-      html: `<h1>Nouvelle demande de devis</h1><p><strong>Nom :</strong> ${safe.name}</p><p><strong>E-mail :</strong> ${safe.email}</p><p><strong>Téléphone :</strong> ${safe.phone || "Non renseigné"}</p><p><strong>Prestation :</strong> ${safe.service}</p><p><strong>Date / période souhaitée :</strong> ${safe.date || "Non renseignée"}</p><h2>Projet</h2><p style="white-space:pre-wrap">${safe.message}</p>`
+      html: `<h1>Nouvelle demande de devis</h1><p><strong>Nom :</strong> ${safe.name}</p><p><strong>E-mail :</strong> ${safe.email}</p><p><strong>Téléphone :</strong> ${safe.phone || "Non renseigné"}</p><p><strong>Rubrique :</strong> ${safe.service}</p><p><strong>Type de prestation :</strong> ${safe.type || "À préciser ensemble"}</p><p><strong>Date / période souhaitée :</strong> ${safe.date || "Non renseignée"}</p><h2>Projet</h2><p style="white-space:pre-wrap">${safe.message}</p>`
     })
   });
 
@@ -138,6 +163,7 @@ Deno.serve(async (request) => {
     const email = readOptionalString(body.email, "Adresse e-mail", 254);
     const phone = readOptionalString(body.phone, "Téléphone", 30);
     const service = readOptionalString(body.service, "Prestation", 80);
+    const type = readOptionalString(body.type, "Type de prestation", 80);
     const date = validateDate(readOptionalString(body.date, "Date", 10));
     const message = readOptionalString(body.message, "Message", 4000);
 
@@ -147,6 +173,9 @@ Deno.serve(async (request) => {
     }
     if (service && !services.has(service)) throw new Error("Veuillez choisir une prestation valide.");
     if (!service) throw new Error("Veuillez choisir une prestation.");
+    if (type && !(typesByService[service] ?? []).includes(type)) {
+      throw new Error("Veuillez choisir un type de prestation valide.");
+    }
     if (!message) throw new Error("Veuillez décrire votre projet.");
     if (body.consent !== true) throw new Error("Votre accord est nécessaire pour traiter la demande.");
 
@@ -158,7 +187,7 @@ Deno.serve(async (request) => {
     }
 
     stage = "email";
-    await sendContactEmail({ name, email, phone, service, date, message });
+    await sendContactEmail({ name, email, phone, service, type, date, message });
     return jsonResponse(request, 200, { ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur inattendue.";

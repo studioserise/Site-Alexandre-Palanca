@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="fonts.css?v=2">
   <link rel="stylesheet" href="site-nav.css?v=fondu">
   <link rel="stylesheet" href="redesign.css?v=70">
-  <link rel="stylesheet" href="contact.css">
+  <link rel="stylesheet" href="contact.css?v=2">
   <link rel="stylesheet" href="drone.css?v=16">
   <link rel="stylesheet" href="cursor.css?v=7">
   <link rel="stylesheet" href="photo-reel.css?v=5">
@@ -24,7 +24,7 @@
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
   <script type="module" src="drone.js?v=15"></script>
-  <script type="module" src="contact.js"></script>
+  <script type="module" src="contact.js?v=3"></script>
   <script src="contact-reveal.js?v=2" defer></script>
   <link rel="stylesheet" href="mobile.css?v=2" media="(max-width: 800px)">
   <link rel="stylesheet" href="touch.css?v=3" media="(hover: none)">
@@ -167,7 +167,7 @@
             <div class="contact-field"><label for="contact-email">Adresse e-mail <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>
             <div class="contact-field"><label for="contact-phone">Téléphone <span class="contact-optional">(facultatif)</span></label><input id="contact-phone" name="phone" type="tel" autocomplete="tel" maxlength="30"></div>
             <div class="contact-field"><label for="contact-date">Date ou période <span class="contact-optional">(facultatif)</span></label><input id="contact-date" name="date" type="date"></div>
-            <div class="contact-field"><label for="pref-type">Type de prestation</label><select id="pref-type" name="pref-type" data-extra><option value="">À préciser ensemble</option><option>Séance portrait</option><option>Reportage événementiel</option><option>Série d’images professionnelle</option><option>Portrait filmé</option><option>Aftermovie</option><option>Film de présentation</option><option>Prises de vues aériennes</option><option>Autre projet</option></select></div>
+            <div class="contact-field"><label for="pref-type">Type de prestation</label><select id="pref-type" name="type"><option value="">À préciser ensemble</option><option>Portrait (solo, couple, famille)</option><option>Portrait professionnel</option><option>Événement privé ou d’entreprise</option><option>Concert, spectacle ou festival</option><option>Sport et compétition</option><option>Lieu, commerce ou savoir-faire</option><option>Clip ou projet artistique</option><option>Contenus pour les réseaux sociaux</option><option>Autre projet</option></select></div>
             <div class="contact-field"><label for="pref-budget">Budget indicatif</label><select id="pref-budget" name="pref-budget" data-extra><option value="">Je ne sais pas encore</option><option>Moins de 300 €</option><option>300 € – 800 €</option><option>800 € – 1 500 €</option><option>Plus de 1 500 €</option></select></div>
             <fieldset class="contact-chips contact-field--wide"><legend>Ce dont vous avez besoin</legend><label><input type="checkbox" name="pref-livrables" value="Photos"><span>Photos</span></label><label><input type="checkbox" name="pref-livrables" value="Vidéo"><span>Vidéo</span></label><label><input type="checkbox" name="pref-livrables" value="Drone"><span>Drone</span></label><label><input type="checkbox" name="pref-livrables" value="Retouche avancée"><span>Retouche avancée</span></label></fieldset>
             <div class="contact-field contact-field--wide"><label for="contact-message">Quelques mots sur votre projet <span aria-hidden="true">*</span></label><textarea id="contact-message" name="message" rows="5" maxlength="4000" required></textarea></div>
