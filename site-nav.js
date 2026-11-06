@@ -154,6 +154,10 @@ if (!document.querySelector(".site-footer")) {
         <a class="site-footer-email" href="mailto:info@alexandrepalanca.fr">info@alexandrepalanca.fr</a>
         <a class="site-footer-phone" href="tel:+33679538280">+33 6 79 53 82 80</a>
         <p>Sarlat-la-Canéda · Dordogne &amp; Périgord</p>
+        <nav class="site-footer-socials" aria-label="Réseaux sociaux">
+          <a href="https://www.instagram.com/alexpalanca_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/></svg></a>
+          <a href="https://www.facebook.com/alexandre.palanca.7" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8.5h2.5V5H14a3.5 3.5 0 0 0-3.5 3.5V11H8v3.5h2.5V21H14v-6.5h2.5l.5-3.5h-3V8.8a.3.3 0 0 1 .3-.3z"/></svg></a>
+        </nav>
         <div class="site-footer-actions">
           <a href="photo-video.html#demande-devis">Photo &amp; vidéo <span aria-hidden="true">↗︎</span></a>
           <a href="sites-internet.html#demande-projet">Site internet <span aria-hidden="true">↗︎</span></a>

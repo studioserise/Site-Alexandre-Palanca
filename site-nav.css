@@ -395,3 +395,9 @@ textarea {
 @media (max-width: 680px) {
   .site-footer-brand > a { font-size: 1.4rem; }
 }
+
+/* Bas de page : liens Instagram et Facebook (mêmes icônes que l'accueil) */
+.site-footer-socials { display: flex; flex-direction: row; gap: 4px; margin: 14px 0 6px -10px; }
+.site-footer-socials a { display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: inherit; opacity: 0.78; transition: opacity 200ms ease, transform 200ms ease; }
+.site-footer-socials a:hover, .site-footer-socials a:focus-visible { opacity: 1; transform: translateY(-2px); }
+.site-footer-socials svg { width: 24px; height: 24px; }

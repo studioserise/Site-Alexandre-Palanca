@@ -45,3 +45,37 @@ html[data-theme="light"] .photo-hero-flip .flip-card-face--back {
     linear-gradient(var(--face), var(--face)) padding-box,
     linear-gradient(135deg, rgba(23, 23, 21, 0) 0%, rgba(23, 23, 21, 0.55) 50%, rgba(23, 23, 21, 0) 100%) border-box !important;
 }
+
+/* Léger flottement (comme la carte du bas de page) : cartes de l'accueil, formules, formulaire, portfolio.
+   Propriétés translate / rotate séparées : elles s'ajoutent à l'effet de survol (transform) sans le remplacer,
+   et la carte qui se retourne (sur .flip-card-inner) n'est pas touchée. */
+@media (prefers-reduced-motion: no-preference) {
+  /* :not(.rv) : le flottement démarre une fois l'apparition au défilement terminée (elle utilise aussi translate) */
+  .studio-service-card:not(.rv),
+  .flip-card-grid > .flip-card:not(.rv),
+  .contact-form:not(.rv),
+  .portfolio-carousel:not(.rv) {
+    animation: frame-float 7s ease-in-out infinite;
+    will-change: translate, rotate;
+  }
+  /* Rythmes décalés pour un mouvement naturel (départ toujours à la position de repos) */
+  .studio-service-card:nth-child(2):not(.rv), .flip-card-grid > .flip-card:nth-child(2):not(.rv) { animation-duration: 8.2s; animation-delay: 0.9s; }
+  .studio-service-card:nth-child(3):not(.rv), .flip-card-grid > .flip-card:nth-child(3):not(.rv) { animation-duration: 7.6s; animation-delay: 1.8s; }
+  .portfolio-carousel:not(.rv) { animation-duration: 9s; animation-name: frame-float-soft; }
+  .contact-form:not(.rv) { animation-duration: 8.6s; animation-name: frame-float-soft; }
+  /* Pendant la saisie, le formulaire se pose */
+  .contact-form:focus-within { animation-play-state: paused; }
+}
+@keyframes frame-float {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  30% { translate: 0 -6px; rotate: -0.35deg; }
+  65% { translate: 0 3px; rotate: 0.3deg; }
+}
+/* Version plus douce pour les grands cadres */
+@keyframes frame-float-soft {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  35% { translate: 0 -5px; rotate: -0.12deg; }
+  70% { translate: 0 2px; rotate: 0.1deg; }
+}
+/* Le formulaire est dans un bloc qui se déplie (contenu masqué au-delà) : un peu d'air pour que le flottement ne soit pas coupé */
+.contact-collapse-inner { padding-block: 8px; }

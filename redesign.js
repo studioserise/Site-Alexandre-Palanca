@@ -183,7 +183,8 @@ const carouselProjects = [
     kind: "Vidéo",
     title: "Aftermovie",
     text: "Le film d’un événement, monté pour en retrouver l’énergie et le partager.",
-    sets: [["images/video/aftermovie-1200.webp"]]
+    sets: [["images/video/aftermovie-affiche-1200.webp"]],
+    video: "images/video/aftermovie-720.mp4"
   },
   {
     id: "concerts",
@@ -197,11 +198,12 @@ const carouselProjects = [
     ]
   },
   {
-    id: "clip",
+    id: "captation",
     kind: "Vidéo",
-    title: "Clip musical",
-    text: "Une mise en images pensée avec l’artiste, de l’intention au montage final.",
-    sets: [["images/video/clip-musical-1200.webp"]]
+    title: "Captation",
+    text: "Un concert ou un spectacle filmé tel qu’il s’est vécu, au plus près de la scène.",
+    sets: [["images/video/captation-affiche-1200.webp"]],
+    video: "images/video/captation-720.mp4"
   },
   {
     id: "festivals",
@@ -213,11 +215,13 @@ const carouselProjects = [
     ]
   },
   {
-    id: "film-presentation",
+    id: "interview",
     kind: "Vidéo",
-    title: "Film de présentation",
-    text: "Un film qui présente votre activité, votre lieu ou votre savoir-faire.",
-    sets: [["images/video/film-presentation-1200.webp"]]
+    title: "Interview filmée",
+    text: "Une parole mise en valeur, avec un cadre et un son soignés.",
+    sets: [["images/video/interview-affiche-1200.webp"]],
+    video: "images/video/interview-720.mp4",
+    videoPosition: "center 30%" // vidéo verticale : on garde le visage dans le cadre
   },
   {
     id: "sport",
