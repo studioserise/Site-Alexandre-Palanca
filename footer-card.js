@@ -59,27 +59,51 @@ document.querySelectorAll(".site-footer-card").forEach((card) => {
     run();
   };
   card.addEventListener("dragstart", (event) => event.preventDefault());
-  // Écran tactile : glisser le doigt servait aussi à faire défiler la page, la carte partait dans tous les sens.
-  // Ici, un simple toucher la retourne (recto / verso) ; le doigt garde le défilement de la page.
-  let tap = null;
+  // Écran tactile :
+  // - glisser le doigt à l'horizontale fait tourner la carte (le glissé vertical garde le défilement de la page,
+  //   grâce à touch-action: pan-y dans touch.css) ;
+  // - un simple toucher la retourne (recto / verso). On s'appuie sur l'événement « click », que Safari
+  //   envoie toujours après un toucher sans mouvement.
+  const touchScreen = window.matchMedia("(hover: none)").matches;
   const hint = card.closest(".site-footer-card-wrap")?.querySelector(".site-footer-card-hint");
-  if (window.matchMedia("(hover: none)").matches && hint) hint.textContent = "Touchez la carte pour la retourner";
+  if (touchScreen && hint) hint.textContent = "Touchez ou faites glisser pour retourner la carte";
+  let touch = null;      // doigt posé sur la carte
+  let swiped = false;    // vrai juste après un glissé, pour ne pas le compter aussi comme un toucher
   card.addEventListener("pointerdown", (event) => {
     if (event.pointerType !== "touch") return;
-    tap = { x: event.clientX, y: event.clientY, time: event.timeStamp };
+    touch = { x: event.clientX, y: event.clientY, ry: target.ry, turning: false };
   });
-  card.addEventListener("pointerup", (event) => {
-    if (event.pointerType !== "touch" || !tap) return;
-    const moved = Math.hypot(event.clientX - tap.x, event.clientY - tap.y);
-    const quick = event.timeStamp - tap.time < 600;
-    tap = null;
-    if (moved < 12 && quick) {
-      target.rx = 0;
-      target.ry = Math.round(target.ry / 180) * 180 + 180;
+  card.addEventListener("pointermove", (event) => {
+    if (event.pointerType !== "touch" || !touch) return;
+    const dx = event.clientX - touch.x, dy = event.clientY - touch.y;
+    if (!touch.turning) {
+      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return; // pas encore un glissé horizontal
+      touch.turning = true;
+      card.classList.add("is-dragging");
+    }
+    target.rx = 0;
+    target.ry = touch.ry + dx * 0.6;
+    run();
+  });
+  const endTouch = () => {
+    if (!touch) return;
+    if (touch.turning) {
+      card.classList.remove("is-dragging");
+      target.ry = Math.round(target.ry / 180) * 180; // revient sur la face la plus proche
+      swiped = true;
+      setTimeout(() => { swiped = false; }, 400);
       run();
     }
+    touch = null;
+  };
+  card.addEventListener("pointerup", (event) => { if (event.pointerType === "touch") endTouch(); });
+  card.addEventListener("pointercancel", (event) => { if (event.pointerType === "touch") endTouch(); });
+  card.addEventListener("click", () => {
+    if (!touchScreen || swiped) return;
+    target.rx = 0;
+    target.ry = Math.round(target.ry / 180) * 180 + 180;
+    run();
   });
-  card.addEventListener("pointercancel", () => { tap = null; });
 
   card.addEventListener("pointerdown", (event) => {
     if (event.pointerType === "touch") return; // le toucher est géré juste au-dessus
