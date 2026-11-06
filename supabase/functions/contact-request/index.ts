@@ -1,14 +1,42 @@
-import {
-  assertBrowserOrigin,
-  databaseRequest,
-  jsonResponse,
-  preflightResponse,
-  readJson,
-  sha256
-} from "../_shared/http.ts";
+import { databaseRequest, sha256 } from "../_shared/http.ts";
+
+// Formulaire de contact : la demande doit parvenir à Alex dans tous les cas.
+// Aucun champ n'est bloquant : ce qui manque ou semble incohérent est signalé dans le mail,
+// et l'échange humain clarifiera. Seuls l'anti-spam (champ piège, limite d'envois) et une panne
+// technique (envoi du mail impossible) empêchent l'envoi.
+
+// Origines autorisées : le domaine configuré, avec ou sans « www ».
+function allowedOrigins() {
+  const configured = Deno.env.get("FRONTEND_ORIGIN") ?? "";
+  const set = new Set<string>();
+  if (configured) {
+    set.add(configured);
+    try {
+      const url = new URL(configured);
+      const bare = url.hostname.replace(/^www\./, "");
+      set.add(`${url.protocol}//${bare}`);
+      set.add(`${url.protocol}//www.${bare}`);
+    } catch { /* réglage non standard : on garde la valeur telle quelle */ }
+  }
+  return set;
+}
+function cors(request: Request) {
+  const headers = new Headers({ "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+  const origin = request.headers.get("Origin") ?? "";
+  if (allowedOrigins().has(origin)) {
+    headers.set("Access-Control-Allow-Origin", origin);
+    headers.set("Vary", "Origin");
+    headers.set("Access-Control-Allow-Headers", "authorization, apikey, content-type");
+    headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  }
+  return headers;
+}
+function reply(request: Request, status: number, body: unknown) {
+  return new Response(JSON.stringify(body), { status, headers: cors(request) });
+}
 
 // Rubriques du site et types de prestation proposés dans chaque formulaire.
-// Les anciennes catégories restent acceptées (pages encore en cache chez un visiteur).
+// Une rubrique ou un type inconnu n'est pas bloquant : il est simplement signalé dans le mail.
 const typesByService: Record<string, string[]> = {
   "Photo et vidéo": [
     "Portrait (solo, couple, famille)",
@@ -29,14 +57,6 @@ const typesByService: Record<string, string[]> = {
     "Autre projet"
   ]
 };
-const services = new Set([
-  ...Object.keys(typesByService),
-  "Portraits",
-  "Événementiel",
-  "Vidéos",
-  "Lieux & marques",
-  "Autre"
-]);
 
 function requiredEnv(name: string) {
   const value = Deno.env.get(name);
@@ -44,12 +64,10 @@ function requiredEnv(name: string) {
   return value;
 }
 
-function readOptionalString(value: unknown, label: string, maxLength: number) {
-  if (value === undefined || value === null || value === "") return "";
-  if (typeof value !== "string" || value.length > maxLength) {
-    throw new Error(`${label} invalide.`);
-  }
-  return value.trim();
+// Lit n'importe quelle valeur comme du texte, coupée à une longueur raisonnable : jamais d'erreur.
+function text(value: unknown, maxLength: number) {
+  if (value === undefined || value === null) return "";
+  return String(value).trim().slice(0, maxLength);
 }
 
 function escapeHtml(value: string) {
@@ -63,21 +81,6 @@ function escapeHtml(value: string) {
       default: return character;
     }
   });
-}
-
-function validateDate(value: string) {
-  if (!value) return "";
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    throw new Error("La date souhaitée est invalide.");
-  }
-  const [year, month, day] = value.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month - 1 ||
-    date.getUTCDate() !== day
-  ) throw new Error("La date souhaitée est invalide.");
-  return value;
 }
 
 async function consumeRateLimit(request: Request) {
@@ -101,6 +104,7 @@ async function sendContactEmail(data: {
   type: string;
   date: string;
   message: string;
+  notes: string;
 }) {
   const safe = Object.fromEntries(
     Object.entries(data).map(([key, value]) => [key, escapeHtml(value)])
@@ -114,22 +118,23 @@ async function sendContactEmail(data: {
     body: JSON.stringify({
       from: requiredEnv("ORDER_EMAIL_FROM"),
       to: [requiredEnv("CONTACT_EMAIL_TO")],
-      reply_to: data.email,
-      subject: `Demande de devis — ${data.service}${data.type ? ` · ${data.type}` : ""}`,
+      ...(isEmail(data.email) ? { reply_to: data.email } : {}),
+      subject: `Demande de devis — ${data.service || "Site"}${data.type ? ` · ${data.type}` : ""}${data.name ? ` — ${data.name}` : ""}`,
       text: [
         "Nouvelle demande de devis reçue depuis le site.",
+        ...(data.notes ? ["", `À vérifier : ${data.notes}`] : []),
         "",
-        `Nom : ${data.name}`,
-        `E-mail : ${data.email}`,
+        `Nom : ${data.name || "Non renseigné"}`,
+        `E-mail : ${data.email || "Non renseigné"}`,
         `Téléphone : ${data.phone || "Non renseigné"}`,
         `Rubrique : ${data.service}`,
         `Type de prestation : ${data.type || "À préciser ensemble"}`,
         `Date / période souhaitée : ${data.date || "Non renseignée"}`,
         "",
         "Projet :",
-        data.message
+        data.message || "(aucun message)"
       ].join("\n"),
-      html: `<h1>Nouvelle demande de devis</h1><p><strong>Nom :</strong> ${safe.name}</p><p><strong>E-mail :</strong> ${safe.email}</p><p><strong>Téléphone :</strong> ${safe.phone || "Non renseigné"}</p><p><strong>Rubrique :</strong> ${safe.service}</p><p><strong>Type de prestation :</strong> ${safe.type || "À préciser ensemble"}</p><p><strong>Date / période souhaitée :</strong> ${safe.date || "Non renseignée"}</p><h2>Projet</h2><p style="white-space:pre-wrap">${safe.message}</p>`
+      html: `<h1>Nouvelle demande de devis</h1>${safe.notes ? `<p style="padding:10px 12px;background:#fff4d6;border-radius:6px"><strong>À vérifier :</strong> ${safe.notes}</p>` : ""}<p><strong>Nom :</strong> ${safe.name || "Non renseigné"}</p><p><strong>E-mail :</strong> ${safe.email || "Non renseigné"}</p><p><strong>Téléphone :</strong> ${safe.phone || "Non renseigné"}</p><p><strong>Rubrique :</strong> ${safe.service}</p><p><strong>Type de prestation :</strong> ${safe.type || "À préciser ensemble"}</p><p><strong>Date / période souhaitée :</strong> ${safe.date || "Non renseignée"}</p><h2>Projet</h2><p style="white-space:pre-wrap">${safe.message || "(aucun message)"}</p>`
     })
   });
 
@@ -139,74 +144,72 @@ async function sendContactEmail(data: {
   }
 }
 
+function isEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
 Deno.serve(async (request) => {
-  const preflight = preflightResponse(request);
-  if (preflight) return preflight;
+  if (request.method === "OPTIONS") {
+    const ok = allowedOrigins().has(request.headers.get("Origin") ?? "");
+    return new Response(null, { status: ok ? 204 : 403, headers: cors(request) });
+  }
   let stage = "request";
 
   try {
-    assertBrowserOrigin(request);
-    if (request.method !== "POST") {
-      return jsonResponse(request, 405, { message: "Méthode non autorisée." });
+    if (!allowedOrigins().has(request.headers.get("Origin") ?? "")) {
+      return reply(request, 403, { message: "Origine non autorisée." });
     }
-    const contentLength = Number(request.headers.get("content-length") ?? 0);
-    if (contentLength > 12_000) {
-      return jsonResponse(request, 413, { message: "Le formulaire est trop volumineux." });
-    }
+    if (request.method !== "POST") return reply(request, 405, { message: "Méthode non autorisée." });
 
-    const body = await readJson(request);
-    if (typeof body.website === "string" && body.website.trim()) {
-      return jsonResponse(request, 200, { ok: true });
-    }
+    // Lecture tolérante : un contenu illisible donne simplement des champs vides.
+    let body: Record<string, unknown> = {};
+    try {
+      const parsed = await request.json();
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) body = parsed as Record<string, unknown>;
+    } catch { /* champs vides */ }
 
-    const name = readOptionalString(body.name, "Nom", 100);
-    const email = readOptionalString(body.email, "Adresse e-mail", 254);
-    const phone = readOptionalString(body.phone, "Téléphone", 30);
-    const service = readOptionalString(body.service, "Prestation", 80);
-    const type = readOptionalString(body.type, "Type de prestation", 80);
-    const date = validateDate(readOptionalString(body.date, "Date", 10));
-    const message = readOptionalString(body.message, "Message", 4000);
+    // Champ piège invisible rempli : c'est un robot, on fait comme si tout allait bien.
+    if (text(body.website, 200)) return reply(request, 200, { ok: true });
 
-    if (name.length < 2) throw new Error("Veuillez renseigner votre nom.");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      throw new Error("Veuillez renseigner une adresse e-mail valide.");
+    const name = text(body.name, 200);
+    const email = text(body.email, 254);
+    const phone = text(body.phone, 60);
+    const service = text(body.service, 120);
+    const type = text(body.type, 120);
+    const date = text(body.date, 60);
+    const message = text(body.message, 8000);
+
+    // Remarques pour Alex (rien de bloquant)
+    const notes: string[] = [];
+    if (!name) notes.push("nom non renseigné");
+    if (!email) notes.push("e-mail non renseigné");
+    else if (!isEmail(email)) notes.push("adresse e-mail peut-être erronée (répondre par téléphone si besoin)");
+    if (!email && !phone) notes.push("aucun moyen de recontacter la personne");
+    if (!message) notes.push("pas de message");
+    if (body.consent !== true) notes.push("case d’accord RGPD non cochée");
+    if (type && service && typesByService[service] && !typesByService[service].includes(type)) {
+      notes.push("type de prestation inhabituel");
     }
-    if (service && !services.has(service)) throw new Error("Veuillez choisir une prestation valide.");
-    if (!service) throw new Error("Veuillez choisir une prestation.");
-    if (type && !(typesByService[service] ?? []).includes(type)) {
-      throw new Error("Veuillez choisir un type de prestation valide.");
-    }
-    if (!message) throw new Error("Veuillez décrire votre projet.");
-    if (body.consent !== true) throw new Error("Votre accord est nécessaire pour traiter la demande.");
 
     stage = "rate-limit";
-    if (await consumeRateLimit(request) > 5) {
-      return jsonResponse(request, 429, {
-        message: "Trop de demandes ont été envoyées. Veuillez réessayer dans 15 minutes."
-      });
+    try {
+      if (await consumeRateLimit(request) > 5) {
+        return reply(request, 429, { message: "Trop de demandes ont été envoyées. Veuillez réessayer dans 15 minutes." });
+      }
+    } catch (error) {
+      // La limite d'envoi ne doit jamais empêcher une vraie demande d'arriver.
+      console.error("Contact rate limit unavailable", { error });
     }
 
     stage = "email";
-    await sendContactEmail({ name, email, phone, service, type, date, message });
-    return jsonResponse(request, 200, { ok: true });
+    await sendContactEmail({ name, email, phone, service, type, date, message, notes: notes.join(" · ") });
+    return reply(request, 200, { ok: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erreur inattendue.";
-    const status =
-      message.includes("Origine") ? 403 :
-      message.includes("invalide") || message.includes("Veuillez") || message.includes("accord") ? 400 :
-      message.includes("Trop") ? 429 :
-      500;
-    if (status === 500) console.error("Contact request failed", { stage, error });
-    const resendStatus = message.match(/Resend HTTP (\d{3})/)?.[1];
-    return jsonResponse(request, status, {
-      message: status === 500
-        ? "La demande n’a pas pu être envoyée. Réessayez dans quelques instants."
-        : message,
-      diagnostic: status === 500
-        ? resendStatus
-          ? `RESEND_HTTP_${resendStatus}`
-          : `CONTACT_${stage.toUpperCase().replaceAll("-", "_")}_FAILED`
-        : undefined
+    console.error("Contact request failed", { stage, error });
+    const resendStatus = error instanceof Error ? error.message.match(/Resend HTTP (\d{3})/)?.[1] : undefined;
+    return reply(request, 500, {
+      message: "La demande n’a pas pu être envoyée.",
+      diagnostic: resendStatus ? `RESEND_HTTP_${resendStatus}` : `CONTACT_${stage.toUpperCase().replaceAll("-", "_")}_FAILED`
     });
   }
 });

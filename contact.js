@@ -20,7 +20,7 @@ contactForm.addEventListener("submit", async (event) => {
   contactStatus.textContent = "";
   delete contactStatus.dataset.kind;
 
-  if (!contactForm.reportValidity()) return;
+  // Aucun champ n'est bloquant : la demande part toujours, l'échange avec Alex clarifiera le reste.
 
   const formData = new FormData(contactForm);
   const extras = [];
@@ -47,6 +47,9 @@ contactForm.addEventListener("submit", async (event) => {
   contactSubmit.disabled = true;
   contactSubmit.querySelector("span").textContent = "Envoi en cours…";
 
+  // Au-delà de 20 secondes sans réponse, on considère que l'envoi a échoué.
+  const timeout = new AbortController();
+  const timer = setTimeout(() => timeout.abort(), 20000);
   try {
     const response = await fetch(
       `${config.supabaseUrl}/functions/v1/contact-request`,
@@ -56,24 +59,46 @@ contactForm.addEventListener("submit", async (event) => {
           apikey: config.supabaseAnonKey,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: timeout.signal
       }
     );
-    const result = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      throw new Error(result?.message || "L’envoi n’a pas abouti. Réessayez dans quelques instants.");
-    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     contactForm.reset();
     contactStatus.dataset.kind = "success";
     contactStatus.textContent = "Votre demande a bien été envoyée. Merci, je reviendrai vers vous dès que possible.";
   } catch (error) {
-    contactStatus.textContent = error instanceof Error
-      ? error.message
-      : "Une erreur est survenue pendant l’envoi. Réessayez dans quelques instants.";
+    // Seul cas d'erreur montré au visiteur : la demande n'a pas pu partir. Le formulaire garde ce qu'il a écrit.
+    console.error("Envoi du formulaire impossible", error);
+    showContactFallback();
   } finally {
+    clearTimeout(timer);
     contactSubmit.disabled = false;
     contactSubmit.querySelector("span").textContent = "Envoyer ma demande";
   }
 });
+
+// Petite fenêtre affichée seulement si l'envoi a échoué pour une raison technique.
+function showContactFallback() {
+  let dialog = document.getElementById("contact-fallback");
+  if (!dialog) {
+    dialog = document.createElement("dialog");
+    dialog.id = "contact-fallback";
+    dialog.className = "contact-fallback";
+    dialog.setAttribute("aria-labelledby", "contact-fallback-title");
+    dialog.innerHTML = `
+      <p class="contact-fallback-title" id="contact-fallback-title">Un problème avec l’envoi du formulaire ?</p>
+      <p>Votre message n’a pas pu partir pour une raison technique. Vous pouvez nous contacter directement :</p>
+      <p class="contact-fallback-links">
+        <a href="mailto:info@alexandrepalanca.fr">info@alexandrepalanca.fr</a>
+        <a href="tel:+33679538280">+33 6 79 53 82 80</a>
+      </p>
+      <button type="button" class="contact-fallback-close">Fermer</button>`;
+    dialog.querySelector(".contact-fallback-close").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    document.body.append(dialog);
+  }
+  if (typeof dialog.showModal === "function") dialog.showModal();
+  else dialog.setAttribute("open", "");
+}

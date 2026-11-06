@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="fonts.css?v=2">
   <link rel="stylesheet" href="site-nav.css?v=fondu">
   <link rel="stylesheet" href="redesign.css?v=70">
-  <link rel="stylesheet" href="contact.css?v=2">
+  <link rel="stylesheet" href="contact.css?v=3">
   <link rel="stylesheet" href="drone.css?v=16">
   <link rel="stylesheet" href="cursor.css?v=7">
   <link rel="stylesheet" href="photo-reel.css?v=5">
@@ -24,7 +24,7 @@
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
   <script type="module" src="drone.js?v=15"></script>
-  <script type="module" src="contact.js?v=3"></script>
+  <script type="module" src="contact.js?v=4"></script>
   <script src="contact-reveal.js?v=2" defer></script>
   <link rel="stylesheet" href="mobile.css?v=2" media="(max-width: 800px)">
   <link rel="stylesheet" href="touch.css?v=3" media="(hover: none)">
@@ -163,16 +163,16 @@
         <form class="contact-form redesign-contact-form" id="contact-form" novalidate>
           <input id="contact-service" name="service" type="hidden" value="Photo et vidéo">
           <div class="contact-form-grid">
-            <div class="contact-field"><label for="contact-name">Nom et prénom <span aria-hidden="true">*</span></label><input id="contact-name" name="name" autocomplete="name" maxlength="100" required></div>
-            <div class="contact-field"><label for="contact-email">Adresse e-mail <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>
+            <div class="contact-field"><label for="contact-name">Nom et prénom <span aria-hidden="true">*</span></label><input id="contact-name" name="name" autocomplete="name" maxlength="100"></div>
+            <div class="contact-field"><label for="contact-email">Adresse e-mail <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254"></div>
             <div class="contact-field"><label for="contact-phone">Téléphone <span class="contact-optional">(facultatif)</span></label><input id="contact-phone" name="phone" type="tel" autocomplete="tel" maxlength="30"></div>
             <div class="contact-field"><label for="contact-date">Date ou période <span class="contact-optional">(facultatif)</span></label><input id="contact-date" name="date" type="date"></div>
             <div class="contact-field"><label for="pref-type">Type de prestation</label><select id="pref-type" name="type"><option value="">À préciser ensemble</option><option>Portrait (solo, couple, famille)</option><option>Portrait professionnel</option><option>Événement privé ou d’entreprise</option><option>Concert, spectacle ou festival</option><option>Sport et compétition</option><option>Lieu, commerce ou savoir-faire</option><option>Clip ou projet artistique</option><option>Contenus pour les réseaux sociaux</option><option>Autre projet</option></select></div>
             <div class="contact-field"><label for="pref-budget">Budget indicatif</label><select id="pref-budget" name="pref-budget" data-extra><option value="">Je ne sais pas encore</option><option>Moins de 300 €</option><option>300 € – 800 €</option><option>800 € – 1 500 €</option><option>Plus de 1 500 €</option></select></div>
             <fieldset class="contact-chips contact-field--wide"><legend>Ce dont vous avez besoin</legend><label><input type="checkbox" name="pref-livrables" value="Photos"><span>Photos</span></label><label><input type="checkbox" name="pref-livrables" value="Vidéo"><span>Vidéo</span></label><label><input type="checkbox" name="pref-livrables" value="Drone"><span>Drone</span></label><label><input type="checkbox" name="pref-livrables" value="Retouche avancée"><span>Retouche avancée</span></label></fieldset>
-            <div class="contact-field contact-field--wide"><label for="contact-message">Quelques mots sur votre projet <span aria-hidden="true">*</span></label><textarea id="contact-message" name="message" rows="5" maxlength="4000" required></textarea></div>
+            <div class="contact-field contact-field--wide"><label for="contact-message">Quelques mots sur votre projet <span aria-hidden="true">*</span></label><textarea id="contact-message" name="message" rows="5" maxlength="4000"></textarea></div>
             <div class="contact-honeypot" aria-hidden="true"><label for="contact-website">Ne pas remplir ce champ</label><input id="contact-website" name="website" tabindex="-1" autocomplete="off"></div>
-            <div class="contact-consent contact-field--wide"><input id="contact-consent" name="consent" type="checkbox" required><label for="contact-consent">J’accepte que mes informations soient utilisées pour répondre à cette demande. Consultez la <a href="politique-confidentialite.html">politique de confidentialité</a>. <span aria-hidden="true">*</span></label></div>
+            <div class="contact-consent contact-field--wide"><input id="contact-consent" name="consent" type="checkbox"><label for="contact-consent">J’accepte que mes informations soient utilisées pour répondre à cette demande. Consultez la <a href="politique-confidentialite.html">politique de confidentialité</a>. <span aria-hidden="true">*</span></label></div>
           </div>
           <p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p>
           <button class="contact-submit" id="contact-submit" type="submit"><span>Envoyer ma demande</span><span aria-hidden="true">↗︎</span></button>
