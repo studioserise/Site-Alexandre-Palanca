@@ -509,3 +509,4 @@ html .press-fx { transform: none; } }
 .site-footer .site-footer-inner { position: relative; z-index: 1; }
 .site-footer-ground { position: absolute; inset: auto 0 0; z-index: 0; height: clamp(90px, 23vw, 330px); background: url("images/accueil-plans/plan-1-bas.webp?v=4") center calc(100% + 50px) / cover no-repeat; transform: scaleX(-1); filter: brightness(0.4); pointer-events: none; }
 html[data-theme="light"] .site-footer-ground { filter: invert(1) brightness(0.4) invert(1); }
+@media (max-width: 800px) { .site-footer { padding-bottom: calc(26vw + env(safe-area-inset-bottom, 0px)); } .site-footer-ground { height: 44vw; background-position: left calc(100% + 5vw); } }
