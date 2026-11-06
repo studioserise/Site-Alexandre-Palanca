@@ -22,3 +22,6 @@
 .flip-card-grid .flip-card-face p,
 .flip-card-grid .flip-card-face li { font-size: 0.82rem; line-height: 1.6; }
 .flip-card-grid .flip-card-face .flip-price { font-size: 0.92rem; }
+
+/* Section vidéo : la liste des prestations sous le descriptif est retirée sur mobile */
+.redesign-hero .redesign-hero-copy > .studio-eyebrow--note { display: none; }
