@@ -137,6 +137,18 @@
 .drone-section.is-static .drone-sprite {
   width: 100%;
   height: auto;
+  animation: drone-hover 5s ease-in-out infinite;
+}
+
+/* Drone posé (mobile) : il flotte doucement sur place */
+@keyframes drone-hover {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  30% { transform: translate3d(0, -9px, 0) rotate(-1.2deg); }
+  65% { transform: translate3d(0, 5px, 0) rotate(0.9deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drone-section.is-static .drone-sprite { animation: none; }
 }
 
 .drone-layer {

@@ -100,7 +100,7 @@ if (quoteText && testimonials) {
 }
 
 // Cartes des formules : un clic renvoie vers le formulaire de contact de la page (qui s'ouvre tout seul).
-// Sur écran tactile, un seul toucher mène au formulaire (le contenu des deux faces est déjà visible).
+// Sur écran tactile, chaque toucher retourne la carte ; le formulaire est juste en dessous.
 const contactSection = document.querySelector("[data-contact-reveal]")?.closest("section[id]");
 const canHover = window.matchMedia("(hover: hover)").matches;
 const goToContact = () => {
@@ -113,13 +113,24 @@ const goToContact = () => {
   }
 };
 
+// Écran tactile : les indications « Survolez… » deviennent « Touchez pour découvrir ».
+if (!canHover) {
+  document.querySelectorAll(".flip-card .flip-hint").forEach((hint) => {
+    if (/survolez/i.test(hint.textContent)) hint.textContent = "Touchez pour découvrir ↻\uFE0E";
+  });
+}
+
 document.querySelectorAll(".flip-card-grid .flip-card[tabindex]").forEach((card) => {
   if (!contactSection) return;
   card.setAttribute("role", "link");
   card.setAttribute("aria-label", `${card.querySelector("h3")?.textContent ?? "Cette formule"} — demander un devis`);
   card.style.cursor = "pointer";
-  // Sur écran tactile, la carte affiche déjà tout son contenu (touch.css) : un toucher mène directement au formulaire.
+  // Ordinateur : un clic mène au formulaire. Écran tactile : chaque toucher retourne la carte (recto ↔ verso).
   const activate = () => {
+    if (!canHover) {
+      card.classList.toggle("is-flipped");
+      return;
+    }
     card.classList.remove("is-flipped");
     goToContact();
   };
@@ -135,8 +146,6 @@ document.querySelectorAll(".flip-card-grid .flip-card[tabindex]").forEach((card)
 });
 
 document.querySelectorAll(".flip-card[tabindex]:not([data-contact-link])").forEach((card) => {
-  // Écran tactile : pas de retournement, le texte du verso est affiché sous la photo (touch.css).
-  if (!canHover) { card.removeAttribute("tabindex"); return; }
   const toggle = () => {
     const isFlipped = card.classList.toggle("is-flipped");
     card.setAttribute("aria-pressed", String(isFlipped));

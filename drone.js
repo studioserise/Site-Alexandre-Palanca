@@ -127,7 +127,7 @@ function createSprite(sprite) {
 function mountStatic(section, target) {
   section.classList.add("is-static");
   const sprite = createSprite(DRONE_CONTENT.sprite);
-  if (section.dataset.droneFlip === "left") sprite.style.transform = "scaleX(-1)";
+  if (section.dataset.droneFlip === "left") target.style.transform = "scaleX(-1)"; // sur le cadre : le sprite garde son animation de flottement
   target.append(sprite);
 }
 
@@ -296,6 +296,9 @@ function mountFlight(section, target, flightMode, flip) {
       `rotate(${rotation.toFixed(3)}deg) scale(${(flip ? -scale : scale).toFixed(4)}, ${scale.toFixed(4)})`;
   }
 
+  // Mobile : la barre de Safari qui se replie en défilant ne doit pas relancer tous les calculs (saccades).
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
   const trigger = ScrollTrigger.create({
     trigger: section,
     start: () => Math.max(0, geo.startScroll - geo.vh * 0.35),
@@ -346,7 +349,10 @@ function init() {
     if (section.dataset.droneReady) return;
     section.dataset.droneReady = "true";
     const { target } = renderSection(section);
-    const canFly = Boolean(window.gsap && window.ScrollTrigger) && !reduceMotionQuery.matches;
+    // Mobile / écran tactile : drone posé dans son cadre avec un léger flottement en CSS.
+    // Le vol piloté par le défilement saccadait sur téléphone (calculs en retard sur le doigt).
+    const touchOrSmall = window.matchMedia("(hover: none), (max-width: 800px)").matches;
+    const canFly = Boolean(window.gsap && window.ScrollTrigger) && !reduceMotionQuery.matches && !touchOrSmall;
     if (canFly) {
       mountFlight(section, target, section.dataset.droneFlight === "local" ? "local" : "home", section.dataset.droneFlip === "left");
     } else {

@@ -1,28 +1,14 @@
 /* Écrans tactiles (téléphones, tablettes) — fichier chargé avec media="(hover: none)".
-   Sans souris, les effets « au survol » restaient bloqués (une carte touchée restait retournée).
-   Ici, plus aucun retournement : le contenu des deux faces est affiché l'un sous l'autre. */
+   Sans souris, les effets « au survol » restaient bloqués (une carte touchée restait retournée). */
 
-/* Cartes retournables : pas de 3D, recto puis verso empilés */
-.flip-card { min-height: 0; perspective: none; }
-.flip-card-inner { display: flex; flex-direction: column; gap: 10px; height: auto; min-height: 0; transform: none !important; transition: none; }
-.flip-card-face { position: relative; inset: auto; transform: none !important; backface-visibility: visible; -webkit-backface-visibility: visible; }
-.flip-card-face::after { display: none; }
-
-/* Formules : la carte entière mène au formulaire ; plus de grille alignée ni d'indication « Survolez » */
-.flip-card-grid--aligned > .flip-card { display: block; grid-row: auto; }
-.flip-card-grid--aligned .flip-card-inner { display: flex; }
-.flip-card-grid--aligned .flip-card-face:not(.flip-card-face--back) { display: flex; }
-.flip-card-grid .flip-card-face:not(.flip-card-face--back) > .flip-hint:last-child { display: none; }
-.flip-card-grid .flip-card-face--back { justify-content: flex-start; }
-.flip-card-grid .flip-card-face--back h3 { margin: 0 0 10px; font-size: 1.05rem; }
-
-/* Grandes cartes photo / vidéo : la photo, puis le texte du verso en dessous */
-.redesign-hero .photo-hero-flip,
-.photo-hero-flip { min-height: 0; }
-.photo-hero-flip .flip-card-inner { min-height: 0; }
-.photo-hero-flip .redesign-hero-image { aspect-ratio: 4 / 5; min-height: 0; }
-.photo-hero-flip .redesign-hero-image .flip-hint { display: none; }
-.photo-hero-flip .flip-card-face--back { padding: 24px 22px; }
+/* Cartes retournables : elles se retournent seulement au toucher (classe is-flipped posée par redesign.js),
+   à chaque toucher dans un sens puis dans l'autre. Le « survol » et le « focus » laissés par le doigt
+   ne peuvent plus garder une carte bloquée retournée. */
+.flip-card:hover .flip-card-inner,
+.flip-card:focus-within .flip-card-inner { transform: none !important; }
+.flip-card.is-flipped .flip-card-inner { transform: rotateY(180deg) !important; }
+.flip-card-face { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.flip-card { -webkit-tap-highlight-color: transparent; }
 
 /* Carte de visite : un toucher la retourne (voir footer-card.js) */
 .site-footer-card { touch-action: pan-y; }

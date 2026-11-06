@@ -123,9 +123,13 @@
       position: absolute;
       inset: auto 0 0;
       z-index: 2;
-      height: 28%;
+      /* 50 % de haut : 28 % de fondu + 22 % de place pour la montée du plan 1.
+         Au départ il est décalé vers le bas (seuls les 28 % du bas sont visibles) et il remonte avec le plan 1. */
+      height: 50%;
       --fade-color: 0, 0, 0;
-      background: linear-gradient(to bottom, rgba(var(--fade-color), 0), rgb(var(--fade-color)) var(--fade-solid, 100%));
+      background: linear-gradient(to bottom, rgba(var(--fade-color), 0), rgb(var(--fade-color)) 56%);
+      transform: translateY(44%);
+      will-change: transform;
       pointer-events: none;
     }
     html[data-theme="light"] .hero-fade { --fade-color: 241, 238, 232; }
@@ -149,10 +153,44 @@
       position: absolute;
       inset: 0;
       z-index: 4;
-      background: rgba(0, 0, 0, 0);
+      background: #080807;
+      opacity: 0;
       pointer-events: none;
-      will-change: background-color;
+      will-change: opacity;
     }
+    html[data-theme="light"] .hero-overlay { background: #f1eee8; }
+
+    /* Navigateurs récents : la cascade, le fondu et le voile suivent le défilement directement dans le moteur
+       d'animation du navigateur (parfaitement synchronisés, sans à-coups sur iPhone). Sinon, le script s'en charge. */
+    @media (prefers-reduced-motion: no-preference) {
+      @supports (animation-timeline: view()) {
+        .intro-sequence { view-timeline: --hero-scroll block; view-timeline-inset: 0px; }
+        .hero-layer,
+        .hero-fade,
+        .hero-overlay {
+          animation-duration: auto;
+          animation-fill-mode: both;
+          animation-timing-function: ease-in-out;
+          animation-timeline: --hero-scroll;
+          animation-range: contain 0% contain 100%;
+        }
+        .hero-layer[data-depth="0"] { animation-name: hero-plan-0; }
+        .hero-layer[data-depth="1"] { animation-name: hero-plan-1; }
+        .hero-layer[data-depth="2"] { animation-name: hero-plan-2; }
+        .hero-layer[data-depth="3"] { animation-name: hero-plan-3; }
+        .hero-layer[data-depth="4"] { animation-name: hero-plan-4; }
+        .hero-fade { animation-name: hero-fade-rise; }
+        .hero-overlay { animation-name: hero-veil; animation-range: contain 45% contain 95%; }
+      }
+    }
+    /* Valeurs identiques à LAYER_RISE / LAYER_GROWTH du script */
+    @keyframes hero-plan-0 { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(0, 4%, 0) scale(1.05); } }
+    @keyframes hero-plan-1 { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(0, -8%, 0) scale(1.03); } }
+    @keyframes hero-plan-2 { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(0, -12%, 0) scale(1.06); } }
+    @keyframes hero-plan-3 { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(0, -17%, 0) scale(1.09); } }
+    @keyframes hero-plan-4 { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(0, -22%, 0) scale(1.12); } }
+    @keyframes hero-fade-rise { from { transform: translateY(44%); } to { transform: translateY(0); } }
+    @keyframes hero-veil { from { opacity: 0; } to { opacity: 1; } }
 
     /* =========================
        3. SIGNATURE CENTRALE
@@ -494,6 +532,11 @@
       }
     }
 
+    /* Coordonnées et lieu de la photo : affichés seulement sur ordinateur */
+    @media (max-width: 800px) {
+      .hero-meta { display: none; }
+    }
+
     /* Mobile : logo animé 100px plus bas que sur ordinateur (centré 30px sous le milieu au lieu de 70px au-dessus) */
     @media (max-width: 800px) {
       .hero-brand {
@@ -799,14 +842,14 @@
   <script type="module" src="site-nav.js?v=tactile"></script>
   <link rel="stylesheet" href="section-marker.css?v=bord">
   <script src="cursor.js?v=3" defer></script>
-  <script src="redesign.js?v=26" defer></script>
+  <script src="redesign.js?v=27" defer></script>
   <script src="section-marker.js?v=10" defer></script>
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
-  <script type="module" src="drone.js?v=13"></script>
-  <link rel="stylesheet" href="drone.css?v=15">
+  <script type="module" src="drone.js?v=15"></script>
+  <link rel="stylesheet" href="drone.css?v=16">
   <link rel="stylesheet" href="mobile-cta.css?v=2">
-  <link rel="stylesheet" href="touch.css?v=2" media="(hover: none)">
+  <link rel="stylesheet" href="touch.css?v=3" media="(hover: none)">
 </head>
 
 <body>
@@ -1019,7 +1062,8 @@
     // (son léger zoom compense sa descente, pour qu'aucun vide n'apparaisse en haut)
     const LAYER_GROWTH = [0.05, 0.03, 0.06, 0.09, 0.12]; // léger zoom
     const LAYER_RISE = [-4, 8, 12, 17, 22];               // montée en % de la hauteur de l'écran (négatif = descend)
-    const FADE_HEIGHT = 28;                          // hauteur du fondu du bas, en %
+    const CSS_SCROLL_ANIMATION = window.CSS && CSS.supports("animation-timeline: view()") &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const overlay = document.getElementById("hero-overlay");
     const brand = document.getElementById("hero-brand");
     const scrollIndicator = document.getElementById("scroll-indicator");
@@ -1083,22 +1127,21 @@
         clamp((progress - 0.45) / 0.5, 0, 1)
       );
 
-      /* Le voile se fond dans la couleur de fond de la section suivante (sombre ou clair). */
-      const fade = fadeColor();
-      overlay.style.backgroundColor =
-        `rgba(${fade[0]}, ${fade[1]}, ${fade[2]}, ${darkProgress})`;
+      // Cascade, fondu du bas et voile : gérés par le CSS quand le navigateur sait suivre le défilement
+      // (animation-timeline). Sinon, calculés ici à chaque image.
+      if (!CSS_SCROLL_ANIMATION) {
+        overlay.style.opacity = String(darkProgress);
 
-      /* Cascade des plans : plus un plan est proche, plus il grandit et remonte. */
-      const layerProgress = smoothstep(progress);
-      heroLayers.forEach((layer, index) => {
-        const scale = 1 + LAYER_GROWTH[index] * layerProgress;
-        const rise = LAYER_RISE[index] * layerProgress;
-        layer.style.transform = `translate3d(0, ${-rise}%, 0) scale(${scale})`;
-      });
-      // Le fondu du bas suit le plan 1 qui monte : en dessous, seulement la couleur de la section suivante.
-      const frontRise = LAYER_RISE[LAYER_RISE.length - 1] * layerProgress;
-      heroFade.style.height = `${FADE_HEIGHT + frontRise}%`;
-      heroFade.style.setProperty("--fade-solid", `${(100 * FADE_HEIGHT) / (FADE_HEIGHT + frontRise)}%`);
+        /* Cascade des plans : plus un plan est proche, plus il grandit et remonte. */
+        const layerProgress = smoothstep(progress);
+        heroLayers.forEach((layer, index) => {
+          const scale = 1 + LAYER_GROWTH[index] * layerProgress;
+          const rise = LAYER_RISE[index] * layerProgress;
+          layer.style.transform = `translate3d(0, ${-rise}%, 0) scale(${scale})`;
+        });
+        // Le fondu du bas remonte avec le plan 1 : en dessous, seulement la couleur de la section suivante.
+        heroFade.style.transform = `translateY(${(44 * (1 - layerProgress)).toFixed(2)}%)`;
+      }
 
       if (progress > 0) {
         siteNav.classList.add("is-visible");
@@ -1251,7 +1294,12 @@
       brand.style.setProperty("--row-shift", `${Math.round(shift)}px`);
     };
     placeRowShift();
-    window.addEventListener("resize", placeRowShift);
+    let rowShiftWidth = window.innerWidth;
+    window.addEventListener("resize", () => {
+      if (window.innerWidth === rowShiftWidth) return; // simple repli de la barre du navigateur mobile
+      rowShiftWidth = window.innerWidth;
+      placeRowShift();
+    });
 
     updateScrollAnimation();
     startSignatureAnimation();
@@ -1399,7 +1447,10 @@
       }).catch(() => {});
 
       let resizeTimer = null;
+      let logoWidth = window.innerWidth;
       window.addEventListener("resize", () => {
+        if (window.innerWidth === logoWidth) return; // simple repli de la barre du navigateur mobile
+        logoWidth = window.innerWidth;
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(placeLogo, 150);
       });

@@ -1,0 +1,24 @@
+/* Mise en page mobile (chargé avec media="(max-width: 800px)") */
+
+/* Sections photo et vidéo : titre au-dessus de la grande image, descriptif en dessous,
+   puis la galerie défilante (section suivante). */
+.redesign-hero { gap: 0; }
+.redesign-hero .redesign-hero-copy { display: contents; }
+.redesign-hero .redesign-hero-copy > .studio-eyebrow:first-child { order: 1; margin: 0 0 14px; }
+.redesign-hero .redesign-hero-copy > h1 { order: 2; margin: 0 0 26px; }
+.redesign-hero .photo-hero-flip,
+.redesign-hero--reverse .photo-hero-flip { order: 3; }
+.redesign-hero .redesign-hero-copy > p:not(:first-child) { order: 4; }
+.redesign-hero .redesign-hero-copy > p:not(.studio-eyebrow) { margin-top: 24px; }
+.redesign-hero .redesign-hero-copy > .studio-eyebrow--note { margin-top: 18px; }
+
+/* Formules : cartes un peu plus petites, placées en quinconce (gauche, droite, gauche) */
+.flip-card-grid { grid-template-columns: 1fr; row-gap: 18px; }
+.flip-card-grid > .flip-card { width: 84%; }
+.flip-card-grid > .flip-card:nth-child(odd) { justify-self: start; }
+.flip-card-grid > .flip-card:nth-child(even) { justify-self: end; }
+.flip-card-grid .flip-card-face { padding: 20px 20px 18px; }
+.flip-card-grid .flip-card-face h3 { font-size: 1.25rem; }
+.flip-card-grid .flip-card-face p,
+.flip-card-grid .flip-card-face li { font-size: 0.82rem; line-height: 1.6; }
+.flip-card-grid .flip-card-face .flip-price { font-size: 0.92rem; }
