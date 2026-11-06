@@ -1,0 +1,47 @@
+/* Contours en dégradé (même effet que le cadre du menu mobile) sur les encadrés de texte et les boutons.
+   Un fin trait de 1 px, plus lumineux au centre et qui s'efface vers les coins. Jamais sur les photos. */
+
+:is(.studio-service-card, .flip-card-grid .flip-card-face, .portfolio-carousel, .studio-quote, .contact-form,
+    .contact-fallback, .studio-button, .drone-cta, .site-footer-actions a, .contact-submit) {
+  position: relative;
+  border-color: transparent !important;
+}
+
+:is(.studio-service-card, .flip-card-grid .flip-card-face, .portfolio-carousel, .studio-quote, .contact-form,
+    .contact-fallback, .studio-button, .drone-cta, .site-footer-actions a, .contact-submit)::before {
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  content: "";
+  background: linear-gradient(135deg, rgba(245, 243, 239, 0) 0%, rgba(245, 243, 239, 0.8) 50%, rgba(245, 243, 239, 0) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Boutons et encadrés sans bordure d'origine : on réserve le trait de 1 px */
+:is(.studio-service-card, .flip-card-grid .flip-card-face, .studio-quote) { border: 1px solid transparent; }
+
+/* Verso des grandes cartes photo / vidéo : son ::before sert déjà à la photo en transparence,
+   le contour est donc dessiné par le fond (couleur de la carte + dégradé sur la bordure). */
+.photo-hero-flip .flip-card-face--back {
+  --face: #2e2e2b;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--face), var(--face)) padding-box,
+    linear-gradient(135deg, rgba(245, 243, 239, 0) 0%, rgba(245, 243, 239, 0.8) 50%, rgba(245, 243, 239, 0) 100%) border-box !important;
+}
+
+/* Mode clair : même dégradé, en foncé */
+html[data-theme="light"] :is(.studio-service-card, .flip-card-grid .flip-card-face, .portfolio-carousel, .studio-quote, .contact-form,
+    .contact-fallback, .studio-button, .drone-cta, .site-footer-actions a, .contact-submit)::before {
+  background: linear-gradient(135deg, rgba(23, 23, 21, 0) 0%, rgba(23, 23, 21, 0.55) 50%, rgba(23, 23, 21, 0) 100%);
+}
+html[data-theme="light"] .photo-hero-flip .flip-card-face--back {
+  --face: #e6e1d7;
+  background:
+    linear-gradient(var(--face), var(--face)) padding-box,
+    linear-gradient(135deg, rgba(23, 23, 21, 0) 0%, rgba(23, 23, 21, 0.55) 50%, rgba(23, 23, 21, 0) 100%) border-box !important;
+}

@@ -349,3 +349,4 @@ html[data-theme="light"] .contact-fallback p { color: #3d3b36; }
 html[data-theme="light"] .contact-fallback .contact-fallback-title,
 html[data-theme="light"] .contact-fallback-links a,
 html[data-theme="light"] .contact-fallback-close { color: #171715; border-color: rgba(23, 23, 21, 0.35); }
+.contact-field input[aria-invalid="true"] { border-color: #e8b3a9; }

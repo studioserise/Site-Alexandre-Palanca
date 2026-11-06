@@ -20,7 +20,19 @@ contactForm.addEventListener("submit", async (event) => {
   contactStatus.textContent = "";
   delete contactStatus.dataset.kind;
 
-  // Aucun champ n'est bloquant : la demande part toujours, l'échange avec Alex clarifiera le reste.
+  // Seule l'adresse e-mail est obligatoire (pour pouvoir répondre). Tout le reste est libre :
+  // la demande part toujours, l'échange avec Alex clarifiera.
+  const emailField = contactForm.querySelector("#contact-email");
+  const emailValue = (emailField?.value || "").trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+    contactStatus.textContent = emailValue
+      ? "Cette adresse e-mail semble incomplète. Vérifiez-la pour que nous puissions vous répondre."
+      : "Indiquez votre adresse e-mail pour que nous puissions vous répondre.";
+    emailField?.setAttribute("aria-invalid", "true");
+    emailField?.focus();
+    return;
+  }
+  emailField?.removeAttribute("aria-invalid");
 
   const formData = new FormData(contactForm);
   const extras = [];
