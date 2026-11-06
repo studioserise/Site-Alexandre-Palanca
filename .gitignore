@@ -12,3 +12,6 @@ supabase/.branches/
 supabase/.env
 supabase/.env.*
 node_modules/
+
+# Brouillons gardés en local, jamais mis en ligne
+_brouillons/
