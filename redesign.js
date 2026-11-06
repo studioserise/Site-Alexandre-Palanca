@@ -166,9 +166,9 @@ const carouselProjects = [
     title: "Portraits",
     text: "Une présence simple, des images naturelles et une séance pensée à votre rythme.",
     sets: [
-      ["images/portraits/personnel-01.jpg", "images/portraits/personnel-02.jpg", "images/portraits/personnel-03.jpg"],
-      ["images/portraits/personnel-11.jpg", "images/portraits/personnel-12.jpg", "images/portraits/personnel-13.jpg"],
-      ["images/portraits/personnel-21.jpg", "images/portraits/personnel-22.jpg", "images/portraits/personnel-23.jpg"]
+      ["images/portraits/personnel-01-1200.webp", "images/portraits/personnel-02-1200.webp", "images/portraits/personnel-03-1200.webp"],
+      ["images/portraits/personnel-11-1200.webp", "images/portraits/personnel-12-1200.webp", "images/portraits/personnel-13-1200.webp"],
+      ["images/portraits/personnel-21-1200.webp", "images/portraits/personnel-22-1200.webp", "images/portraits/personnel-23-1200.webp"]
     ]
   },
   {
@@ -176,7 +176,7 @@ const carouselProjects = [
     kind: "Vidéo",
     title: "Aftermovie",
     text: "Le film d’un événement, monté pour en retrouver l’énergie et le partager.",
-    sets: [["images/video/aftermovie.jpg"]]
+    sets: [["images/video/aftermovie-1200.webp"]]
   },
   {
     id: "concerts",
@@ -184,9 +184,9 @@ const carouselProjects = [
     title: "Concerts",
     text: "Des images au cœur de la scène, pour garder l’énergie d’un live.",
     sets: [
-      ["images/evenementiel/concert-01.jpg", "images/evenementiel/concert-02.jpg", "images/evenementiel/concert-03.jpg"],
-      ["images/evenementiel/concert-11.jpg", "images/evenementiel/concert-12.jpg", "images/evenementiel/concert-13.jpg"],
-      ["images/evenementiel/concert-31.jpg", "images/evenementiel/concert-32.jpg", "images/evenementiel/concert-33.jpg"]
+      ["images/evenementiel/concert-01-1200.webp", "images/evenementiel/concert-02-1200.webp", "images/evenementiel/concert-03-1200.webp"],
+      ["images/evenementiel/concert-11-1200.webp", "images/evenementiel/concert-12-1200.webp", "images/evenementiel/concert-13-1200.webp"],
+      ["images/evenementiel/concert-31-1200.webp", "images/evenementiel/concert-32-1200.webp", "images/evenementiel/concert-33-1200.webp"]
     ]
   },
   {
@@ -194,7 +194,7 @@ const carouselProjects = [
     kind: "Vidéo",
     title: "Clip musical",
     text: "Une mise en images pensée avec l’artiste, de l’intention au montage final.",
-    sets: [["images/video/clip-musical.jpg"]]
+    sets: [["images/video/clip-musical-1200.webp"]]
   },
   {
     id: "festivals",
@@ -202,7 +202,7 @@ const carouselProjects = [
     title: "Festivals",
     text: "L’ambiance d’un festival, de la foule aux instants en coulisses.",
     sets: [
-      ["images/evenementiel/festival-01.jpg", "images/evenementiel/festival-02.jpg", "images/evenementiel/festival-03.jpg"]
+      ["images/evenementiel/festival-01-1200.webp", "images/evenementiel/festival-02-1200.webp", "images/evenementiel/festival-03-1200.webp"]
     ]
   },
   {
@@ -210,7 +210,7 @@ const carouselProjects = [
     kind: "Vidéo",
     title: "Film de présentation",
     text: "Un film qui présente votre activité, votre lieu ou votre savoir-faire.",
-    sets: [["images/video/film-presentation.jpg"]]
+    sets: [["images/video/film-presentation-1200.webp"]]
   },
   {
     id: "sport",
@@ -218,8 +218,8 @@ const carouselProjects = [
     title: "Sport & compétition",
     text: "Le mouvement, l’effort et la concentration, saisis au bon moment.",
     sets: [
-      ["images/evenementiel/sport-competition-01.jpg", "images/evenementiel/sport-competition-02.jpg", "images/evenementiel/sport-competition-03.jpg"],
-      ["images/evenementiel/sport-competition-11.jpg", "images/evenementiel/sport-competition-12.jpg", "images/evenementiel/sport-competition-13.jpg"]
+      ["images/evenementiel/sport-competition-01-1200.webp", "images/evenementiel/sport-competition-02-1200.webp", "images/evenementiel/sport-competition-03-1200.webp"],
+      ["images/evenementiel/sport-competition-11-1200.webp", "images/evenementiel/sport-competition-12-1200.webp", "images/evenementiel/sport-competition-13-1200.webp"]
     ]
   },
   {
@@ -227,8 +227,8 @@ const carouselProjects = [
     kind: "Vidéo",
     title: "Formats courts",
     text: "Des vidéos courtes et rythmées, pensées pour les réseaux sociaux.",
-    sets: [["images/video/formats-courts.jpg"]],
-    video: "images/video/formats-courts.mp4",
+    sets: [["images/video/formats-courts-1200.webp"]],
+    video: "images/video/formats-courts-720.mp4",
     videoPosition: "right center" // cadrage de la vidéo dans le portfolio
   },
   {
@@ -237,11 +237,11 @@ const carouselProjects = [
     title: "Cabaret",
     text: "L’élégance et le rythme d’une soirée cabaret, au plus près des artistes.",
     sets: [
-      ["images/evenementiel/cabaret-31.jpg", "images/evenementiel/cabaret-32.jpg", "images/evenementiel/cabaret-33.jpg"],
-      ["images/evenementiel/cabaret-11.jpg", "images/evenementiel/cabaret-12.jpg", "images/evenementiel/cabaret-13.jpg"],
-      ["images/evenementiel/cabaret-01.jpg", "images/evenementiel/cabaret-02.jpg", "images/evenementiel/cabaret-03.jpg"],
-      ["images/evenementiel/cabaret-21.jpg", "images/evenementiel/cabaret-22.jpg", "images/evenementiel/cabaret-23.jpg"],
-      ["images/portraits/professionnel-11.jpg", "images/portraits/professionnel-12.jpg", "images/portraits/professionnel-13.jpg"]
+      ["images/evenementiel/cabaret-31-1200.webp", "images/evenementiel/cabaret-32-1200.webp", "images/evenementiel/cabaret-33-1200.webp"],
+      ["images/evenementiel/cabaret-11-1200.webp", "images/evenementiel/cabaret-12-1200.webp", "images/evenementiel/cabaret-13-1200.webp"],
+      ["images/evenementiel/cabaret-01-1200.webp", "images/evenementiel/cabaret-02-1200.webp", "images/evenementiel/cabaret-03-1200.webp"],
+      ["images/evenementiel/cabaret-21-1200.webp", "images/evenementiel/cabaret-22-1200.webp", "images/evenementiel/cabaret-23-1200.webp"],
+      ["images/portraits/professionnel-11-1200.webp", "images/portraits/professionnel-12-1200.webp", "images/portraits/professionnel-13-1200.webp"]
     ]
   },
   {
@@ -249,8 +249,8 @@ const carouselProjects = [
     kind: "Vidéo",
     title: "Prises de vues aériennes",
     text: "Des images en drone pour offrir une autre perspective sur vos lieux et vos événements.",
-    sets: [["images/video/prises-aeriennes.jpg"]],
-    video: "images/video/prises-aeriennes.mp4"
+    sets: [["images/video/prises-aeriennes-1200.webp"]],
+    video: "images/video/prises-aeriennes-720.mp4"
   }
 ];
 
@@ -267,17 +267,17 @@ document.querySelectorAll("[data-carousel]").forEach((carousel) => {
         {
           title: "Site vitrine",
           text: "Un aperçu du travail de conception et de mise en page, à remplacer par les mockups des réalisations.",
-          images: ["images/hero-accueil-web.jpg", "images/accueil.jpg", "images/lieux-marques.jpg"]
+          images: ["images/hero-accueil-web-1200.webp", "images/accueil-1200.webp", "images/lieux-marques-1200.webp"]
         },
         {
           title: "Univers de marque",
           text: "Une direction visuelle adaptée au projet, de l’identité aux supports digitaux.",
-          images: ["images/Lieux-et-marques/letm-01.jpg", "images/Lieux-et-marques/letm-02.jpg", "images/Lieux-et-marques/letm-03.jpg"]
+          images: ["images/Lieux-et-marques/letm-01-1200.webp", "images/Lieux-et-marques/letm-02-1200.webp", "images/Lieux-et-marques/letm-03-1200.webp"]
         },
         {
           title: "Projet sur mesure",
           text: "Des exemples et descriptifs détaillés pourront être ajoutés au fil des réalisations.",
-          images: ["images/accueil.jpg", "images/hero-accueil-web.jpg", "images/lieux-marques.jpg"]
+          images: ["images/accueil-1200.webp", "images/hero-accueil-web-1200.webp", "images/lieux-marques-1200.webp"]
         }
       ]
     : carouselProjects;

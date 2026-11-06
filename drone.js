@@ -14,10 +14,10 @@ const DRONE_CONTENT = {
   text: "Une autre perspective pour raconter les lieux, révéler les espaces et donner une nouvelle dimension à vos projets. Grâce aux prises de vues aériennes, chaque réalisation prend de la hauteur.",
   cta: "Découvrir les formules",
   // Fond par défaut : photo ou vidéo (.mp4/.webm), remplaçable par page avec data-drone-media.
-  backdrop: "images/Lieux-et-marques/hero-lieux-et-marques-poster.jpg",
+  backdrop: "images/Lieux-et-marques/hero-lieux-et-marques-poster.webp",
   compactText: "Une vue aérienne peut enrichir cette prestation : plans d'ensemble, perspective sur le lieu, nouvelle dimension pour vos images.",
   backdropAlt: "",
-  sprite: "images/dji-lito-x1.png"
+  sprite: "images/dji-lito-x1.webp"
 };
 
 const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");

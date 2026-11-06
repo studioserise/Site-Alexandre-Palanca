@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/favicon.png?v=3">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
-  <link rel="preload" as="image" href="images/accueil-plans/plan-0-arriere.jpg?v=3" imagesrcset="images/accueil-plans/plan-0-arriere-1200.jpg?v=3 1200w, images/accueil-plans/plan-0-arriere.jpg?v=3 2400w" imagesizes="100vw" fetchpriority="high">
+  <link rel="preload" as="image" type="image/webp" href="images/accueil-plans/plan-0-arriere.webp?v=3" imagesrcset="images/accueil-plans/plan-0-arriere-1200.webp?v=3 1200w, images/accueil-plans/plan-0-arriere.webp?v=3 2400w" imagesizes="100vw" fetchpriority="high">
   <script src="page-transition.js?v=5"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alexandre Palanca | Photographe, vidéaste et création digitale en Dordogne</title>
@@ -791,19 +791,20 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="redesign.css?v=66">
+  <link rel="preload" href="fonts/introrust.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts.css?v=2">
+  <link rel="stylesheet" href="redesign.css?v=68">
   <link rel="stylesheet" href="site-nav.css?v=fondu">
   <link rel="stylesheet" href="cursor.css?v=7">
-  <script type="module" src="site-nav.js?v=theme"></script>
+  <script type="module" src="site-nav.js?v=perf"></script>
   <link rel="stylesheet" href="section-marker.css?v=bord">
   <script src="cursor.js?v=3" defer></script>
-  <script src="redesign.js?v=22" defer></script>
+  <script src="redesign.js?v=25" defer></script>
   <script src="section-marker.js?v=10" defer></script>
   <script src="vendor/gsap.min.js" defer></script>
   <script src="vendor/ScrollTrigger.min.js" defer></script>
-  <script type="module" src="drone.js?v=11"></script>
-  <link rel="stylesheet" href="drone.css?v=13">
+  <script type="module" src="drone.js?v=13"></script>
+  <link rel="stylesheet" href="drone.css?v=15">
   <link rel="stylesheet" href="mobile-cta.css?v=2">
 </head>
 
@@ -855,7 +856,7 @@
         <!-- Paysage en plans superposés, de l'arrière-plan au plan 1 -->
 
         <div class="hero-layers">
-          <img class="hero-layer" data-depth="0" src="images/accueil-plans/plan-0-arriere.jpg?v=3" srcset="images/accueil-plans/plan-0-arriere-1200.jpg?v=3 1200w, images/accueil-plans/plan-0-arriere.jpg?v=3 2400w" sizes="100vw" alt="" fetchpriority="high">
+          <img class="hero-layer" data-depth="0" src="images/accueil-plans/plan-0-arriere.webp?v=3" srcset="images/accueil-plans/plan-0-arriere-1200.webp?v=3 1200w, images/accueil-plans/plan-0-arriere.webp?v=3 2400w" sizes="100vw" alt="" fetchpriority="high">
           <img class="hero-layer" data-depth="1" src="images/accueil-plans/plan-4.webp?v=2" srcset="images/accueil-plans/plan-4-1200.webp?v=2 1200w, images/accueil-plans/plan-4.webp?v=2 2400w" sizes="100vw" alt="">
           <img class="hero-layer" data-depth="2" src="images/accueil-plans/plan-3.webp?v=2" srcset="images/accueil-plans/plan-3-1200.webp?v=2 1200w, images/accueil-plans/plan-3.webp?v=2 2400w" sizes="100vw" alt="">
           <!-- Signature animée : entre le plan 3 et le plan 2, les plans avant passent devant -->
@@ -924,7 +925,7 @@
 
     <section class="studio-about" id="a-propos" aria-labelledby="about-title">
       <figure class="studio-about-photo">
-        <img src="images/Alex & Elisa.jpg" alt="Alexandre en séance de prise de vue" loading="lazy">
+        <img src="images/alex-elisa.webp" decoding="async" alt="Alexandre en séance de prise de vue" loading="lazy">
       </figure>
       <div class="studio-about-copy">
         <p class="studio-eyebrow">Deux indépendants · Un même studio</p>
@@ -969,7 +970,7 @@
         <p>Nous aimons les échanges simples, les idées qui mûrissent ensemble et les finitions qui font toute la différence.</p>
       </div>
       <figure class="studio-approach-photo">
-        <img src="images/Lieux-et-marques/letm-05.jpg" alt="Détail d’un lieu photographié pour mettre en valeur son atmosphère" loading="lazy">
+        <img src="images/Lieux-et-marques/letm-05.webp" decoding="async" alt="Détail d’un lieu photographié pour mettre en valeur son atmosphère" loading="lazy">
       </figure>
     </section>
 
@@ -980,9 +981,9 @@
       </header>
       <div class="studio-testimonial-layout">
         <div class="studio-people" role="group" aria-label="Témoignages de nos clients">
-          <button type="button" class="studio-person is-selected" data-quote="0" aria-pressed="true"><img src="images/evenementiel/cabaret-01.jpg" alt="" loading="lazy" decoding="async"><span>Événementiel</span></button>
-          <button type="button" class="studio-person" data-quote="1" aria-pressed="false"><img src="images/Lieux-et-marques/letm-01.jpg" alt="" loading="lazy" decoding="async"><span>Hôtellerie</span></button>
-          <button type="button" class="studio-person" data-quote="2" aria-pressed="false"><img src="images/evenementiel/concert-01.jpg" alt="" loading="lazy" decoding="async"><span>Culture</span></button>
+          <button type="button" class="studio-person is-selected" data-quote="0" aria-pressed="true"><img src="images/evenementiel/cabaret-01-300.webp" alt="" loading="lazy" decoding="async"><span>Événementiel</span></button>
+          <button type="button" class="studio-person" data-quote="1" aria-pressed="false"><img src="images/Lieux-et-marques/letm-01-300.webp" alt="" loading="lazy" decoding="async"><span>Hôtellerie</span></button>
+          <button type="button" class="studio-person" data-quote="2" aria-pressed="false"><img src="images/evenementiel/concert-01-300.webp" alt="" loading="lazy" decoding="async"><span>Culture</span></button>
         </div>
         <blockquote class="studio-quote" aria-live="polite">
           <p id="studio-quote-text">« Votre retour d’expérience apparaîtra ici. »</p>
@@ -1268,7 +1269,7 @@
       const row = brand.querySelector(".hero-signature-row");
       const logoBox = brand.querySelector(".logo-position");
       const signature = brand.querySelector(".hero-signature");
-      const MAX_HIDDEN = 0.1;
+      const MAX_HIDDEN = 0.09; // 10 % autorisés, 9 % visés pour garder une petite marge d'arrondi
       // le logo apparaît seul, en plus grand, avant de se placer
       const startScale = () => parseFloat(getComputedStyle(row).getPropertyValue("--logo-start-scale")) || 1.625;
 
@@ -1280,8 +1281,9 @@
       });
 
       // Pour chaque colonne d'une image : premier (top) ou dernier (bottom) pixel visible.
-      const readAlpha = (images) => {
-        const w = images[0].naturalWidth, h = images[0].naturalHeight;
+      const readAlpha = (images, maxWidth = Infinity) => {
+        const ratio = Math.min(1, maxWidth / images[0].naturalWidth);
+        const w = Math.round(images[0].naturalWidth * ratio), h = Math.round(images[0].naturalHeight * ratio);
         const canvas = document.createElement("canvas");
         canvas.width = w; canvas.height = h;
         const context = canvas.getContext("2d", { willReadFrequently: true });
@@ -1374,14 +1376,25 @@
       };
 
       Promise.all([
-        Promise.all(["images/accueil-plans/plan-2-1200.webp?v=2", "images/accueil-plans/plan-1-1200.webp?v=2"].map(loadImage)),
+        // Les plans 2 et 1 déjà affichés sont réutilisés : rien n'est téléchargé en plus.
+        Promise.all([...document.querySelectorAll('.hero-layer[data-depth="3"], .hero-layer[data-depth="4"]')].map((layer) =>
+          layer.complete && layer.naturalWidth ? Promise.resolve(layer) : new Promise((resolve, reject) => {
+            layer.addEventListener("load", () => resolve(layer), { once: true });
+            layer.addEventListener("error", reject, { once: true });
+          }))),
         loadImage(signature.currentSrc || signature.src),
         loadImage(brand.querySelector(".hero-logo").currentSrc || brand.querySelector(".hero-logo").src)
       ]).then(([frontImages, textImage, logoImage]) => {
-        front = readAlpha(frontImages);
-        text = readAlpha([textImage]);
-        mark = readAlpha([logoImage]);
-        placeLogo();
+        // Calcul fait dès que le navigateur a un moment libre (au plus tard 600 ms), pour ne pas
+        // freiner l'affichage de la page ; l'animation du logo ne démarre qu'après 1,5 s.
+        const compute = () => {
+          front = readAlpha(frontImages, 1200);
+          text = readAlpha([textImage]);
+          mark = readAlpha([logoImage]);
+          placeLogo();
+        };
+        if ("requestIdleCallback" in window) requestIdleCallback(compute, { timeout: 600 });
+        else setTimeout(compute, 0);
       }).catch(() => {});
 
       let resizeTimer = null;

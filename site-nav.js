@@ -164,11 +164,11 @@ if (!document.querySelector(".site-footer")) {
         <div class="site-footer-card-inner">
           ${[-3, -2, -1, 0, 1, 2, 3].map((z) => `<span class="site-footer-card-slice" style="--z:${z}px" aria-hidden="true"></span>`).join("")}
           <div class="site-footer-card-face site-footer-card-front">
-            <span class="card-ink card-ink--logo" style="--ink: url(images/logo-accueil-carte.png)"><img src="images/logo-accueil-carte.png" alt="" aria-hidden="true"></span>
-            <span class="card-ink card-ink--text" style="--ink: url(images/texte-accueil-carte.png)"><img src="images/texte-accueil-carte.png" alt="Alex &amp; Elisa"></span>
+            <span class="card-ink card-ink--logo" style="--ink: url(images/logo-accueil-carte.png)"><img src="images/logo-accueil-carte.png" alt="" aria-hidden="true" loading="lazy" decoding="async"></span>
+            <span class="card-ink card-ink--text" style="--ink: url(images/texte-accueil-carte.png)"><img src="images/texte-accueil-carte.png" alt="Alex &amp; Elisa" loading="lazy" decoding="async"></span>
           </div>
           <div class="site-footer-card-face site-footer-card-back">
-            <img src="images/envers%20carte.png" alt="Alexandre Palanca, photographe — 06 79 53 82 80 — instagram alexpalanca — alexpalanca@gmail.com">
+            <img src="images/carte-verso.webp" loading="lazy" decoding="async" alt="Alexandre Palanca, photographe — 06 79 53 82 80 — instagram alexpalanca — alexpalanca@gmail.com">
           </div>
         </div>
       </div>

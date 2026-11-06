@@ -19,6 +19,16 @@
     var images = tile.querySelectorAll('img');
     var index = 0;
     var timer = null;
+    // Les images 2 et 3 d'une case ne sont téléchargées qu'au premier survol (data-src) :
+    // la page s'ouvre beaucoup plus vite.
+    function loadAll() {
+      Array.prototype.forEach.call(images, function (img) {
+        var src = img.getAttribute('data-src');
+        var srcset = img.getAttribute('data-srcset');
+        if (srcset) { img.srcset = srcset; img.removeAttribute('data-srcset'); }
+        if (src) { img.src = src; img.removeAttribute('data-src'); }
+      });
+    }
     var videoSrc = tile.getAttribute('data-video');
     var video = null;
     if (images[0]) images[0].classList.add('is-active');
@@ -60,6 +70,7 @@
     return {
       start: function () {
         tile.classList.add('is-hovered');
+        loadAll();
         if (images.length < 2 || timer) return;
         timer = setInterval(function () { show(index + 1); }, SLIDE_DELAY);
       },

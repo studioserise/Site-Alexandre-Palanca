@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Intro Rust";
-  src: url("fonts/introrust.otf") format("opentype");
+  src: url("fonts/introrust.woff2") format("woff2"), url("fonts/introrust.otf") format("opentype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
