@@ -401,3 +401,11 @@ textarea {
 .site-footer-socials a { display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: inherit; opacity: 0.78; transition: opacity 200ms ease, transform 200ms ease; }
 .site-footer-socials a:hover, .site-footer-socials a:focus-visible { opacity: 1; transform: translateY(-2px); }
 .site-footer-socials svg { width: 24px; height: 24px; }
+
+/* Bouton de langue FR / EN, à côté de l'éclair */
+.site-lang-toggle { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; order: 2; min-width: 34px; padding: 8px 6px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; cursor: pointer; opacity: 0.85; transition: opacity 180ms ease; }
+.site-lang-toggle:hover, .site-lang-toggle:focus-visible { opacity: 1; }
+.site-nav-theme-item { gap: 6px; align-items: center; }
+.lang-legal-note { max-width: 760px; margin: 0 auto 24px; padding: 12px 16px; border-radius: 8px; background: rgba(245, 243, 239, 0.08); font-size: 0.82rem; }
+html[data-theme="light"] .site-lang-toggle { color: #171715; }
+html[data-theme="light"] .lang-legal-note { background: rgba(23, 23, 21, 0.06); }

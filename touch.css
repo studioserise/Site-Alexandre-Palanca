@@ -47,3 +47,4 @@
   65% { opacity: 1; }
   100% { background-position: -20% 0; opacity: 0; }
 }
+:lang(en) .photo-reel-tile[data-portfolio]::after { content: "Portfolio \2192\FE0E"; }

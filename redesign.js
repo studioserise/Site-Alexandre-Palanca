@@ -35,13 +35,16 @@ function selectPerson(index) {
 
 function typeQuote(quote, onDone) {
   clearInterval(typingTimer);
-  const full = `« ${quote.text} »`;
+  // Version anglaise : texte traduit et guillemets anglais
+  const i18n = window.siteI18n;
+  const english = i18n?.lang() === "en";
+  const full = english ? `“${i18n.t(quote.text)}”` : `« ${quote.text} »`;
   quoteText.classList.remove("is-selecting");
   quoteAuthor.textContent = "";
   quoteAuthor.style.opacity = "0";
   if (reducedMotion.matches) {
     quoteText.textContent = full;
-    quoteAuthor.textContent = quote.author;
+    quoteAuthor.textContent = i18n ? i18n.t(quote.author) : quote.author;
     quoteAuthor.style.opacity = "1";
     onDone();
     return;
@@ -53,7 +56,7 @@ function typeQuote(quote, onDone) {
     quoteText.textContent = full.slice(0, index);
     if (index >= full.length) {
       clearInterval(typingTimer);
-      quoteAuthor.textContent = quote.author;
+      quoteAuthor.textContent = i18n ? i18n.t(quote.author) : quote.author;
       quoteAuthor.style.opacity = "1";
       onDone();
     }

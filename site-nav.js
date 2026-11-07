@@ -61,13 +61,30 @@ if (siteNav && !siteNav.querySelector(".site-theme-toggle")) {
   const themeItem = document.createElement("li");
   themeItem.className = "site-nav-theme-item";
   const mobileNav = window.matchMedia("(max-width: 800px)");
+  // Bouton de langue (FR / EN), placé juste avant l'éclair. Il affiche la langue vers laquelle il bascule.
+  const langToggle = document.createElement("button");
+  langToggle.className = "site-lang-toggle";
+  langToggle.type = "button";
+  const syncLangToggle = () => {
+    const english = window.siteI18n?.lang() === "en";
+    langToggle.textContent = english ? "FR" : "EN";
+    langToggle.setAttribute("lang", english ? "fr" : "en");
+    langToggle.setAttribute("aria-label", english ? "Passer le site en français" : "Switch the site to English");
+  };
+  syncLangToggle();
+  langToggle.addEventListener("click", () => {
+    window.siteI18n?.toggle();
+    syncLangToggle();
+  });
+  if (!window.siteI18n) langToggle.hidden = true; // page sans traduction
+
   const placeThemeToggle = () => {
     if (mobileNav.matches && siteNavLinks) {
-      themeItem.append(themeToggle);
+      themeItem.append(langToggle, themeToggle);
       siteNavLinks.append(themeItem);
     } else {
       themeItem.remove();
-      navInner.append(themeToggle);
+      navInner.append(langToggle, themeToggle);
     }
   };
   placeThemeToggle();

@@ -119,3 +119,6 @@
 @media (prefers-reduced-motion: reduce) {
   .photo-reel-tile, .photo-reel-tile img { transition-duration: 1ms; }
 }
+
+/* Version anglaise */
+:lang(en) .photo-reel-tile[data-portfolio]::after { content: "View in portfolio \2192\FE0E"; }
