@@ -160,10 +160,12 @@ function createPhotoCard(photo, index) {
   });
   openButton.append(image);
 
-  if (!isFree) {
+  // Les photos payantes portent déjà leur propre filigrane : plus de mention « APERÇU » ajoutée par le site
+  // (seule la galerie de démonstration garde sa mention).
+  if (photo.demo) {
     const watermark = document.createElement("span");
     watermark.className = "gallery-preview-watermark";
-    watermark.textContent = photo.demo ? "APERÇU DÉMO" : "APERÇU";
+    watermark.textContent = "APERÇU DÉMO";
     openButton.append(watermark);
   }
   openButton.addEventListener("click", () => openViewer(index));
@@ -346,7 +348,7 @@ function renderViewer() {
     elements.viewerImage.alt = `Aperçu indisponible : ${error.message}`;
   });
   elements.viewerNumber.textContent = `Photo ${photo.photoNumber}`;
-  elements.viewer.querySelector(".gallery-viewer-watermark").hidden = isFree;
+  elements.viewer.querySelector(".gallery-viewer-watermark").hidden = !photo.demo;
   elements.viewerSelect.hidden = isFree;
   elements.viewerDownload.hidden = !isFree;
   elements.viewerDownload.textContent = "Télécharger en haute résolution";
