@@ -1001,3 +1001,63 @@ button {
 .admin-tool > div { flex: 1 1 420px; }
 .admin-tool h2 { margin-top: 0; }
 .admin-tool-download { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; white-space: nowrap; }
+
+/* Galerie « livraison vidéo » : boutons de téléchargement, sans aperçu */
+.gallery-video-list { display: grid; gap: 12px; width: min(calc(100% - 40px), 640px); margin: 10px auto 80px; }
+.gallery-video-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border: 1px solid rgba(245, 243, 239, 0.18);
+  border-radius: 12px;
+  background: rgba(245, 243, 239, 0.04);
+}
+.gallery-video-card strong { font-weight: 400; font-size: 1.05rem; overflow-wrap: anywhere; }
+.gallery-video-card .gallery-primary-button { border-radius: 9px; text-decoration: none; }
+.gallery-video-note { margin: 8px 0 0; color: #a9a59e; font-size: 0.84rem; line-height: 1.6; text-align: center; }
+@media (max-width: 560px) {
+  .gallery-video-card .gallery-primary-button { flex: 1 1 100%; text-align: center; }
+}
+
+/* Administration : liens de la livraison vidéo */
+.admin-video-links { display: grid; gap: 10px; margin: 6px 0 4px; }
+.admin-video-row { display: grid; grid-template-columns: 2fr 1.4fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+.admin-video-current { margin: 0; padding-left: 18px; font-size: 0.86rem; }
+.admin-video-current a { color: var(--gallery-text); overflow-wrap: anywhere; }
+.admin-video-links form { display: grid; gap: 8px; }
+@media (max-width: 700px) { .admin-video-row { grid-template-columns: 1fr; } }
+
+/* Fenêtre de livraison vidéo (page du code d'accès) */
+.video-dialog {
+  width: min(calc(100% - 32px), 560px);
+  padding: 30px 26px 24px;
+  border: 1px solid rgba(245, 243, 239, 0.2);
+  border-radius: 14px;
+  background: #101010;
+  color: var(--gallery-text);
+  text-align: center;
+}
+.video-dialog::backdrop { background: rgba(0, 0, 0, 0.72); }
+.video-dialog h2 { margin: 0; font-weight: 400; font-size: clamp(1.5rem, 5vw, 2.1rem); letter-spacing: -0.03em; }
+.video-dialog .gallery-eyebrow { margin-bottom: 10px; }
+.video-dialog-intro { margin: 12px 0 20px; color: #c5c1bb; font-size: 0.92rem; line-height: 1.6; }
+.video-dialog-list { display: grid; gap: 10px; text-align: left; }
+.video-dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(245, 243, 239, 0.2);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gallery-text);
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+.admin-video-multiple { grid-column: 1 / -1; display: inline-flex; gap: 8px; align-items: center; margin-top: -2px; color: #c5c1bb; font-size: 0.82rem; }
+.admin-video-multiple input { width: auto; }

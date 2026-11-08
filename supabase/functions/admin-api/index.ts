@@ -117,6 +117,29 @@ async function createSignedUpload(bucket: string, path: string) {
   return token;
 }
 
+
+// Liens de vidéos (galerie « livraison vidéo ») : 1 à 10 liens https, avec un nom facultatif.
+function parseVideoLinks(value: unknown) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 10) {
+    throw new Error("Liens vidéo invalides : ajoutez 1 à 10 liens.");
+  }
+  return value.map((entry, index) => {
+    const raw = typeof entry?.url === "string" ? entry.url.trim() : "";
+    let url: URL;
+    try {
+      url = new URL(raw);
+    } catch {
+      throw new Error(`Lien vidéo ${index + 1} invalide : collez l'adresse complète (https://…).`);
+    }
+    if (url.protocol !== "https:" || raw.length > 2000) {
+      throw new Error(`Lien vidéo ${index + 1} invalide : l'adresse doit commencer par https://.`);
+    }
+    const label = typeof entry?.label === "string" ? entry.label.trim().slice(0, 120) : "";
+    // multiple : le lien contient plusieurs vidéos (dossier ou zip) → « Télécharger les vidéos »
+    return { label, url: url.toString(), multiple: entry?.multiple === true };
+  });
+}
+
 Deno.serve(async (request) => {
   const preflight = preflightResponse(request);
   if (preflight) return preflight;
@@ -127,7 +150,7 @@ Deno.serve(async (request) => {
 
     if (request.method === "GET") {
       const [galleries, orders] = await Promise.all([
-        databaseRequest("galleries?select=id,name,type,tariff,status,expires_at,created_at,access_code_encrypted&order=created_at.desc"),
+        databaseRequest("galleries?select=id,name,type,tariff,status,expires_at,created_at,access_code_encrypted,delivery,video_links&order=created_at.desc"),
         databaseRequest("gallery_orders?select=id,gallery_id,customer_email,status,currency,subtotal_cents,discount_bps,discount_cents,total_cents,created_at,paid_at,sent_at&order=created_at.desc")
       ]);
       const orderIds = (orders as Array<{ id: string }>).map((order) => order.id);
@@ -156,7 +179,10 @@ Deno.serve(async (request) => {
       if (type !== "event" && type !== "individual") {
         return jsonResponse(request, 400, { message: "Type de galerie invalide." });
       }
-      const tariff = body.tariff;
+      const delivery = body.delivery === "video" ? "video" : "photos";
+      const videoLinks = delivery === "video" ? parseVideoLinks(body.videoLinks) : [];
+      // Livraison vidéo : téléchargement libre, pas de tarif
+      const tariff = delivery === "video" ? "tarif0" : body.tariff;
       if (!["tarif0", "tarif2", "tarif5"].includes(String(tariff))) {
         return jsonResponse(request, 400, { message: "Tarif de galerie invalide." });
       }
@@ -188,6 +214,8 @@ Deno.serve(async (request) => {
           access_code_hash: await sha256(code),
           access_code_encrypted: await encryptCode(code),
           expires_at: expiresAt,
+          delivery,
+          video_links: videoLinks,
           ...link
         })
       }) as Array<{ id: string; name: string; type: string; status: string; expires_at: string }>;
@@ -207,6 +235,17 @@ Deno.serve(async (request) => {
         body: JSON.stringify({ access_code_hash: await sha256(code), access_code_encrypted: await encryptCode(code) })
       });
       return jsonResponse(request, 200, { ok: true, accessCode: code });
+    }
+
+    // Modifier les liens d'une galerie « livraison vidéo »
+    if (body.action === "set-video-links") {
+      const galleryId = requiredText(body.galleryId, "Galerie", 64);
+      const videoLinks = parseVideoLinks(body.videoLinks);
+      await databaseRequest(`galleries?id=eq.${encodeURIComponent(galleryId)}&delivery=eq.video`, {
+        method: "PATCH",
+        body: JSON.stringify({ video_links: videoLinks })
+      });
+      return jsonResponse(request, 200, { ok: true });
     }
 
     if (body.action === "close-gallery") {
@@ -234,14 +273,17 @@ Deno.serve(async (request) => {
       const previewExtension = extensionFromFileName(body.previewFileName);
       const originalExtension = extensionFromFileName(body.originalFileName);
       const galleries = await databaseRequest(
-        `galleries?select=id,status,expires_at&id=eq.${encodeURIComponent(galleryId)}&limit=1`
-      ) as Array<{ id: string; status: string; expires_at: string }>;
+        `galleries?select=id,status,expires_at,delivery&id=eq.${encodeURIComponent(galleryId)}&limit=1`
+      ) as Array<{ id: string; status: string; expires_at: string; delivery: string }>;
       if (
         !galleries[0] ||
         galleries[0].status !== "open" ||
         Date.parse(galleries[0].expires_at) <= Date.now()
       ) {
         return jsonResponse(request, 410, { message: "Cette galerie est fermée." });
+      }
+      if (galleries[0].delivery === "video") {
+        return jsonResponse(request, 400, { message: "Galerie de livraison vidéo : pas de photos, seulement des liens." });
       }
       const photoId = crypto.randomUUID();
       const previewPath = `${galleryId}/${photoId}/preview.${previewExtension}`;
@@ -272,14 +314,17 @@ Deno.serve(async (request) => {
         return jsonResponse(request, 400, { message: "Informations de photo invalides." });
       }
       const galleries = await databaseRequest(
-        `galleries?select=id,status,expires_at&id=eq.${encodeURIComponent(galleryId)}&limit=1`
-      ) as Array<{ id: string; status: string; expires_at: string }>;
+        `galleries?select=id,status,expires_at,delivery&id=eq.${encodeURIComponent(galleryId)}&limit=1`
+      ) as Array<{ id: string; status: string; expires_at: string; delivery: string }>;
       if (
         !galleries[0] ||
         galleries[0].status !== "open" ||
         Date.parse(galleries[0].expires_at) <= Date.now()
       ) {
         return jsonResponse(request, 410, { message: "Cette galerie est fermée." });
+      }
+      if (galleries[0].delivery === "video") {
+        return jsonResponse(request, 400, { message: "Galerie de livraison vidéo : pas de photos, seulement des liens." });
       }
 
       const previewPath = requiredText(body.previewPath, "Chemin aperçu", 500);

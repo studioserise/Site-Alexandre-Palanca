@@ -48,8 +48,8 @@ Deno.serve(async (request) => {
     }
 
     const galleries = await databaseRequest(
-      `galleries?select=id,status,expires_at&access_code_hash=eq.${hash}&limit=1`
-    ) as Array<{ id: string; status: string; expires_at: string }>;
+      `galleries?select=id,status,expires_at,delivery&access_code_hash=eq.${hash}&limit=1`
+    ) as Array<{ id: string; status: string; expires_at: string; delivery: string }>;
     const gallery = galleries[0];
     if (!gallery) {
       return jsonResponse(request, 404, { message: "Code invalide ou galerie introuvable." });
@@ -64,7 +64,9 @@ Deno.serve(async (request) => {
     }).catch(() => {});
 
     return jsonResponse(request, 200, {
-      accessToken: await createGallerySession(gallery.id)
+      accessToken: await createGallerySession(gallery.id),
+      // Livraison vidéo : la page du code affiche une fenêtre de téléchargement (pas de galerie)
+      delivery: gallery.delivery === "video" ? "video" : "photos"
     });
   } catch (error) {
     return errorResponse(request, error);

@@ -464,6 +464,43 @@ function showLoadError(message, { serviceUnavailable = false } = {}) {
   elements.orderBar.hidden = true;
 }
 
+// Galerie « livraison vidéo » : un bouton de téléchargement par vidéo (lien externe), sans aperçu.
+function renderVideos(data) {
+  elements.title.textContent = data.gallery.name;
+  const several = data.videos.length > 1 || data.videos.some((video) => video.multiple);
+  elements.description.textContent = several
+    ? "Vos vidéos sont prêtes. Téléchargez-les avec les boutons ci-dessous (chaque lien s’ouvre dans un nouvel onglet)."
+    : "Votre vidéo est prête. Téléchargez-la avec le bouton ci-dessous (le lien s’ouvre dans un nouvel onglet).";
+  elements.grid.hidden = true;
+  elements.orderBar.hidden = true;
+  const list = document.createElement("section");
+  list.className = "gallery-video-list";
+  list.setAttribute("aria-label", several ? "Vidéos à télécharger" : "Vidéo à télécharger");
+  for (const video of data.videos) {
+    const card = document.createElement("div");
+    card.className = "gallery-video-card";
+    const name = document.createElement("strong");
+    name.textContent = video.label;
+    const link = document.createElement("a");
+    link.className = "gallery-primary-button";
+    link.href = video.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = video.multiple ? "Télécharger les vidéos" : "Télécharger la vidéo";
+    // Statistique : le clic est compté (jamais bloquant)
+    link.addEventListener("click", () => {
+      callGalleryFunction("gallery-data?compter=video", { method: "GET" }).catch(() => {});
+    });
+    card.append(name, link);
+    list.append(card);
+  }
+  const note = document.createElement("p");
+  note.className = "gallery-video-note";
+  note.textContent = "Pensez à enregistrer vos vidéos sur votre ordinateur ou votre téléphone : l’accès à cette page est limité dans le temps.";
+  list.append(note);
+  elements.grid.after(list);
+}
+
 async function loadGallery() {
   if (isDemo) {
     elements.title.textContent = "Galerie de démonstration";
@@ -484,6 +521,10 @@ async function loadGallery() {
 
   try {
     const data = await callGalleryFunction("gallery-data", { method: "GET" });
+    if (data.gallery.delivery === "video") {
+      renderVideos(data);
+      return;
+    }
     state.galleryId = data.gallery.id;
     state.galleryName = data.gallery.name;
     state.tariff = data.gallery.tariff;

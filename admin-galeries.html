@@ -7,13 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <title>Administration des galeries — Alexandre Palanca</title>
-  <link rel="stylesheet" href="galeries.css?v=outil">
+  <link rel="stylesheet" href="galeries.css?v=video2">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=langue">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script src="site-nav.js?v=langue" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="admin-galeries.js?v=code3"></script>
+  <script type="module" src="admin-galeries.js?v=video2"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -74,6 +74,18 @@
               Nom affiché
               <input class="gallery-admin-input" id="admin-gallery-name" maxlength="160" required>
             </label>
+            <label class="gallery-admin-label" for="admin-gallery-delivery">
+              Contenu
+              <select class="gallery-admin-select" id="admin-gallery-delivery">
+                <option value="photos">Photos</option>
+                <option value="video">Livraison vidéo (lien de téléchargement)</option>
+              </select>
+            </label>
+            <div class="admin-video-links" id="admin-video-links" hidden>
+              <p class="gallery-admin-note">Déposez la vidéo sur Google Drive, WeTransfer, SwissTransfer, Dropbox… puis collez ici le lien de téléchargement. Le client verra seulement un bouton « Télécharger » (rien n’est stocké sur le site).</p>
+              <div id="admin-video-rows"></div>
+              <button class="gallery-quiet-button" id="admin-video-add" type="button">+ Ajouter une autre vidéo</button>
+            </div>
             <div class="gallery-admin-row">
               <label class="gallery-admin-label" for="admin-gallery-type">
                 Type
@@ -82,7 +94,7 @@
                   <option value="individual">Galerie individuelle</option>
                 </select>
               </label>
-              <label class="gallery-admin-label" for="admin-gallery-tariff">
+              <label class="gallery-admin-label" for="admin-gallery-tariff" id="admin-gallery-tariff-field">
                 Tarif
                 <select class="gallery-admin-select" id="admin-gallery-tariff">
                   <option value="tarif0">Gratuit — téléchargement haute résolution</option>

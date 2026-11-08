@@ -68,7 +68,7 @@ export async function notifications() {
     rows("invoices?select=id,number,kind,status,quote_id,due_date,amount_due_cents,paid_cents,client_snapshot&status=neq.cancelled&limit=2000"),
     rows("contact_requests?select=*&status=eq.new&order=created_at.desc&limit=200"),
     rows("quote_reminders?select=quote_id,kind,token,prepared_at&sent_at=is.null&limit=200"),
-    rows(`galleries?select=id,name,status,expires_at,created_at,view_count,download_count,quote_id,event_id&limit=500`),
+    rows(`galleries?select=id,name,status,expires_at,created_at,view_count,download_count,quote_id,event_id,delivery&limit=500`),
     rows(`gallery_orders?select=id,gallery_id,total_cents,paid_at,status&status=in.(paid_to_prepare,sent)&paid_at=gte.${addDays(today, -30)}&limit=500`),
     rows(`planning_events?select=*&kind=eq.seance&event_date=gte.${addDays(today, -30)}&event_date=lte.${today}`),
     rows("notification_dismissals?select=key&limit=5000")
@@ -276,7 +276,9 @@ export async function notifications() {
     push({
       key: `stats:${gallery.id}:${gallery.view_count}:${gallery.download_count}:${sales.count}`, priority: 20, category: "galerie",
       title: `Galerie ${gallery.name}`,
-      detail: `${gallery.view_count} ouverture${gallery.view_count > 1 ? "s" : ""} · ${gallery.download_count} photo${gallery.download_count > 1 ? "s" : ""} téléchargée${gallery.download_count > 1 ? "s" : ""} · ${sales.count} vendue${sales.count > 1 ? "s" : ""} sur 30 jours${sales.cents ? ` (${formatMoney(sales.cents)})` : ""}.`,
+      detail: gallery.delivery === "video"
+        ? `Livraison vidéo : ${gallery.view_count} ouverture${gallery.view_count > 1 ? "s" : ""} · ${gallery.download_count} clic${gallery.download_count > 1 ? "s" : ""} sur « Télécharger ».`
+        : `${gallery.view_count} ouverture${gallery.view_count > 1 ? "s" : ""} · ${gallery.download_count} photo${gallery.download_count > 1 ? "s" : ""} téléchargée${gallery.download_count > 1 ? "s" : ""} · ${sales.count} vendue${sales.count > 1 ? "s" : ""} sur 30 jours${sales.cents ? ` (${formatMoney(sales.cents)})` : ""}.`,
       link: "admin-galeries.html"
     });
   }

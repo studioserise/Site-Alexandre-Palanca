@@ -14,6 +14,8 @@ type Gallery = {
   tariff: "tarif0" | "tarif2" | "tarif5";
   status: "open" | "closed";
   expires_at: string;
+  delivery: "photos" | "video";
+  video_links: Array<{ label: string; url: string; multiple?: boolean }>;
 };
 
 Deno.serve(async (request) => {
@@ -28,7 +30,7 @@ Deno.serve(async (request) => {
     const galleryId = await readGallerySession(request);
     const queryId = encodeURIComponent(galleryId);
     const galleries = await databaseRequest(
-      `galleries?select=id,name,type,tariff,status,expires_at&id=eq.${queryId}&limit=1`
+      `galleries?select=id,name,type,tariff,status,expires_at,delivery,video_links&id=eq.${queryId}&limit=1`
     ) as Gallery[];
     const gallery = galleries[0];
     if (
@@ -37,6 +39,29 @@ Deno.serve(async (request) => {
       Date.parse(gallery.expires_at) <= Date.now()
     ) {
       return jsonResponse(request, 410, { message: "Cette galerie est fermée." });
+    }
+
+    // Livraison vidéo : seulement les liens de téléchargement (aucun fichier stocké ici).
+    // ?compter=video : un clic sur « Télécharger » est compté pour les statistiques.
+    if (gallery.delivery === "video") {
+      if (new URL(request.url).searchParams.get("compter") === "video") {
+        await databaseRequest("rpc/count_gallery_download", {
+          method: "POST", body: JSON.stringify({ p_gallery: gallery.id })
+        }).catch(() => {});
+        return jsonResponse(request, 200, { ok: true });
+      }
+      return jsonResponse(request, 200, {
+        gallery: { id: gallery.id, name: gallery.name, type: gallery.type, tariff: "tarif0", delivery: "video" },
+        videos: (gallery.video_links ?? []).map((video, index) => ({
+          label: video.label || ((gallery.video_links ?? []).length > 1
+            ? `Vidéo${video.multiple ? "s" : ""} ${index + 1}`
+            : video.multiple ? "Vos vidéos" : "Votre vidéo"),
+          url: video.url,
+          multiple: video.multiple === true
+        })),
+        photos: [],
+        pricing: { unitPriceCents: 0, currency: "EUR", tiers: [] }
+      });
     }
 
     const [photos, settings, tiers] = await Promise.all([

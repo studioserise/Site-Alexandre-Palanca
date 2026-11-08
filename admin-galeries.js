@@ -123,6 +123,103 @@ function renderAccessCode(gallery) {
   return box;
 }
 
+// ---- Livraison vidéo : liens de téléchargement (nom facultatif + adresse)
+function videoRow(video = { label: "", url: "", multiple: false }) {
+  const row = document.createElement("div");
+  row.className = "admin-video-row";
+  const url = document.createElement("input");
+  url.className = "gallery-admin-input";
+  url.type = "url";
+  url.placeholder = "https://… (lien de téléchargement)";
+  url.value = video.url;
+  url.dataset.field = "url";
+  const label = document.createElement("input");
+  label.className = "gallery-admin-input";
+  label.placeholder = "Nom affiché (facultatif) — ex. Film du mariage";
+  label.maxLength = 120;
+  label.value = video.label;
+  label.dataset.field = "label";
+  const remove = makeText("button", "gallery-quiet-button", "Retirer");
+  remove.type = "button";
+  remove.addEventListener("click", () => {
+    if (row.parentElement.children.length > 1) row.remove();
+    else { url.value = ""; label.value = ""; }
+  });
+  const several = document.createElement("label");
+  several.className = "admin-video-multiple";
+  const check = document.createElement("input");
+  check.type = "checkbox";
+  check.checked = video.multiple === true;
+  check.dataset.field = "multiple";
+  several.append(check, " Plusieurs vidéos dans ce lien (dossier ou zip)");
+  row.append(url, label, remove, several);
+  return row;
+}
+function readVideoRows(container) {
+  return [...container.querySelectorAll(".admin-video-row")]
+    .map((row) => ({
+      url: row.querySelector('[data-field="url"]').value.trim(),
+      label: row.querySelector('[data-field="label"]').value.trim(),
+      multiple: row.querySelector('[data-field="multiple"]').checked
+    }))
+    .filter((video) => video.url);
+}
+function renderVideoLinks(gallery) {
+  const box = document.createElement("div");
+  box.className = "admin-video-links";
+  const list = document.createElement("ul");
+  list.className = "admin-video-current";
+  for (const video of gallery.video_links ?? []) {
+    const item = document.createElement("li");
+    const link = makeText("a", "", `${video.label || video.url}${video.multiple ? " (plusieurs vidéos)" : ""}`);
+    link.href = video.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    item.append(link);
+    list.append(item);
+  }
+  box.append(list);
+  if (gallery.status !== "open") return box;
+  const edit = makeText("button", "gallery-quiet-button", "Modifier les liens");
+  edit.type = "button";
+  const form = document.createElement("form");
+  form.hidden = true;
+  const rows = document.createElement("div");
+  for (const video of gallery.video_links?.length ? gallery.video_links : [undefined]) rows.append(videoRow(video));
+  const add = makeText("button", "gallery-quiet-button", "+ Ajouter une vidéo");
+  add.type = "button";
+  add.addEventListener("click", () => rows.append(videoRow()));
+  const save = makeText("button", "gallery-primary-button", "Enregistrer les liens");
+  save.type = "submit";
+  form.append(rows, add, save);
+  edit.addEventListener("click", () => { form.hidden = !form.hidden; });
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    save.disabled = true;
+    try {
+      await callAdmin({ action: "set-video-links", galleryId: gallery.id, videoLinks: readVideoRows(rows) });
+      await loadDashboard();
+      setMessage(`Liens enregistrés pour « ${gallery.name} ».`, false);
+    } catch (error) {
+      setMessage(error.message);
+      save.disabled = false;
+    }
+  });
+  box.append(edit, form);
+  return box;
+}
+
+const deliverySelect = document.getElementById("admin-gallery-delivery");
+const videoRows = document.getElementById("admin-video-rows");
+function syncDelivery() {
+  const video = deliverySelect.value === "video";
+  document.getElementById("admin-video-links").hidden = !video;
+  document.getElementById("admin-gallery-tariff-field").hidden = video;
+  if (video && !videoRows.children.length) videoRows.append(videoRow());
+}
+deliverySelect.addEventListener("change", syncDelivery);
+document.getElementById("admin-video-add").addEventListener("click", () => videoRows.append(videoRow()));
+
 function randomCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const values = crypto.getRandomValues(new Uint8Array(12));
@@ -136,14 +233,14 @@ function renderGalleries(galleries) {
     gallery.status === "open" && Date.parse(gallery.expires_at) > Date.now()
   );
   photoGallerySelect.replaceChildren();
-  for (const gallery of openGalleries) {
+  for (const gallery of openGalleries.filter((entry) => entry.delivery !== "video")) {
     const option = document.createElement("option");
     option.value = gallery.id;
     option.textContent = `${gallery.name} — ${tariffLabel(gallery.tariff)}`;
     option.dataset.tariff = gallery.tariff;
     photoGallerySelect.append(option);
   }
-  photoGallerySelect.disabled = openGalleries.length === 0;
+  photoGallerySelect.disabled = photoGallerySelect.options.length === 0;
   updatePhotoUploadNote();
   if (!galleries.length) {
     galleryList.append(makeText("p", "gallery-admin-note", "Aucune galerie."));
@@ -167,8 +264,11 @@ function renderGalleries(galleries) {
       )
     );
     record.append(header);
-    record.append(makeText("small", "", `${gallery.type === "event" ? "Événement partagé" : "Individuelle"} · ${tariffLabel(gallery.tariff)} · ferme le ${new Date(gallery.expires_at).toLocaleDateString("fr-FR")}`));
+    record.append(makeText("small", "", gallery.delivery === "video"
+      ? `Livraison vidéo · ${gallery.video_links?.length ?? 0} lien${(gallery.video_links?.length ?? 0) > 1 ? "s" : ""} · ferme le ${new Date(gallery.expires_at).toLocaleDateString("fr-FR")}`
+      : `${gallery.type === "event" ? "Événement partagé" : "Individuelle"} · ${tariffLabel(gallery.tariff)} · ferme le ${new Date(gallery.expires_at).toLocaleDateString("fr-FR")}`));
     record.append(renderAccessCode(gallery));
+    if (gallery.delivery === "video") record.append(renderVideoLinks(gallery));
     if (gallery.status === "open") {
       const button = makeText("button", "gallery-quiet-button", "Fermer cette galerie");
       button.type = "button";
@@ -329,11 +429,15 @@ document.getElementById("admin-create-gallery-form").addEventListener("submit", 
       tariff: tariffSelect.value,
       daysOpen: Number(document.getElementById("admin-gallery-days").value),
       session: document.getElementById("admin-gallery-session").value,
+      delivery: deliverySelect.value,
+      videoLinks: deliverySelect.value === "video" ? readVideoRows(videoRows) : undefined,
       code
     });
     document.getElementById("admin-created-code").textContent =
       `Galerie créée. Communiquez maintenant le code ${result.accessCode} au client ; il n’est pas conservé en clair.`;
     form.reset();
+    videoRows.replaceChildren();
+    syncDelivery();
     document.getElementById("admin-gallery-days").value = "15";
     await loadDashboard();
     document.getElementById("admin-created-code").textContent =
