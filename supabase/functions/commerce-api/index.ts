@@ -436,15 +436,15 @@ async function quotePdf(quote: Row, settings: Row) {
       { heading: "Réalisation", text: quote.service_period },
       { heading: "Description du projet", text: quote.project_description },
       { heading: "Conditions particulières", text: quote.special_conditions },
-      { heading: "Modalités de paiement", text: quote.payment_terms },
-      { heading: "Conditions d'annulation", text: quote.cancellation_terms },
-      { heading: "Conditions de livraison", text: quote.delivery_terms },
-      { heading: "Utilisation des photographies et vidéos", text: quote.usage_terms },
-      {
-        heading: "Bon pour accord",
-        text: "Date, signature du client précédée de la mention « Bon pour accord » :\n\n\n"
-      }
+      { heading: "Modalités de paiement", text: quote.payment_terms, small: true },
+      { heading: "Conditions d'annulation", text: quote.cancellation_terms, small: true },
+      { heading: "Conditions de livraison", text: quote.delivery_terms, small: true },
+      { heading: "Utilisation des photographies et vidéos", text: quote.usage_terms, small: true }
     ],
+    signatures: {
+      client: "Date et signature, précédées de la mention manuscrite « Bon pour accord »",
+      issuer: "Date et signature"
+    },
     footer: footerText(settings),
     logo: await loadLogo()
   });

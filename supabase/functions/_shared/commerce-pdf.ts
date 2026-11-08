@@ -30,7 +30,10 @@ export type PdfDocumentData = {
   vatBreakdown: Array<{ rateBps: number; baseCents: number; vatCents: number }>;
   totalTtcCents: number;
   extraTotals: Array<{ label: string; cents: number; strong?: boolean }>;
-  sections: Array<{ heading: string; text: string }>;
+  // small : conditions en petit et serré (police 6), pour que le devis tienne sur une page
+  sections: Array<{ heading: string; text: string; small?: boolean }>;
+  // Bloc de signatures (devis) : deux cadres côte à côte, « Le client » et « Le prestataire »
+  signatures?: { client: string; issuer: string };
   footer: string;
   logo?: Uint8Array | null;
 };
@@ -153,7 +156,7 @@ export async function renderDocumentPdf(data: PdfDocumentData) {
       text(value, tableX + labelW + 6, rowY + 6.5, { size: 9 });
     });
 
-    y = Math.min(top - 64, top - rows.length * rowH) - 34;
+    y = Math.min(top - 64, top - rows.length * rowH) - 26;
     text(data.title, MARGIN, y, { size: 22 });
     y -= 16;
     if (data.reference) {
@@ -182,7 +185,7 @@ export async function renderDocumentPdf(data: PdfDocumentData) {
         y -= 12.5;
       }
     }
-    y -= 18;
+    y -= 12;
   };
 
   const newPage = () => {
@@ -190,8 +193,9 @@ export async function renderDocumentPdf(data: PdfDocumentData) {
     y = PAGE_HEIGHT - MARGIN;
   };
 
+  // Bas de la zone de contenu : juste au-dessus du pied de page (première ligne à 36 pt du bas).
   const ensure = (height: number) => {
-    if (y - height < MARGIN + 30) newPage();
+    if (y - height < MARGIN + 14) newPage();
   };
 
   drawHeader();
@@ -275,16 +279,60 @@ export async function renderDocumentPdf(data: PdfDocumentData) {
   y -= 12;
 
   // Sections de conditions
+  let afterSmall = false;
   for (const section of data.sections.filter((entry) => entry.text.trim())) {
-    ensure(40);
-    text(section.heading, MARGIN, y, { size: 9, font: bold });
-    y -= 13;
-    for (const line of wrap(section.text, regular, 8.5, PAGE_WIDTH - 2 * MARGIN)) {
-      ensure(12);
-      text(line, MARGIN, y, { size: 8.5 });
-      y -= 11.5;
+    if (!section.small && afterSmall) y -= 5; // un peu d'air après le bloc de conditions
+    afterSmall = Boolean(section.small);
+    if (section.small) {
+      // Petit et serré : titre puis texte en police 6, sans ligne vide entre les paragraphes,
+      // chaque mention (paragraphe) commence simplement à la ligne.
+      ensure(20);
+      text(section.heading, MARGIN, y, { size: 6.5, font: bold });
+      y -= 7.6;
+      for (const line of wrap(section.text, regular, 6, PAGE_WIDTH - 2 * MARGIN).filter((line) => line.trim())) {
+        ensure(9);
+        text(line, MARGIN, y, { size: 6 });
+        y -= 7;
+      }
+      y -= 2;
+      continue;
     }
-    y -= 8;
+    ensure(36);
+    text(section.heading, MARGIN, y, { size: 9, font: bold });
+    y -= 12;
+    for (const line of wrap(section.text, regular, 8.5, PAGE_WIDTH - 2 * MARGIN)) {
+      // Une ligne vide ne provoque pas à elle seule une nouvelle page.
+      if (!line.trim()) { y -= 10.5; continue; }
+      ensure(11);
+      text(line, MARGIN, y, { size: 8.5 });
+      y -= 10.5;
+    }
+    y -= 6;
+  }
+
+  // Signatures : deux cadres côte à côte, avec assez de place pour signer (jamais coupés entre deux pages).
+  if (data.signatures) {
+    const boxHeight = 64; // environ 2,3 cm : de quoi dater, écrire « Bon pour accord » et signer
+    if (afterSmall) y -= 4;
+    ensure(boxHeight + 4);
+    const gap = 14;
+    const boxWidth = (PAGE_WIDTH - 2 * MARGIN - gap) / 2;
+    const boxes = [
+      { title: "Le client", note: data.signatures.client },
+      { title: "Le prestataire", note: data.signatures.issuer }
+    ];
+    boxes.forEach((box, index) => {
+      const x = MARGIN + index * (boxWidth + gap);
+      page.drawRectangle({
+        x, y: y - boxHeight, width: boxWidth, height: boxHeight,
+        borderColor: rgb(0.75, 0.75, 0.75), borderWidth: 0.6
+      });
+      text(box.title, x + 8, y - 12, { size: 8.5, font: bold });
+      wrap(box.note, regular, 6.5, boxWidth - 16).slice(0, 2).forEach((line, lineIndex) => {
+        text(line, x + 8, y - 22 - lineIndex * 8, { size: 6.5, color: GREY });
+      });
+    });
+    y -= boxHeight + 6;
   }
 
   // Pied de page sur chaque page
