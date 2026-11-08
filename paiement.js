@@ -1,6 +1,6 @@
 import { getConfig } from "./galeries-config.js?v=2";
 
-// Fiche de virement de l'acompte (p=acompte) ou du solde (p=solde) d'un devis accepté.
+// Paiement de l'acompte (p=acompte) ou du solde (p=solde) d'un devis accepté : par carte (Stripe) ou par virement.
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
 const token = params.get("t") || "";
@@ -61,6 +61,9 @@ function row(label, shown, copied) {
 
 async function start() {
   if (!token) return say("Lien incomplet", "Ouvrez cette page avec le bouton reçu par e-mail.");
+  if (params.get("ok") === "1") {
+    return say("Merci, paiement reçu !", "Votre paiement par carte a bien été effectué. Vous recevrez un reçu par e-mail, et le règlement est enregistré sur votre facture.");
+  }
   let data;
   try {
     data = await call({ action: "get" });
@@ -73,12 +76,10 @@ async function start() {
       ? "L'acompte de ce devis est déjà réglé. Merci !"
       : "Ce devis est déjà entièrement réglé. Merci !");
   }
-  if (!data.iban) {
-    return say("Coordonnées bancaires à venir", "Les coordonnées de virement ne sont pas encore disponibles. Répondez simplement à l'e-mail reçu pour les obtenir.");
-  }
   say(part === "acompte" ? "Régler l'acompte" : "Régler le solde", part === "acompte"
-    ? `L'acompte confirme la réservation de votre date.${data.dueDate ? ` Merci de faire le virement au plus tard le ${dateFr(data.dueDate)}.` : ""}`
-    : "Le solde peut être réglé par virement avant la prestation, ou sur place le jour même (espèces ou virement).");
+    ? `L'acompte confirme la réservation de votre date.${data.dueDate ? ` Merci de le régler au plus tard le ${dateFr(data.dueDate)}.` : ""}`
+    : "Le solde peut être réglé dès maintenant par carte ou par virement, ou sur place le jour même (espèces ou virement).");
+  $("p-card").textContent = `Payer ${money(data.amountCents)} par carte`;
   const facts = [
     ["Client", data.clientName],
     ...(data.invoiceNumber ? [[part === "acompte" ? "Facture d'acompte" : "Facture", data.invoiceNumber]] : []),
@@ -92,7 +93,10 @@ async function start() {
     return [dt, dd];
   }));
   const euros = (data.amountCents / 100).toFixed(2).replace(".", ",");
-  $("p-transfer").replaceChildren(
+  if (!data.iban) {
+    $("p-transfer").replaceChildren(row("Coordonnées de virement", "Bientôt disponibles : répondez à l'e-mail reçu pour les obtenir."));
+    $("p-done").hidden = true;
+  } else $("p-transfer").replaceChildren(
     row("Montant", money(data.amountCents), euros),
     row("Bénéficiaire", data.holder, data.holder),
     row("IBAN", data.iban, data.iban.replace(/\s+/g, "")),
@@ -111,6 +115,19 @@ function markDone() {
   message.dataset.kind = "success";
   message.textContent = "Merci ! Alexandre vous confirmera la bonne réception du virement.";
 }
+
+$("p-card").addEventListener("click", async () => {
+  const button = $("p-card");
+  button.disabled = true;
+  $("p-card-message").textContent = "";
+  try {
+    const { url } = await call({ action: "checkout" });
+    window.location.href = url;
+  } catch (error) {
+    $("p-card-message").textContent = error.message;
+    button.disabled = false;
+  }
+});
 
 $("p-done").addEventListener("click", async () => {
   const button = $("p-done");

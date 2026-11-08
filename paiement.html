@@ -7,14 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex,nofollow">
-  <meta name="description" content="Coordonnées de virement pour votre prestation Alexandre Palanca.">
-  <title>Fiche de virement — Alexandre Palanca</title>
+  <meta name="description" content="Paiement par carte ou par virement de votre prestation Alexandre Palanca.">
+  <title>Paiement — Alexandre Palanca</title>
   <link rel="stylesheet" href="galeries.css?v=outil">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=langue">
-  <link rel="stylesheet" href="reponse-devis.css?v=5">
+  <link rel="stylesheet" href="reponse-devis.css?v=6">
   <script src="site-nav.js?v=langue" defer></script>
-  <script type="module" src="paiement.js?v=2"></script>
+  <script type="module" src="paiement.js?v=3"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -31,6 +31,12 @@
       <p class="gallery-intro" id="p-intro" role="status">Chargement…</p>
       <div id="p-sheet" hidden>
         <dl class="quote-summary" id="p-facts"></dl>
+        <div class="pay-card">
+          <button class="gallery-primary-button" id="p-card" type="button">Payer par carte</button>
+          <p class="quote-help">Paiement sécurisé par Stripe. Le règlement est enregistré automatiquement.</p>
+          <p class="gallery-form-message" id="p-card-message" role="alert"></p>
+        </div>
+        <p class="pay-or"><span>ou par virement bancaire</span></p>
         <div class="transfer-sheet" id="p-transfer"></div>
         <p class="quote-help transfer-help">Dans l'application de votre banque : ajoutez ce bénéficiaire (nom + IBAN), puis faites un virement du montant indiqué en mettant la référence dans le libellé. Touchez « Copier » pour copier chaque information.</p>
         <div class="quote-choice">

@@ -523,6 +523,7 @@ async function quoteDetail(id) {
     <a class="gallery-quiet-button" href="#" id="back">←︎ Retour</a></div>
     <dl><dt>Client</dt><dd>${esc(c.name)}</dd><dt>Date</dt><dd>${dateFr(q.issue_date)}</dd>
     ${q.service_date ? `<dt>Rendez-vous</dt><dd>${dateFr(q.service_date)}${q.service_time ? ` à ${esc(q.service_time)}` : ""}${q.service_location ? ` — ${esc(q.service_location)}` : ""}</dd>` : ""}
+    ${q.online_balance_paid_cents ? `<dt>Payé par carte (à reporter)</dt><dd>${money(q.online_balance_paid_cents)} — reporté automatiquement sur la facture finale à son émission</dd>` : ""}
     ${q.deposit_transfer_notified_at ? `<dt>Virement de l'acompte</dt><dd>signalé par le client le ${dateFr(q.deposit_transfer_notified_at)} — à vérifier, puis à enregistrer sur la facture</dd>` : ""}
     ${q.balance_transfer_notified_at ? `<dt>Virement du solde</dt><dd>signalé par le client le ${dateFr(q.balance_transfer_notified_at)} — à vérifier, puis à enregistrer sur la facture</dd>` : ""}<dt>Valable jusqu'au</dt><dd>${dateFr(q.valid_until)}</dd>
     <dt>Total TTC</dt><dd>${money(q.total_ttc_cents)}</dd><dt>Acompte demandé</dt><dd>${money(data.deposit.requestedCents)}</dd>

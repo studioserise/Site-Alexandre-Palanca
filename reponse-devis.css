@@ -154,3 +154,11 @@
 }
 .transfer-row button.is-copied { border-color: #c6d6c1; color: #c6d6c1; }
 .transfer-help { margin-bottom: 18px; text-align: left; }
+
+/* Page de paiement : carte (Stripe) puis virement */
+.pay-card { display: grid; gap: 8px; justify-items: center; margin: 6px 0 4px; }
+.pay-card .gallery-primary-button { width: 100%; border-radius: 9px; padding: 17px 24px; font-size: 0.88rem; }
+.pay-card .quote-help { text-align: center; }
+.pay-card .gallery-form-message { margin: 0; min-height: 0; }
+.pay-or { display: flex; gap: 12px; align-items: center; margin: 20px 0 12px; color: #a9a59e; font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.pay-or::before, .pay-or::after { flex: 1; height: 1px; background: rgba(245, 243, 239, 0.16); content: ""; }

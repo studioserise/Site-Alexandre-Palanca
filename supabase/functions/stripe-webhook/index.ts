@@ -1,4 +1,34 @@
 import { databaseRequest } from "../_shared/http.ts";
+import { formatMoney } from "../_shared/commerce-pdf.ts";
+import { recordOnlinePayment } from "../_shared/commerce-core.ts";
+
+// Paiement par carte de l'acompte ou du solde d'un devis (page de paiement) : enregistré
+// comme règlement par carte, puis Alex est prévenu par e-mail.
+// deno-lint-ignore no-explicit-any
+async function handleCommercePayment(session: Record<string, any>) {
+  if (session.payment_status !== "paid") return;
+  const quoteId = String(session.metadata?.quote_id ?? "");
+  const part = session.metadata?.part === "acompte" ? "acompte" : "solde";
+  const amount = Number(session.amount_total) || 0;
+  if (!/^[0-9a-f-]{36}$/i.test(quoteId) || amount <= 0) return;
+  const quote = await recordOnlinePayment(quoteId, part, amount, `Stripe ${session.id}`);
+  if (!quote) return; // déjà enregistré
+  const name = quote.client_snapshot?.name ?? "Le client";
+  const text = `${name} a payé par carte ${formatMoney(amount)} (${part}) pour le devis ${quote.number}.\n\nLe règlement est enregistré automatiquement dans la gestion commerciale${part === "solde" ? " (s'il n'y a pas encore de facture finale, il y sera reporté à son émission)" : ""}.`;
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: requiredEnv("ORDER_EMAIL_FROM"),
+      to: [requiredEnv("CONTACT_EMAIL_TO")],
+      subject: `💳 Paiement par carte reçu : ${formatMoney(amount)} — devis ${quote.number} — ${name}`,
+      text,
+      html: `<p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6">${text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>")}</p>`
+    })
+  });
+  if (!response.ok) console.error("Resend rejected the payment notification", response.status);
+}
+
 
 const encoder = new TextEncoder();
 
@@ -120,7 +150,9 @@ Deno.serve(async (request) => {
     }
 
     const event = JSON.parse(rawBody);
-    if (event.type === "checkout.session.completed") {
+    if (event.type === "checkout.session.completed" && event.data?.object?.metadata?.commerce === "1") {
+      await handleCommercePayment(event.data.object);
+    } else if (event.type === "checkout.session.completed") {
       const session = event.data?.object;
       const orderId = session?.metadata?.order_id;
       if (

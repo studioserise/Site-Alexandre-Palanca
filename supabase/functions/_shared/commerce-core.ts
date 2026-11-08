@@ -821,6 +821,19 @@ export async function issueInvoice(id: string) {
     pdf_path: path,
     issued_at: new Date().toISOString()
   });
+  // Solde déjà payé par carte (Stripe) avant la facture finale : reporté comme règlement.
+  if (invoice.kind === "invoice" && invoice.quote_id) {
+    const quote = (await rows(`quotes?select=id,online_balance_paid_cents,online_payment_refs&id=${eq(invoice.quote_id)}`))[0];
+    const amount = Math.min(quote?.online_balance_paid_cents ?? 0, invoice.amount_due_cents);
+    if (amount > 0) {
+      await addPayment({
+        invoiceId: id, amountCents: amount, method: "carte", paidOn: todayParis(),
+        reference: String(quote.online_payment_refs).trim().split(/\s+(?=Stripe)/).pop()?.slice(0, 200) ?? "Stripe",
+        comment: "Payé par carte avant l'émission de la facture"
+      });
+      await patchOne("quotes", quote.id, { online_balance_paid_cents: quote.online_balance_paid_cents - amount });
+    }
+  }
   return await loadInvoice(id);
 }
 
@@ -866,13 +879,39 @@ export async function quoteDues(quote: Row) {
   );
   const deposit = invoices.find((entry) => entry.kind === "deposit") ?? null;
   const final = invoices.find((entry) => entry.kind === "invoice") ?? null;
-  const paid = invoices.reduce((sum, entry) => sum + entry.paid_cents, 0);
+  const paid = invoices.reduce((sum, entry) => sum + entry.paid_cents, 0) + (quote.online_balance_paid_cents ?? 0);
   return {
     deposit,
     final,
     depositRemainingCents: deposit ? Math.max(0, deposit.amount_due_cents - deposit.paid_cents) : 0,
     balanceRemainingCents: Math.max(0, quote.total_ttc_cents - paid)
   };
+}
+
+// Paiement par carte reçu (webhook Stripe) : réglé sur la facture d'acompte, la facture finale,
+// ou gardé sur le devis tant que la facture finale n'existe pas. Jamais enregistré deux fois.
+export async function recordOnlinePayment(quoteId: string, part: string, amountCents: number, reference: string) {
+  const already = await rows(`payments?select=id&reference=eq.${encodeURIComponent(reference)}&limit=1`);
+  const quote = (await rows(`quotes?select=*&id=${eq(quoteId)}`))[0];
+  if (!quote || already.length || String(quote.online_payment_refs ?? "").includes(reference)) return null;
+  let left = amountCents;
+  const dues = await quoteDues(quote);
+  const targets = part === "acompte" ? [dues.deposit] : [dues.final, dues.deposit];
+  for (const invoice of targets) {
+    if (!invoice || left <= 0) continue;
+    if (invoice.status !== "issued" && invoice.status !== "partially_paid") continue;
+    const amount = Math.min(left, invoice.amount_due_cents - invoice.paid_cents);
+    if (amount <= 0) continue;
+    await addPayment({ invoiceId: invoice.id, amountCents: amount, method: "carte", paidOn: todayParis(), reference, comment: "Paiement par carte (Stripe)" });
+    left -= amount;
+  }
+  if (left > 0) {
+    await patchOne("quotes", quote.id, {
+      online_balance_paid_cents: (quote.online_balance_paid_cents ?? 0) + left,
+      online_payment_refs: `${quote.online_payment_refs ?? ""} ${reference}`.trim().slice(-2000)
+    });
+  }
+  return quote;
 }
 
 // ---------------------------------------------------------------- documents

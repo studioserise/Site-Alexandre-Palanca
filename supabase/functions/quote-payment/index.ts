@@ -2,10 +2,11 @@ import { quoteDues, Row, todayParis } from "../_shared/commerce-core.ts";
 import { formatMoney } from "../_shared/commerce-pdf.ts";
 import { databaseRequest, sha256 } from "../_shared/http.ts";
 
-// Fiche de virement de l'acompte ou du solde d'un devis accepté (paiement.html).
+// Page de paiement de l'acompte ou du solde d'un devis accepté (paiement.html) :
+// paiement par carte (Stripe) ou fiche de virement.
 // Le lien contient la clé secrète du devis (la même que pour « Répondre à la proposition »).
-// Le client peut signaler « J'ai effectué le virement » : Alex est prévenu par e-mail
-// et enregistre lui-même le règlement à réception sur son compte.
+// Carte : le règlement est enregistré tout seul par stripe-webhook (metadata commerce = 1).
+// Virement : le client peut signaler « J'ai effectué le virement » ; Alex vérifie et enregistre.
 
 class UserError extends Error {
   status: number;
@@ -124,6 +125,43 @@ async function notify(quote: Row, part: string) {
   return { notified: true };
 }
 
+// Paiement par carte : session Stripe Checkout du montant restant.
+async function checkout(quote: Row, part: string, token: string) {
+  const { dues, amount } = await transfer(quote, part);
+  if (amount <= 0) throw new UserError(part === "acompte" ? "L'acompte est déjà réglé. Merci !" : "Tout est déjà réglé. Merci !", 409);
+  if (amount < 50) throw new UserError("Montant trop faible pour un paiement par carte.");
+  const origin = requiredEnv("FRONTEND_ORIGIN").replace(/\/$/, "");
+  const back = `${origin}/paiement.html?t=${encodeURIComponent(token)}&p=${part}`;
+  const label = part === "acompte"
+    ? `Acompte — devis ${quote.number}${dues.deposit ? ` (facture ${dues.deposit.number})` : ""}`
+    : `Solde — devis ${quote.number}${dues.final ? ` (facture ${dues.final.number})` : ""}`;
+  const params = new URLSearchParams();
+  params.set("mode", "payment");
+  params.set("success_url", `${back}&ok=1`);
+  params.set("cancel_url", back);
+  if (quote.client_snapshot?.email) params.set("customer_email", quote.client_snapshot.email);
+  params.set("client_reference_id", quote.id);
+  params.set("metadata[commerce]", "1");
+  params.set("metadata[quote_id]", quote.id);
+  params.set("metadata[part]", part);
+  params.set("line_items[0][price_data][currency]", "eur");
+  params.set("line_items[0][price_data][product_data][name]", label);
+  params.set("line_items[0][price_data][unit_amount]", String(amount));
+  params.set("line_items[0][quantity]", "1");
+  params.set("expires_at", String(Math.floor(Date.now() / 1000) + 60 * 60));
+  const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${requiredEnv("STRIPE_SECRET_KEY")}`, "Content-Type": "application/x-www-form-urlencoded" },
+    body: params
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || typeof result.url !== "string") {
+    console.error("Stripe refused the commerce checkout", response.status, result?.error?.code, result?.error?.message);
+    throw new Error("Stripe n'a pas pu ouvrir le paiement.");
+  }
+  return { url: result.url };
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: allowedOrigins().has(request.headers.get("Origin") ?? "") ? 204 : 403, headers: cors(request) });
@@ -136,6 +174,10 @@ Deno.serve(async (request) => {
     const quote = await findQuote(body.token);
     const part = body.part === "acompte" ? "acompte" : "solde";
     if (body.action === "get") return reply(request, 200, await view(quote, part));
+    if (body.action === "checkout") {
+      await consumeRateLimit(request);
+      return reply(request, 200, await checkout(quote, part, String(body.token)));
+    }
     if (body.action === "notify") {
       await consumeRateLimit(request);
       return reply(request, 200, await notify(quote, part));

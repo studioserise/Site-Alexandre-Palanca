@@ -4,7 +4,7 @@ import { quoteDues, Row, serviceWhen, todayParis, addDays } from "../_shared/com
 
 // Rappels au client avant la prestation (devis acceptés avec une date de prestation) :
 // - 72 h avant : rendez-vous (date, heure, lieu) + acompte à régler s'il ne l'est pas ;
-// - 24 h avant : rendez-vous + règlement du solde (par virement avant, ou sur place en espèces / virement).
+// - 24 h avant : rendez-vous + règlement du solde (par carte ou virement avant, ou sur place en espèces / virement).
 // Toutes les heures (pg_cron), les rappels arrivés à échéance sont préparés et envoyés à Alex pour
 // validation. Le client ne reçoit rien tant qu'Alex n'a pas cliqué « Envoyer au client » sur rappel.html.
 
@@ -112,7 +112,7 @@ async function defaultMessage(kind: string, quote: Row, client: Row) {
       hello, "",
       `Je me permets de vous rappeler notre rendez-vous du ${where(quote)}.`, "",
       dues.depositRemainingCents > 0
-        ? `Votre acompte de ${formatMoney(dues.depositRemainingCents)}${dues.deposit ? ` (facture ${dues.deposit.number})` : ""} n'a pas encore été réglé : merci de le régler dès maintenant par virement pour confirmer la réservation. Les coordonnées bancaires sont sur la fiche de virement (bouton ci-dessous).`
+        ? `Votre acompte de ${formatMoney(dues.depositRemainingCents)}${dues.deposit ? ` (facture ${dues.deposit.number})` : ""} n'a pas encore été réglé : merci de le régler dès maintenant pour confirmer la réservation, par carte bancaire ou par virement, grâce au bouton ci-dessous.`
         : "Votre acompte a bien été reçu, merci.",
       "",
       "N'hésitez pas à me contacter si vous avez la moindre question.", "",
@@ -129,7 +129,7 @@ async function defaultMessage(kind: string, quote: Row, client: Row) {
         dues.depositRemainingCents > 0
           ? `Il reste ${formatMoney(dues.balanceRemainingCents)} à régler (acompte compris). Vous pouvez au choix :`
           : `Pour le solde de ${formatMoney(dues.balanceRemainingCents)}, vous pouvez au choix :`,
-        "— le régler dès maintenant par virement (coordonnées sur la fiche de virement, bouton ci-dessous) ;",
+        "— le régler dès maintenant, par carte bancaire ou par virement, grâce au bouton ci-dessous ;",
         "— le régler sur place au moment de la prestation, en espèces ou par virement."
       ]
       : ["Tout est déjà réglé, merci !"]),
@@ -153,7 +153,7 @@ async function paymentButton(kind: string, quote: Row) {
   }
   return {
     url: `${site()}/paiement.html?t=${encodeURIComponent(token)}&p=${kind === "j3" ? "acompte" : "solde"}`,
-    label: kind === "j3" ? `Régler l'acompte par virement (${formatMoney(amount)})` : `Régler par virement (${formatMoney(amount)})`
+    label: kind === "j3" ? `Régler l'acompte (${formatMoney(amount)})` : `Régler le solde (${formatMoney(amount)})`
   };
 }
 

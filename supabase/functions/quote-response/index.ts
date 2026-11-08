@@ -245,7 +245,7 @@ async function sendClientConfirmation(
     "",
     ...(deposit
       ? [
-        `L'acompte confirme la réservation de votre date. Il est à régler par virement bancaire au plus tard le ${longDateFr(deposit.due_date)} (72 h avant la prestation) : toutes les coordonnées sont sur la fiche de virement, accessible avec le bouton ci-dessous.`,
+        `L'acompte confirme la réservation de votre date. Il est à régler au plus tard le ${longDateFr(deposit.due_date)} (72 h avant la prestation), par carte bancaire ou par virement, grâce au bouton ci-dessous.`,
         ""
       ]
       : []),
@@ -255,7 +255,7 @@ async function sendClientConfirmation(
     "Alexandre Palanca"
   ];
   const button = payUrl
-    ? `<p style="margin:28px 0"><a href="${escapeHtml(payUrl)}" style="display:inline-block;padding:15px 30px;background:#111111;color:#ffffff;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">Régler l'acompte par virement (${escapeHtml(money(deposit!.amount_due_cents))})</a></p>
+    ? `<p style="margin:28px 0"><a href="${escapeHtml(payUrl)}" style="display:inline-block;padding:15px 30px;background:#111111;color:#ffffff;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">Régler l'acompte (${escapeHtml(money(deposit!.amount_due_cents))})</a></p>
       <p style="color:#777777;font-size:12px">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>${escapeHtml(payUrl)}</p>`
     : "";
   const response = await fetch("https://api.resend.com/emails", {
@@ -268,7 +268,7 @@ async function sendClientConfirmation(
       subject: deposit
         ? `Votre devis ${quote.number} signé et votre facture d'acompte — Alexandre Palanca`
         : `Votre devis ${quote.number} signé — Alexandre Palanca`,
-      text: lines.join("\n") + (payUrl ? `\n\nFiche de virement de l'acompte : ${payUrl}` : ""),
+      text: lines.join("\n") + (payUrl ? `\n\nRégler l'acompte (carte ou virement) : ${payUrl}` : ""),
       html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
         <p>${lines.map(escapeHtml).join("<br>")}</p>${button}</div>`,
       attachments
@@ -424,7 +424,7 @@ async function accept(body: Row, request: Request) {
     {
       title: "Facture d'acompte",
       lines: [deposit
-        ? `${deposit.number} (${money(deposit.amount_due_cents)}) émise automatiquement, jointe à cet e-mail, à régler au plus tard le ${longDateFr(deposit.due_date)}. Le client l'a reçue avec son devis signé et le lien vers la fiche de virement.`
+        ? `${deposit.number} (${money(deposit.amount_due_cents)}) émise automatiquement, jointe à cet e-mail, à régler au plus tard le ${longDateFr(deposit.due_date)}. Le client l'a reçue avec son devis signé et le lien de paiement (carte ou virement).`
         : depositError
         ? `Elle n'a pas pu être émise automatiquement (${depositError}) : créez-la depuis la fiche du devis.`
         : "Pas d'acompte prévu sur ce devis."]
