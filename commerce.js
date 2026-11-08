@@ -258,6 +258,7 @@ async function settings() {
   view.innerHTML = `<div class="com-panel"><h2>Informations de l'émetteur</h2><div class="com-form">
     <div class="com-row">${text("legal_name", "Nom légal")}${text("trade_name", "Nom commercial")}</div>
     <div class="com-row">${text("siren", "SIREN / SIRET")}${text("iban", "IBAN")}</div>
+    <div class="com-row">${text("bic", "BIC")}<p class="com-hint">L'IBAN et le BIC sont affichés au client sur la fiche de virement (acompte et solde).</p></div>
     ${text("address", "Adresse")}
     <div class="com-row">${text("postal_code", "Code postal")}${text("city", "Ville")}</div>
     <div class="com-row">${text("email", "E-mail")}${text("phone", "Téléphone")}</div>
@@ -317,7 +318,7 @@ async function quoteEditor(id, presetClient) {
   draft = {
     id: null, client: { ...EMPTY_CLIENT, ...(presetClient || {}) }, items: [],
     validUntil: new Date(Date.now() + (s.default_validity_days || 30) * 86400000).toISOString().slice(0, 10),
-    servicePeriod: "", projectDescription: "", specialConditions: "",
+    servicePeriod: "", serviceDate: "", serviceTime: "", serviceLocation: "", projectDescription: "", specialConditions: "",
     paymentTerms: s.default_payment_terms || "", cancellationTerms: s.default_cancellation_terms || "",
     deliveryTerms: s.default_delivery_terms || "", usageTerms: s.default_usage_terms || "",
     depositEnabled: true, depositPct: String((s.default_deposit_bps ?? 3000) / 100)
@@ -328,7 +329,8 @@ async function quoteEditor(id, presetClient) {
     const q = data.quote;
     Object.assign(draft, {
       id: q.id, client: clientFromRow({ id: q.client_id, ...q.client_snapshot, postal_code: q.client_snapshot?.postalCode ?? q.client_snapshot?.postal_code, vat_number: q.client_snapshot?.vatNumber ?? q.client_snapshot?.vat_number }),
-      validUntil: q.valid_until || "", servicePeriod: q.service_period, projectDescription: q.project_description,
+      validUntil: q.valid_until || "", servicePeriod: q.service_period,
+      serviceDate: q.service_date || "", serviceTime: q.service_time || "", serviceLocation: q.service_location || "", projectDescription: q.project_description,
       specialConditions: q.special_conditions, paymentTerms: q.payment_terms, cancellationTerms: q.cancellation_terms,
       deliveryTerms: q.delivery_terms, usageTerms: q.usage_terms, depositEnabled: q.deposit_enabled !== false,
       depositPct: String((q.deposit_bps ?? 3000) / 100),
@@ -347,7 +349,7 @@ function previewHtml() {
   return `<h4>Devis</h4>
     <div class="pv-cols"><div><strong>${esc(appSettings.trade_name || appSettings.legal_name)}</strong><br>${esc(appSettings.address)}<br>${esc(`${appSettings.postal_code} ${appSettings.city}`)}</div>
     <div><strong>${esc(c.name) || "Client"}</strong><br>${esc(c.address)}<br>${esc(`${c.postalCode} ${c.city}`.trim())}</div></div>
-    <div>Valable jusqu'au ${dateFr(draft.validUntil)}${draft.servicePeriod ? ` · Prestation : ${esc(draft.servicePeriod)}` : ""}</div>
+    <div>Valable jusqu'au ${dateFr(draft.validUntil)}${draft.serviceDate ? ` · Prestation le ${dateFr(draft.serviceDate)}${draft.serviceTime ? ` à ${esc(draft.serviceTime)}` : ""}${draft.serviceLocation ? `, ${esc(draft.serviceLocation)}` : ""}` : ""}${draft.servicePeriod ? ` · ${esc(draft.servicePeriod)}` : ""}</div>
     <table><thead><tr><th>Désignation</th><th class="r">Qté</th><th class="r">P.U.</th><th class="r">Total</th></tr></thead><tbody>
     ${draft.items.map((i) => { const p = itemPayload(i); return `<tr><td><strong>${esc(i.title)}</strong><br>${esc(i.description)}</td><td class="r">${esc(i.quantity)} ${esc(i.unit)}</td><td class="r">${money(p.unitPriceCents)}</td><td class="r">${money(Math.round(p.quantity * p.unitPriceCents))}</td></tr>`; }).join("")}
     </tbody></table>
@@ -428,7 +430,10 @@ function stepItems(body, refresh) {
 }
 
 function stepTerms(body, refresh) {
-  body.innerHTML = `<div class="com-row">${field("Valable jusqu'au", input("validUntil", draft.validUntil, 'type="date"'))}${field("Date de la prestation", input("servicePeriod", draft.servicePeriod))}</div>
+  body.innerHTML = `<div class="com-row">${field("Date de la prestation", input("serviceDate", draft.serviceDate, 'type="date"'))}${field("Heure du rendez-vous", input("serviceTime", draft.serviceTime, 'type="time"'))}</div>
+    ${field("Lieu du rendez-vous", input("serviceLocation", draft.serviceLocation, 'placeholder="Adresse ou lieu précis"'))}
+    <p class="com-hint">La date, l'heure et le lieu servent aux rappels envoyés au client 72 h et 24 h avant (après ta validation), et à l'échéance de l'acompte (72 h avant).</p>
+    <div class="com-row">${field("Valable jusqu'au", input("validUntil", draft.validUntil, 'type="date"'))}${field("Précisions sur la réalisation", input("servicePeriod", draft.servicePeriod, 'placeholder="Durée, plusieurs dates…"'))}</div>
     ${field("Description du projet", textarea("projectDescription", draft.projectDescription))}
     ${field("Conditions particulières", textarea("specialConditions", draft.specialConditions))}
     <div class="com-row"><label class="com-check"><input type="checkbox" id="dep-on" ${draft.depositEnabled ? "checked" : ""}> Demander un acompte</label>${field("Acompte (%)", input("depositPct", draft.depositPct, 'inputmode="decimal"'))}</div>
@@ -450,7 +455,8 @@ function stepReview(body) {
   const persist = async () => {
     const data = await run(() => api("save-quote", {
       quoteId: draft.id, client: draft.client, items: draft.items.map(itemPayload),
-      validUntil: draft.validUntil || null, servicePeriod: draft.servicePeriod, projectDescription: draft.projectDescription,
+      validUntil: draft.validUntil || null, servicePeriod: draft.servicePeriod,
+      serviceDate: draft.serviceDate || null, serviceTime: draft.serviceTime, serviceLocation: draft.serviceLocation, projectDescription: draft.projectDescription,
       specialConditions: draft.specialConditions, paymentTerms: draft.paymentTerms, cancellationTerms: draft.cancellationTerms,
       deliveryTerms: draft.deliveryTerms, usageTerms: draft.usageTerms, depositEnabled: draft.depositEnabled,
       depositBps: Math.round((parseFloat(String(draft.depositPct).replace(",", ".")) || 0) * 100)
@@ -477,8 +483,8 @@ function stepReview(body) {
 
 async function documentActions(kind, id, defaultEmail) {
   // Téléchargement direct (fichier enregistré sous un nom lisible), sans ouvrir d'onglet
-  const open = async () => {
-    const d = await run(() => api("document-url", { kind, id, days: 1 }));
+  const open = async (signed = false) => {
+    const d = await run(() => api("document-url", { kind, id, days: 1, signed: signed === true }));
     if (!d) return;
     const link = document.createElement("a");
     link.href = d.downloadUrl || d.url;
@@ -498,7 +504,7 @@ async function documentActions(kind, id, defaultEmail) {
     const message = window.prompt(kind === "quote" ? "Message (laisser vide pour le message par défaut, avec le bouton « Répondre à la proposition ») :" : "Message (laisser vide pour le message par défaut) :", "") || "";
     if (await run(() => api("send-document", { kind, id, to, message }))) say("E-mail envoyé.", true);
   };
-  return { open, copy, send };
+  return { open, openSigned: () => open(true), copy, send };
 }
 
 async function quoteDetail(id) {
@@ -512,12 +518,16 @@ async function quoteDetail(id) {
   const actions = await documentActions("quote", id, c.email);
   view.innerHTML = `<div class="com-panel com-detail"><div class="com-top"><h2>Devis ${esc(q.number)} ${badge(QUOTE_STATUS, q.status)}</h2>
     <a class="gallery-quiet-button" href="#" id="back">←︎ Retour</a></div>
-    <dl><dt>Client</dt><dd>${esc(c.name)}</dd><dt>Date</dt><dd>${dateFr(q.issue_date)}</dd><dt>Valable jusqu'au</dt><dd>${dateFr(q.valid_until)}</dd>
+    <dl><dt>Client</dt><dd>${esc(c.name)}</dd><dt>Date</dt><dd>${dateFr(q.issue_date)}</dd>
+    ${q.service_date ? `<dt>Rendez-vous</dt><dd>${dateFr(q.service_date)}${q.service_time ? ` à ${esc(q.service_time)}` : ""}${q.service_location ? ` — ${esc(q.service_location)}` : ""}</dd>` : ""}
+    ${q.deposit_transfer_notified_at ? `<dt>Virement de l'acompte</dt><dd>signalé par le client le ${dateFr(q.deposit_transfer_notified_at)} — à vérifier, puis à enregistrer sur la facture</dd>` : ""}
+    ${q.balance_transfer_notified_at ? `<dt>Virement du solde</dt><dd>signalé par le client le ${dateFr(q.balance_transfer_notified_at)} — à vérifier, puis à enregistrer sur la facture</dd>` : ""}<dt>Valable jusqu'au</dt><dd>${dateFr(q.valid_until)}</dd>
     <dt>Total TTC</dt><dd>${money(q.total_ttc_cents)}</dd><dt>Acompte demandé</dt><dd>${money(data.deposit.requestedCents)}</dd>
     <dt>Acompte facturé</dt><dd>${money(data.deposit.invoicedCents)}</dd><dt>Acompte reçu</dt><dd>${money(data.deposit.receivedCents)}</dd></dl>
     <div class="com-actions"><button class="gallery-primary-button" id="dl" type="button">Télécharger le PDF</button>
+    ${q.signed_pdf_path ? '<button class="gallery-primary-button" id="dls" type="button">Télécharger le devis signé</button>' : ""}
     <button class="gallery-quiet-button" id="cp" type="button">Copier le lien</button><button class="gallery-quiet-button" id="sd" type="button">Envoyer par e-mail</button></div>
-    ${q.responded_at ? `<h3>Réponse du client</h3><p>${q.status === "accepted" ? "Devis accepté" : "Devis refusé"} en ligne le ${dateFr(q.responded_at.slice(0, 10))}${q.status === "refused" ? (q.response_redo ? " — <strong>souhaite un nouveau devis</strong>" : " — ne demande pas de nouveau devis") : ""}.</p>
+    ${q.responded_at ? `<h3>Réponse du client</h3><p>${q.status === "accepted" ? (q.signed_at ? "Devis accepté et signé" : "Devis accepté") : "Devis refusé"} en ligne le ${dateFr(q.responded_at.slice(0, 10))}${q.status === "refused" ? (q.response_redo ? " — <strong>souhaite un nouveau devis</strong>" : " — ne demande pas de nouveau devis") : ""}.</p>
       ${q.response_comment ? `<p><em>Commentaire :</em><br>${esc(q.response_comment).replace(/\n/g, "<br>")}</p>` : ""}` : ""}
     <h3>Statut</h3><div class="com-actions">${["sent", "accepted", "refused"].map((s) => `<button class="gallery-quiet-button" type="button" data-st="${s}">Marquer ${QUOTE_STATUS[s][0].toLowerCase()}</button>`).join("")}</div>
     ${q.status === "accepted" ? `<h3>Facturation</h3><div class="com-actions">
@@ -525,7 +535,8 @@ async function quoteDetail(id) {
       <button class="gallery-primary-button" type="button" data-inv="final">Créer la facture finale</button></div>` : ""}
     <h3>Factures liées</h3>${data.invoices.map((i) => `<p><a href="#" data-i="${i.id}">${esc(i.number || "Brouillon")}</a> — ${i.kind === "deposit" ? "Acompte" : "Facture"} ${money(i.total_ttc_cents)} ${badge(INVOICE_STATUS, i.status)}</p>`).join("") || "<p>Aucune.</p>"}</div>`;
   document.getElementById("back").onclick = (e) => { e.preventDefault(); go("quotes"); };
-  document.getElementById("dl").onclick = actions.open;
+  document.getElementById("dl").onclick = () => actions.open();
+  if (q.signed_pdf_path) document.getElementById("dls").onclick = actions.openSigned;
   document.getElementById("cp").onclick = actions.copy;
   document.getElementById("sd").onclick = actions.send;
   view.querySelectorAll("[data-st]").forEach((b) => b.onclick = async () => {

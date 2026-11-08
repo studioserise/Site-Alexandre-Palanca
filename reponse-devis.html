@@ -12,9 +12,9 @@
   <link rel="stylesheet" href="galeries.css?v=outil">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=langue">
-  <link rel="stylesheet" href="reponse-devis.css?v=2">
+  <link rel="stylesheet" href="reponse-devis.css?v=4">
   <script src="site-nav.js?v=langue" defer></script>
-  <script type="module" src="reponse-devis.js?v=1"></script>
+  <script type="module" src="reponse-devis.js?v=3"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -65,6 +65,11 @@
         <button class="quote-link-button" id="add-comment" type="button">+ Ajouter un commentaire</button>
         <label class="quote-field" id="accept-comment-field" hidden><span>Votre commentaire</span><textarea name="comment" rows="4" maxlength="3000" placeholder="Une précision, une question, un détail pour la prestation…"></textarea></label>
         <p class="quote-help" id="deposit-note"></p>
+        <div class="quote-sign">
+          <div class="quote-sign-head"><span>Signature * — « Bon pour accord »</span><button class="quote-link-button" id="sign-clear" type="button">Effacer</button></div>
+          <canvas class="quote-sign-pad" id="sign-pad" aria-label="Cadre de signature : signez avec la souris ou le doigt"></canvas>
+          <p class="quote-help" id="sign-date"></p>
+        </div>
         <div class="quote-choice">
           <button class="gallery-primary-button" type="submit">Confirmer l'acceptation</button>
           <button class="quote-ghost-button" data-back type="button">Retour</button>
@@ -83,6 +88,8 @@
         <p class="gallery-form-message" role="alert"></p>
       </form>
 
+      <a class="gallery-primary-button quote-pay-link" id="q-pay" href="#" hidden></a>
+      <br>
       <a class="gallery-back-link" href="index.html">Retour au site</a>
     </section>
   </main>

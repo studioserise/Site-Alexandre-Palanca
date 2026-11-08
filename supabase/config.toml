@@ -33,3 +33,9 @@ verify_jwt = false
 
 [functions.quote-response]
 verify_jwt = false
+
+[functions.quote-payment]
+verify_jwt = false
+
+[functions.quote-reminders]
+verify_jwt = false

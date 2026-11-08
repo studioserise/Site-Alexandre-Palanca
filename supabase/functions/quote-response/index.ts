@@ -1,4 +1,8 @@
 import { databaseRequest, sha256 } from "../_shared/http.ts";
+import { signQuotePdf } from "../_shared/commerce-pdf.ts";
+import { invoiceFromQuote, issueInvoice, longDateFr, serviceSummary } from "../_shared/commerce-core.ts";
+
+const BUCKET = "commerce-documents";
 
 // Réponse du client à un devis, depuis la page reponse-devis.html (lien reçu avec le devis).
 // Le lien contient une clé secrète propre au devis : sans elle, rien n'est lisible ni modifiable.
@@ -122,7 +126,10 @@ async function consumeRateLimit(request: Request) {
 type Section = { title: string; lines: Array<[string, string]> | string[] };
 
 // E-mail de notification envoyé à Alex à chaque réponse (accepté / refusé), avec toutes les infos.
-async function notifyAlex(subject: string, headline: string, sections: Section[], replyTo: string) {
+async function notifyAlex(
+  subject: string, headline: string, sections: Section[], replyTo: string,
+  attachments: Array<{ filename: string; content: string }> = []
+) {
   const textBody = [headline, ...sections.flatMap((section) => [
     "", section.title.toUpperCase(),
     ...section.lines.map((line) => Array.isArray(line) ? `${line[0]} : ${line[1] || "—"}` : line)
@@ -145,7 +152,8 @@ async function notifyAlex(subject: string, headline: string, sections: Section[]
       ...(isEmail(replyTo) ? { reply_to: replyTo } : {}),
       subject,
       text: textBody,
-      html
+      html,
+      ...(attachments.length ? { attachments } : {})
     })
   });
   if (!response.ok) console.error("Resend rejected a quote response notification", response.status);
@@ -168,7 +176,7 @@ async function quoteSection(quote: Row): Promise<Section[]> {
       lines: [
         ["Montant total", money(quote.total_ttc_cents)],
         ["Acompte", quote.deposit_enabled && quote.deposit_cents ? money(quote.deposit_cents) : "aucun"],
-        ["Date de la prestation", quote.service_period || ""],
+        ["Prestation", serviceSummary(quote)],
         ["Projet", quote.project_description || ""],
         ["Émis le", dateFr(quote.issue_date)],
         ["Valable jusqu'au", dateFr(quote.valid_until)]
@@ -195,7 +203,7 @@ function publicView(quote: Row, client: Row | null) {
       totalCents: quote.total_ttc_cents,
       depositCents: quote.deposit_enabled ? quote.deposit_cents : 0,
       projectDescription: quote.project_description || "",
-      servicePeriod: quote.service_period || ""
+      servicePeriod: serviceSummary(quote)
     },
     client: {
       type: source.type === "professionnel" ? "professionnel" : "particulier",
@@ -221,7 +229,87 @@ async function load(token: unknown) {
   return { ...view, items: items.map((item) => ({ title: item.title })) };
 }
 
-async function accept(body: Row) {
+
+// E-mail au client après sa signature : copie du devis signé, facture d'acompte, bouton de paiement.
+async function sendClientConfirmation(
+  data: Row, quote: Row, deposit: Row | null, payUrl: string,
+  attachments: Array<{ filename: string; content: string }>
+) {
+  const firstName = data.type === "professionnel" ? "" : String(data.name).split(/\s+/)[0];
+  const lines = [
+    firstName ? `Bonjour ${firstName},` : "Bonjour,",
+    "",
+    `Merci pour votre confiance ! Votre acceptation du devis ${quote.number} a bien été enregistrée. Vous trouverez ci-joint :`,
+    "— une copie de votre devis signé ;",
+    ...(deposit ? [`— la facture d'acompte ${deposit.number} de ${money(deposit.amount_due_cents)}.`] : []),
+    "",
+    ...(deposit
+      ? [
+        `L'acompte confirme la réservation de votre date. Il est à régler par virement bancaire au plus tard le ${longDateFr(deposit.due_date)} (72 h avant la prestation) : toutes les coordonnées sont sur la fiche de virement, accessible avec le bouton ci-dessous.`,
+        ""
+      ]
+      : []),
+    "Je reviendrai vers vous quelques jours avant le rendez-vous pour vous en rappeler les détails.",
+    "",
+    "Bien cordialement,",
+    "Alexandre Palanca"
+  ];
+  const button = payUrl
+    ? `<p style="margin:28px 0"><a href="${escapeHtml(payUrl)}" style="display:inline-block;padding:15px 30px;background:#111111;color:#ffffff;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">Régler l'acompte par virement (${escapeHtml(money(deposit!.amount_due_cents))})</a></p>
+      <p style="color:#777777;font-size:12px">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>${escapeHtml(payUrl)}</p>`
+    : "";
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: requiredEnv("ORDER_EMAIL_FROM"),
+      to: [data.email],
+      reply_to: requiredEnv("CONTACT_EMAIL_TO"),
+      subject: deposit
+        ? `Votre devis ${quote.number} signé et votre facture d'acompte — Alexandre Palanca`
+        : `Votre devis ${quote.number} signé — Alexandre Palanca`,
+      text: lines.join("\n") + (payUrl ? `\n\nFiche de virement de l'acompte : ${payUrl}` : ""),
+      html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
+        <p>${lines.map(escapeHtml).join("<br>")}</p>${button}</div>`,
+      attachments
+    })
+  });
+  if (!response.ok) console.error("Resend rejected the client confirmation", response.status);
+}
+
+async function storage(path: string, init: RequestInit = {}) {
+  const url = requiredEnv("SUPABASE_URL").replace(/\/$/, "");
+  const key = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
+  return await fetch(`${url}/storage/v1/${path}`, {
+    ...init,
+    headers: { apikey: key, Authorization: `Bearer ${key}`, ...init.headers }
+  });
+}
+const objectPath = (path: string) => path.split("/").map(encodeURIComponent).join("/");
+
+function toBase64(bytes: Uint8Array) {
+  let binary = "";
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  return btoa(binary);
+}
+
+// Signature dessinée sur la page : image PNG (data URL), taille raisonnable.
+function signaturePng(value: unknown) {
+  const match = typeof value === "string" ? /^data:image\/png;base64,([A-Za-z0-9+/=]+)$/.exec(value) : null;
+  if (!match || match[1].length > 700_000) throw new UserError("Merci de signer dans le cadre avant de confirmer.");
+  const bytes = Uint8Array.from(atob(match[1]), (char) => char.charCodeAt(0));
+  if (bytes.length < 600) throw new UserError("Merci de signer dans le cadre avant de confirmer.");
+  return bytes;
+}
+
+async function hexSha256(bytes: Uint8Array) {
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes as BufferSource));
+  return [...digest].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function accept(body: Row, request: Request) {
   const { quote, client } = await findQuote(body.token);
   if (stateOf(quote) !== "open") throw new UserError("Ce devis n'attend plus de réponse.", 409);
   const input = body.client ?? {};
@@ -244,14 +332,67 @@ async function accept(body: Row) {
   }
   if (type === "particulier" && data.siret && !/^\d{9}(\d{5})?$/.test(data.siret)) data.siret = "";
   const comment = text(body.comment, "Commentaire", 3000);
+  const png = signaturePng(body.signature);
+
+  // Devis signé : signature posée sur le PDF d'origine, archivé à côté de lui (preuve d'acceptation).
+  if (!quote.pdf_path) throw new UserError("Ce devis n'est pas disponible. Contactez-nous directement.", 409);
+  const original = await storage(`object/${BUCKET}/${objectPath(quote.pdf_path)}`);
+  if (!original.ok) throw new Error(`PDF du devis introuvable (${original.status})`);
+  const originalBytes = new Uint8Array(await original.arrayBuffer());
+  const signedAt = new Date();
+  const signed = await signQuotePdf(originalBytes, {
+    png,
+    name: data.name,
+    email: data.email,
+    signedAt,
+    ip: request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "",
+    userAgent: request.headers.get("user-agent") ?? "",
+    number: quote.number,
+    originalSha256: await hexSha256(originalBytes)
+  });
+  const signedPath = quote.pdf_path.replace(/\.pdf$/i, "") + `_signe_${signedAt.getTime()}.pdf`;
+  const upload = await storage(`object/${BUCKET}/${objectPath(signedPath)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/pdf", "x-upsert": "false" },
+    body: signed as BodyInit
+  });
+  if (!upload.ok) throw new Error(`Archivage du devis signé impossible (${upload.status})`);
 
   if (client) await patch("clients", client.id, { ...data, source: "manuel" });
   await patch("quotes", quote.id, {
     status: "accepted",
-    responded_at: new Date().toISOString(),
+    responded_at: signedAt.toISOString(),
     response_comment: comment,
-    response_redo: false
+    response_redo: false,
+    signed_pdf_path: signedPath,
+    signed_at: signedAt.toISOString()
   });
+
+  // Facture d'acompte émise automatiquement (au plus tard 72 h avant la prestation).
+  let deposit: Row | null = null;
+  let depositPdf: Uint8Array | null = null;
+  let depositError = "";
+  if (quote.deposit_enabled && quote.deposit_cents > 0) {
+    try {
+      const draft = await invoiceFromQuote(quote.id, "deposit");
+      deposit = await issueInvoice(draft.id);
+      const file = await storage(`object/${BUCKET}/${objectPath(deposit!.pdf_path)}`);
+      if (file.ok) depositPdf = new Uint8Array(await file.arrayBuffer());
+    } catch (error) {
+      console.error("Deposit invoice could not be issued", error);
+      depositError = error instanceof Error ? error.message : "erreur inconnue";
+    }
+  }
+  const site = requiredEnv("FRONTEND_ORIGIN").replace(/\/$/, "");
+  const payUrl = deposit ? `${site}/paiement.html?t=${encodeURIComponent(String(body.token))}&p=acompte` : "";
+  const fileSafe = (name: string) => name.replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+  const signedAttachment = { filename: fileSafe(`Devis ${quote.number} signé ${data.name}.pdf`), content: toBase64(signed) };
+  const depositAttachment = deposit && depositPdf
+    ? { filename: fileSafe(`Facture d'acompte ${deposit.number} ${data.name}.pdf`), content: toBase64(depositPdf) }
+    : null;
+
+  // Copie au client : devis signé, facture d'acompte et lien de paiement.
+  await sendClientConfirmation(data, quote, deposit, payUrl, [signedAttachment, ...(depositAttachment ? [depositAttachment] : [])]);
 
   const before = client ?? {};
   const labels: Record<string, string> = {
@@ -279,9 +420,17 @@ async function accept(body: Row) {
       lines: [changed.length ? `Mise à jour automatiquement (${changed.join(", ")}).` : "Aucun changement."]
     },
     ...(await quoteSection(quote)),
-    { title: "À faire", lines: ["Le devis est passé en « Accepté » : créez la facture d'acompte depuis la fiche du devis."] }
-  ], data.email);
-  return { state: "accepted" };
+    { title: "Devis signé", lines: ["Le devis signé et daté est joint à cet e-mail (preuve d'acceptation, avec une page d'attestation). Il est aussi archivé dans la fiche du devis."] },
+    {
+      title: "Facture d'acompte",
+      lines: [deposit
+        ? `${deposit.number} (${money(deposit.amount_due_cents)}) émise automatiquement, jointe à cet e-mail, à régler au plus tard le ${longDateFr(deposit.due_date)}. Le client l'a reçue avec son devis signé et le lien vers la fiche de virement.`
+        : depositError
+        ? `Elle n'a pas pu être émise automatiquement (${depositError}) : créez-la depuis la fiche du devis.`
+        : "Pas d'acompte prévu sur ce devis."]
+    }
+  ], data.email, [signedAttachment, ...(depositAttachment ? [depositAttachment] : [])]);
+  return { state: "accepted", payUrl, depositCents: deposit?.amount_due_cents ?? 0 };
 }
 
 async function refuse(body: Row) {
@@ -328,7 +477,7 @@ Deno.serve(async (request) => {
     if (!body || typeof body !== "object") throw new UserError("Requête invalide.");
     if (body.action === "get") return reply(request, 200, await load(body.token));
     await consumeRateLimit(request);
-    if (body.action === "accept") return reply(request, 200, await accept(body));
+    if (body.action === "accept") return reply(request, 200, await accept(body, request));
     if (body.action === "refuse") return reply(request, 200, await refuse(body));
     throw new UserError("Requête invalide.");
   } catch (error) {

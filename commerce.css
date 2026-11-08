@@ -84,3 +84,5 @@
   .com-row, .com-row3, .com-item-grid { grid-template-columns: 1fr; }
   .com-panel { padding: 16px; }
 }
+
+.com-hint { margin: -4px 0 12px; color: #a9a59e; font-size: 0.8rem; line-height: 1.5; }

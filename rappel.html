@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png?v=3">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Rappel client à valider.">
+  <title>Rappel à valider — Alexandre Palanca</title>
+  <link rel="stylesheet" href="galeries.css?v=outil">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css?v=langue">
+  <link rel="stylesheet" href="reponse-devis.css?v=4">
+  <script src="site-nav.js?v=langue" defer></script>
+  <script type="module" src="rappel.js?v=1"></script>
+</head>
+<body>
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+      </a>
+    </div>
+  </header>
+  <main class="gallery-error-page quote-page">
+    <section class="gallery-message-card quote-card">
+      <p class="gallery-eyebrow" id="r-eyebrow">Rappel</p>
+      <h1 id="r-title">Rappel à valider</h1>
+      <p class="gallery-intro" id="r-intro" role="status">Chargement…</p>
+      <form class="quote-form" id="r-form" hidden novalidate>
+        <dl class="quote-summary" id="r-facts"></dl>
+        <label class="quote-field"><span>Message envoyé au client (modifiable)</span><textarea name="message" rows="16" maxlength="6000"></textarea></label>
+        <p class="quote-help" id="r-pay"></p>
+        <div class="quote-choice">
+          <button class="gallery-primary-button" type="submit">Envoyer au client</button>
+        </div>
+        <p class="gallery-form-message" role="alert"></p>
+      </form>
+      <a class="gallery-back-link" href="gestion-commerciale.html">Gestion commerciale</a>
+    </section>
+  </main>
+</body>
+</html>

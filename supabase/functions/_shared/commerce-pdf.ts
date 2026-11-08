@@ -280,7 +280,7 @@ export async function renderDocumentPdf(data: PdfDocumentData) {
 
   // Sections de conditions
   let afterSmall = false;
-  for (const section of data.sections.filter((entry) => entry.text.trim())) {
+  for (const section of data.sections.filter((entry) => (entry.text ?? "").trim())) {
     if (!section.small && afterSmall) y -= 5; // un peu d'air après le bloc de conditions
     afterSmall = Boolean(section.small);
     if (section.small) {
@@ -321,6 +321,10 @@ export async function renderDocumentPdf(data: PdfDocumentData) {
       { title: "Le client", note: data.signatures.client },
       { title: "Le prestataire", note: data.signatures.issuer }
     ];
+    // Emplacement du cadre « Le client », noté dans le PDF : la signature en ligne y sera posée.
+    pdf.setKeywords([
+      `signature-client=${pdf.getPageCount() - 1},${MARGIN.toFixed(2)},${(y - boxHeight).toFixed(2)},${boxWidth.toFixed(2)},${boxHeight}`
+    ]);
     boxes.forEach((box, index) => {
       const x = MARGIN + index * (boxWidth + gap);
       page.drawRectangle({
@@ -357,6 +361,93 @@ export async function renderDocumentPdf(data: PdfDocumentData) {
       color: GREY
     });
   });
+
+  return await pdf.save();
+}
+
+export type OnlineSignature = {
+  png: Uint8Array;
+  name: string;
+  email: string;
+  signedAt: Date;
+  ip: string;
+  userAgent: string;
+  number: string;
+  originalSha256: string;
+};
+
+function parisDateTime(date: Date) {
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "long", timeStyle: "short", timeZone: "Europe/Paris"
+  }).format(date).replace(/\u202f/g, " ");
+}
+
+// Devis signé en ligne : la signature est posée dans le cadre « Le client » du PDF d'origine,
+// avec la mention « Bon pour accord », le nom et la date. Une page « Attestation d'acceptation »
+// est ajoutée à la fin (date et heure, e-mail, adresse IP, empreinte du devis d'origine).
+export async function signQuotePdf(original: Uint8Array, signature: OnlineSignature) {
+  const pdf = await PDFDocument.load(original, { updateMetadata: false });
+  const regular = await pdf.embedFont(StandardFonts.Helvetica);
+  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const image = await pdf.embedPng(signature.png);
+  const when = parisDateTime(signature.signedAt);
+
+  const fit = (maxWidth: number, maxHeight: number) => {
+    const scale = Math.min(maxWidth / image.width, maxHeight / image.height);
+    return { width: image.width * scale, height: image.height * scale };
+  };
+
+  const match = /signature-client=(\d+),([\d.]+),([\d.]+),([\d.]+),([\d.]+)/.exec(pdf.getKeywords() ?? "");
+  if (match) {
+    const [pageIndex, x, y, width, height] = match.slice(1).map(Number);
+    const page = pdf.getPage(pageIndex);
+    // La consigne « Date et signature… » est remplacée par la mention signée.
+    page.drawRectangle({ x: x + 1, y: y + height - 33, width: width - 2, height: 18, color: rgb(1, 1, 1) });
+    page.drawText(pdfSafe(`Bon pour accord — ${signature.name}`), { x: x + 8, y: y + height - 22, size: 6.5, font: bold, color: BLACK });
+    page.drawText(pdfSafe(`Signé en ligne le ${when}`), { x: x + 8, y: y + height - 30, size: 6.5, font: regular, color: GREY });
+    const size = fit(width - 16, height - 37);
+    page.drawImage(image, { x: x + 8, y: y + 3, ...size });
+  }
+
+  // Attestation d'acceptation
+  const page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  let y = PAGE_HEIGHT - MARGIN - 10;
+  page.drawText(pdfSafe(`Attestation d'acceptation du devis ${signature.number}`), { x: MARGIN, y, size: 15, font: bold, color: BLACK });
+  y -= 30;
+  const rows: Array<[string, string]> = [
+    ["Devis", signature.number],
+    ["Accepté par", signature.name],
+    ["Adresse e-mail", signature.email],
+    ["Date et heure", `${when} (heure de Paris)`],
+    ["Adresse IP", signature.ip || "non disponible"],
+    ["Navigateur", signature.userAgent.slice(0, 160) || "non disponible"],
+    ["Empreinte du devis d'origine (SHA-256)", signature.originalSha256]
+  ];
+  for (const [label, value] of rows) {
+    page.drawText(pdfSafe(label), { x: MARGIN, y, size: 8.5, font: bold, color: BLACK });
+    y -= 12;
+    for (const line of wrap(value, regular, 9, PAGE_WIDTH - 2 * MARGIN)) {
+      page.drawText(line, { x: MARGIN, y, size: 9, font: regular, color: BLACK });
+      y -= 12;
+    }
+    y -= 6;
+  }
+  y -= 6;
+  for (const line of wrap(
+    "Le client a pris connaissance du devis ci-dessus, de ses conditions et du montant indiqué, puis l'a accepté en ligne avec la mention « Bon pour accord » en apposant la signature ci-dessous, depuis le lien personnel qui lui a été envoyé par e-mail.",
+    regular, 9, PAGE_WIDTH - 2 * MARGIN
+  )) {
+    page.drawText(line, { x: MARGIN, y, size: 9, font: regular, color: BLACK });
+    y -= 12;
+  }
+  y -= 14;
+  page.drawText("Signature du client", { x: MARGIN, y, size: 8.5, font: bold, color: BLACK });
+  const boxWidth = 260;
+  const boxHeight = 110;
+  y -= boxHeight + 8;
+  page.drawRectangle({ x: MARGIN, y, width: boxWidth, height: boxHeight, borderColor: rgb(0.75, 0.75, 0.75), borderWidth: 0.6 });
+  const size = fit(boxWidth - 20, boxHeight - 20);
+  page.drawImage(image, { x: MARGIN + (boxWidth - size.width) / 2, y: y + (boxHeight - size.height) / 2, ...size });
 
   return await pdf.save();
 }

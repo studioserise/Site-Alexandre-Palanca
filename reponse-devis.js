@@ -114,14 +114,73 @@ $("add-comment").addEventListener("click", () => {
   acceptForm.elements.comment.focus();
 });
 
+// Signature : dessin au doigt ou à la souris, exporté en image (encre noire sur fond transparent).
+const pad = $("sign-pad");
+const ctx = pad.getContext("2d");
+let drawing = false;
+let signed = false;
+let last = null;
+function sizePad() {
+  const ratio = Math.max(1, window.devicePixelRatio || 1);
+  const { width, height } = pad.getBoundingClientRect();
+  if (!width) return;
+  pad.width = Math.round(width * ratio);
+  pad.height = Math.round(height * ratio);
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "#111";
+  signed = false;
+}
+const point = (event) => {
+  const rect = pad.getBoundingClientRect();
+  return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+};
+pad.addEventListener("pointerdown", (event) => {
+  drawing = true;
+  last = point(event);
+  pad.setPointerCapture(event.pointerId);
+  acceptForm.querySelector(".gallery-form-message").textContent = "";
+  ctx.beginPath();
+  ctx.arc(last.x, last.y, 1.1, 0, Math.PI * 2);
+  ctx.fillStyle = "#111";
+  ctx.fill();
+});
+pad.addEventListener("pointermove", (event) => {
+  if (!drawing) return;
+  const next = point(event);
+  ctx.beginPath();
+  ctx.moveTo(last.x, last.y);
+  ctx.lineTo(next.x, next.y);
+  ctx.stroke();
+  if (Math.hypot(next.x - last.x, next.y - last.y) > 0) signed = true;
+  last = next;
+  pad.parentElement.classList.remove("is-missing");
+});
+["pointerup", "pointercancel", "pointerleave"].forEach((name) => pad.addEventListener(name, () => { drawing = false; }));
+$("sign-clear").addEventListener("click", () => {
+  ctx.clearRect(0, 0, pad.width, pad.height);
+  signed = false;
+});
+let padWidth = 0;
+window.addEventListener("resize", () => {
+  // Un changement de largeur efface le cadre : on ne redimensionne que si la largeur change vraiment.
+  const width = pad.getBoundingClientRect().width;
+  if (width && Math.abs(width - padWidth) > 1) { padWidth = width; sizePad(); }
+});
+$("q-accept").addEventListener("click", () => {
+  requestAnimationFrame(() => { padWidth = pad.getBoundingClientRect().width; sizePad(); });
+  $("sign-date").textContent = `Signé le ${new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`;
+});
+
 async function submit(form, body, done) {
   const message = form.querySelector(".gallery-form-message");
   const button = form.querySelector('button[type="submit"]');
   message.textContent = "";
   button.disabled = true;
   try {
-    await call(body);
-    done();
+    done(await call(body));
   } catch (error) {
     message.textContent = error.message;
   } finally {
@@ -141,11 +200,27 @@ acceptForm.addEventListener("submit", (event) => {
     f[missing[0]].focus();
     return;
   }
+  if (!signed) {
+    message.textContent = "Merci de signer dans le cadre avant de confirmer.";
+    pad.parentElement.classList.add("is-missing");
+    pad.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
   const client = Object.fromEntries(
     ["name", "email", "phone", "address", "postalCode", "city", "country", "siret", "vatNumber"].map((key) => [key, f[key].value.trim()])
   );
-  submit(acceptForm, { action: "accept", client: { ...client, type: f.type.value }, comment: f.comment.value.trim() },
-    () => finish("Merci, devis accepté !", "Votre réponse a bien été transmise. Alexandre revient vers vous très vite avec la facture d'acompte et la suite."));
+  submit(acceptForm, { action: "accept", client: { ...client, type: f.type.value }, comment: f.comment.value.trim(), signature: pad.toDataURL("image/png") },
+    (result) => {
+      finish("Merci, devis accepté !", result.payUrl
+        ? "Votre devis signé a bien été transmis. Vous allez recevoir par e-mail une copie du devis signé et la facture d'acompte. Vous pouvez aussi régler l'acompte dès maintenant :"
+        : "Votre devis signé a bien été transmis. Vous allez en recevoir une copie par e-mail.");
+      if (result.payUrl) {
+        const link = $("q-pay");
+        link.href = result.payUrl;
+        link.textContent = `Payer l'acompte (${money(result.depositCents)})`;
+        link.hidden = false;
+      }
+    });
 });
 
 refuseForm.addEventListener("submit", (event) => {
