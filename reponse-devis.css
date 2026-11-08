@@ -107,3 +107,6 @@
 }
 
 .quote-card .gallery-back-link { display: inline-block; margin-top: 36px; }
+
+/* Le bloc commence sous la barre du haut (fixe, en dégradé) */
+.quote-page { place-items: start center; padding-top: clamp(130px, 18vh, 170px); }
