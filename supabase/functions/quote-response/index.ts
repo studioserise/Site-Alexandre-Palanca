@@ -119,7 +119,23 @@ async function consumeRateLimit(request: Request) {
   if (attempts > 10) throw new UserError("Trop de tentatives. Réessayez dans quelques minutes.", 429);
 }
 
-async function notifyAlex(subject: string, lines: string[], replyTo: string) {
+type Section = { title: string; lines: Array<[string, string]> | string[] };
+
+// E-mail de notification envoyé à Alex à chaque réponse (accepté / refusé), avec toutes les infos.
+async function notifyAlex(subject: string, headline: string, sections: Section[], replyTo: string) {
+  const textBody = [headline, ...sections.flatMap((section) => [
+    "", section.title.toUpperCase(),
+    ...section.lines.map((line) => Array.isArray(line) ? `${line[0]} : ${line[1] || "—"}` : line)
+  ])].join("\n");
+  const cell = "padding:4px 14px 4px 0;vertical-align:top";
+  const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#222222;max-width:620px">
+    <p style="font-size:17px"><strong>${escapeHtml(headline)}</strong></p>
+    ${sections.map((section) => `<h3 style="margin:22px 0 6px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#777777">${escapeHtml(section.title)}</h3>
+      ${section.lines.length && Array.isArray(section.lines[0])
+        ? `<table style="border-collapse:collapse">${(section.lines as Array<[string, string]>).map(([label, value]) =>
+          `<tr><td style="${cell};color:#777777;white-space:nowrap">${escapeHtml(label)}</td><td style="${cell}">${escapeHtml(value || "—").replace(/\n/g, "<br>")}</td></tr>`).join("")}</table>`
+        : `<p style="margin:0">${(section.lines as string[]).map(escapeHtml).join("<br>").replace(/\n/g, "<br>")}</p>`}`).join("")}
+  </div>`;
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`, "Content-Type": "application/json" },
@@ -128,11 +144,43 @@ async function notifyAlex(subject: string, lines: string[], replyTo: string) {
       to: [requiredEnv("CONTACT_EMAIL_TO")],
       ...(isEmail(replyTo) ? { reply_to: replyTo } : {}),
       subject,
-      text: lines.join("\n"),
-      html: `<p>${lines.map(escapeHtml).join("<br>")}</p>`
+      text: textBody,
+      html
     })
   });
   if (!response.ok) console.error("Resend rejected a quote response notification", response.status);
+}
+
+function dateFr(iso: string | null) {
+  if (!iso) return "";
+  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T12:00:00Z`));
+}
+
+// Partie commune aux deux e-mails : le devis et ses prestations.
+async function quoteSection(quote: Row): Promise<Section[]> {
+  const items = await rows(
+    `quote_items?select=title,quantity,unit,total_ht_cents&quote_id=eq.${encodeURIComponent(quote.id)}&order=position.asc`
+  );
+  const site = (Deno.env.get("FRONTEND_ORIGIN") ?? "https://alexandrepalanca.fr").replace(/\/$/, "");
+  return [
+    {
+      title: `Devis ${quote.number}`,
+      lines: [
+        ["Montant total", money(quote.total_ttc_cents)],
+        ["Acompte", quote.deposit_enabled && quote.deposit_cents ? money(quote.deposit_cents) : "aucun"],
+        ["Date de la prestation", quote.service_period || ""],
+        ["Projet", quote.project_description || ""],
+        ["Émis le", dateFr(quote.issue_date)],
+        ["Valable jusqu'au", dateFr(quote.valid_until)]
+      ]
+    },
+    {
+      title: "Prestations",
+      lines: items.map((item) =>
+        `• ${item.title} — ${Number(item.quantity)} ${item.unit} — ${money(item.total_ht_cents)}`)
+    },
+    { title: "Gestion commerciale", lines: [`${site}/gestion-commerciale.html`] }
+  ];
 }
 
 function publicView(quote: Row, client: Row | null) {
@@ -206,19 +254,32 @@ async function accept(body: Row) {
   });
 
   const before = client ?? {};
+  const labels: Record<string, string> = {
+    type: "Type", name: "Nom", email: "E-mail", phone: "Téléphone", address: "Adresse",
+    postal_code: "Code postal", city: "Ville", country: "Pays", siret: "SIRET", vat_number: "N° de TVA"
+  };
   const changed = (Object.keys(data) as Array<keyof typeof data>)
-    .filter((key) => String(before[key] ?? "") !== String(data[key] ?? ""));
-  await notifyAlex(`Devis ${quote.number} accepté — ${data.name}`, [
-    `Bonne nouvelle : ${data.name} a accepté le devis ${quote.number} (${money(quote.total_ttc_cents)}).`,
-    "",
-    "Coordonnées de facturation :",
-    `${data.name}${type === "professionnel" ? ` — SIRET ${data.siret}` : ""}`,
-    `${data.address}, ${data.postal_code} ${data.city}, ${data.country}`,
-    `${data.email}${data.phone ? ` — ${data.phone}` : ""}`,
-    ...(changed.length ? ["", "La fiche client a été mise à jour automatiquement."] : []),
-    ...(comment ? ["", "Commentaire du client :", comment] : []),
-    "",
-    "Le devis est passé en « Accepté » dans la gestion commerciale : vous pouvez créer la facture d'acompte."
+    .filter((key) => String(before[key] ?? "") !== String(data[key] ?? ""))
+    .map((key) => labels[key]);
+  await notifyAlex(`✅ Devis ${quote.number} accepté — ${data.name}`,
+    `${data.name} a accepté le devis ${quote.number} (${money(quote.total_ttc_cents)}).`, [
+    { title: "Commentaire du client", lines: [comment || "Aucun commentaire."] },
+    {
+      title: "Coordonnées de facturation",
+      lines: [
+        ["Client", `${data.name} (${type})`],
+        ["E-mail", data.email],
+        ["Téléphone", data.phone],
+        ["Adresse", `${data.address}\n${data.postal_code} ${data.city}\n${data.country}`],
+        ...(type === "professionnel" ? [["SIRET", data.siret], ["N° de TVA", data.vat_number]] as Array<[string, string]> : [])
+      ]
+    },
+    {
+      title: "Fiche client",
+      lines: [changed.length ? `Mise à jour automatiquement (${changed.join(", ")}).` : "Aucun changement."]
+    },
+    ...(await quoteSection(quote)),
+    { title: "À faire", lines: ["Le devis est passé en « Accepté » : créez la facture d'acompte depuis la fiche du devis."] }
   ], data.email);
   return { state: "accepted" };
 }
@@ -234,13 +295,25 @@ async function refuse(body: Row) {
     response_comment: comment,
     response_redo: redo
   });
-  const name = client?.name || quote.client_snapshot?.name || "Le client";
-  await notifyAlex(`Devis ${quote.number} refusé${redo ? " — nouveau devis souhaité" : ""} — ${name}`, [
-    `${name} a refusé le devis ${quote.number} (${money(quote.total_ttc_cents)}).`,
-    "",
-    redo ? "Le client souhaite recevoir un nouveau devis." : "Le client ne demande pas de nouveau devis.",
-    ...(comment ? ["", "Commentaire du client :", comment] : [])
-  ], client?.email || quote.client_snapshot?.email || "");
+  const who = client ?? quote.client_snapshot ?? {};
+  const name = who.name || "Le client";
+  await notifyAlex(`${redo ? "🔁" : "❌"} Devis ${quote.number} refusé${redo ? " — nouveau devis souhaité" : ""} — ${name}`,
+    `${name} a refusé le devis ${quote.number} (${money(quote.total_ttc_cents)}).`, [
+    {
+      title: "Nouveau devis",
+      lines: [redo ? "OUI : le client souhaite recevoir un nouveau devis." : "Non, le client ne demande pas de nouveau devis."]
+    },
+    { title: "Commentaire du client", lines: [comment || "Aucun commentaire."] },
+    {
+      title: "Client",
+      lines: [
+        ["Nom", who.name || ""],
+        ["E-mail", who.email || ""],
+        ["Téléphone", who.phone || ""]
+      ]
+    },
+    ...(await quoteSection(quote))
+  ], who.email || "");
   return { state: "refused" };
 }
 
