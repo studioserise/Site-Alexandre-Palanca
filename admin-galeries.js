@@ -35,27 +35,10 @@ function tariffLabel(tariff) {
 
 function updatePhotoUploadNote() {
   const tariff = photoGallerySelect.selectedOptions[0]?.dataset.tariff;
-  const previewLabel = document.getElementById("admin-photo-preview-label");
-  const uploadNote = document.getElementById("admin-photo-upload-note");
-  if (!tariff) {
-    document.getElementById("admin-free-upload").hidden = true;
-    document.getElementById("admin-paid-upload").hidden = false;
-    previewLabel.textContent = "Aperçu (JPG, PNG ou WebP, max. 50 Mo)";
-    uploadNote.textContent = "Créez ou ouvrez une galerie avant d’ajouter des photos.";
-    return;
-  }
   const isFree = tariff === "tarif0";
-  // Galerie gratuite : zone de dépôt multiple ; galerie payante : aperçu filigrané + original.
-  document.getElementById("admin-free-upload").hidden = !isFree;
-  document.getElementById("admin-paid-upload").hidden = isFree;
-  ["admin-photo-number", "admin-photo-preview", "admin-photo-original"].forEach((id) => {
-    document.getElementById(id).required = !isFree;
-  });
-  previewLabel.textContent =
-    `${isFree ? "Aperçu sans filigrane" : "Aperçu déjà filigrané"} (JPG, PNG ou WebP, max. 50 Mo)`;
-  uploadNote.textContent = isFree
-    ? "Cette galerie est gratuite : choisissez un aperçu sans filigrane. Les deux fichiers restent privés ; seul le téléchargement autorisé transmettra l’original."
-    : "Cette galerie est payante : le filigrane doit être intégré à l’aperçu avant l’envoi. Les deux fichiers restent privés ; seul l’original acheté sera téléchargeable.";
+  // Galerie gratuite : un seul dépôt (photos finales). Galerie payante : aperçus filigranés + originaux couplés.
+  document.getElementById("admin-free-upload").hidden = !tariff || !isFree;
+  document.getElementById("admin-paid-upload").hidden = Boolean(tariff) && isFree;
 }
 
 async function callAdmin(body) {
@@ -285,61 +268,183 @@ document.getElementById("admin-create-gallery-form").addEventListener("submit", 
 
 photoGallerySelect.addEventListener("change", updatePhotoUploadNote);
 
+/* =========================
+   Galerie payante : dépôt groupé et couplage par numéro
+   Le numéro est la dernière suite de chiffres du nom de fichier (« ethan-001-wm.jpg » → 1).
+   Un aperçu et un original qui portent le même numéro forment une paire ; ce numéro devient
+   celui de la photo dans la galerie.
+========================= */
+const previewInput = document.getElementById("admin-photo-preview");
+const originalInput = document.getElementById("admin-photo-original");
+const pairsDetails = document.getElementById("admin-pairs");
+const pairsTable = document.getElementById("admin-pairs-table");
+const pairsSummary = document.getElementById("admin-pairs-summary");
+const pairsSubmit = document.getElementById("admin-pairs-submit");
+const paidProgress = document.getElementById("admin-paid-progress");
+let previewFiles = [];
+let originalFiles = [];
+let thumbUrls = [];
+
+function numberFromName(name) {
+  const base = name.replace(/\.[^.]+$/, "");
+  const groups = base.match(/\d+/g);
+  return groups ? Number(groups.at(-1)) : null;
+}
+
+function buildPairs() {
+  const map = new Map();
+  const add = (file, side) => {
+    const number = numberFromName(file.name);
+    const key = number ?? `sans-numero:${file.name}`;
+    const entry = map.get(key) || { number, preview: [], original: [] };
+    entry[side].push(file);
+    map.set(key, entry);
+  };
+  previewFiles.forEach((file) => add(file, "preview"));
+  originalFiles.forEach((file) => add(file, "original"));
+  return [...map.values()]
+    .map((entry) => {
+      let problem = "";
+      if (entry.number === null) problem = "aucun numéro dans le nom";
+      else if (entry.number < 1) problem = "numéro invalide";
+      else if (entry.preview.length > 1 || entry.original.length > 1) problem = "numéro en double";
+      else if (!entry.preview.length) problem = "aperçu manquant";
+      else if (!entry.original.length) problem = "original manquant";
+      else if (entry.preview[0].size > 50 * 1024 * 1024 || entry.original[0].size > 50 * 1024 * 1024) problem = "fichier de plus de 50 Mo";
+      return { ...entry, problem };
+    })
+    .sort((a, b) => (a.number ?? Infinity) - (b.number ?? Infinity));
+}
+
+function thumb(file) {
+  const cell = document.createElement("div");
+  cell.className = "admin-pair-file";
+  if (!file) { cell.append(makeText("span", "admin-pair-missing", "—")); return cell; }
+  const url = URL.createObjectURL(file);
+  thumbUrls.push(url);
+  const image = document.createElement("img");
+  image.src = url;
+  image.alt = "";
+  image.loading = "lazy";
+  image.decoding = "async";
+  cell.append(image, makeText("span", "admin-pair-name", file.name));
+  return cell;
+}
+
+function renderPairs() {
+  const pairs = buildPairs();
+  const ready = pairs.filter((pair) => !pair.problem);
+  const issues = pairs.length - ready.length;
+  document.getElementById("admin-preview-count").textContent = previewFiles.length ? `${previewFiles.length} fichier(s)` : "Aucun fichier";
+  document.getElementById("admin-original-count").textContent = originalFiles.length ? `${originalFiles.length} fichier(s)` : "Aucun fichier";
+  pairsSummary.textContent = pairs.length
+    ? `Vérifier les associations — ${ready.length} paire(s) prête(s)${issues ? `, ${issues} à corriger` : ""}`
+    : "Vérifier les associations";
+  pairsSubmit.disabled = !ready.length;
+  pairsSubmit.textContent = ready.length ? `Envoyer ${ready.length} photo(s)` : "Envoyer les photos";
+
+  // Les miniatures ne sont créées que lorsque le panneau est ouvert.
+  thumbUrls.forEach((url) => URL.revokeObjectURL(url));
+  thumbUrls = [];
+  pairsTable.replaceChildren();
+  if (!pairsDetails.open) return;
+  pairs.forEach((pair) => {
+    const row = document.createElement("div");
+    row.className = "admin-pair-row";
+    row.dataset.kind = pair.problem ? "error" : "ok";
+    row.append(
+      makeText("span", "admin-pair-number", pair.number === null ? "?" : String(pair.number).padStart(3, "0")),
+      thumb(pair.preview[0]),
+      thumb(pair.original[0]),
+      makeText("span", "admin-pair-status", pair.problem || "OK")
+    );
+    pairsTable.append(row);
+  });
+}
+
+function addFiles(list, side) {
+  const files = [...list].filter((file) => /^image\/(jpeg|png|webp)$/.test(file.type));
+  if (side === "preview") previewFiles = files; else originalFiles = files;
+  paidProgress.replaceChildren();
+  renderPairs();
+}
+
+previewInput.addEventListener("change", () => addFiles(previewInput.files, "preview"));
+originalInput.addEventListener("change", () => addFiles(originalInput.files, "original"));
+pairsDetails.addEventListener("toggle", renderPairs);
+[["admin-preview-drop", "preview"], ["admin-original-drop", "original"]].forEach(([id, side]) => {
+  const zone = document.getElementById(id);
+  ["dragenter", "dragover"].forEach((type) => zone.addEventListener(type, (event) => { event.preventDefault(); zone.classList.add("is-over"); }));
+  ["dragleave", "drop"].forEach((type) => zone.addEventListener(type, () => zone.classList.remove("is-over")));
+  zone.addEventListener("drop", (event) => { event.preventDefault(); addFiles(event.dataTransfer.files, side); });
+});
+
 document.getElementById("admin-add-photos-form").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const form = event.currentTarget;
-  const button = form.querySelector("button[type=submit]");
-  const previewFile = document.getElementById("admin-photo-preview").files[0];
-  const originalFile = document.getElementById("admin-photo-original").files[0];
   const galleryId = photoGallerySelect.value;
-  const photoNumber = Number(document.getElementById("admin-photo-number").value);
-  if (!galleryId || !previewFile || !originalFile) {
-    setMessage("Choisissez une galerie ouverte ainsi que les deux fichiers photo.");
-    return;
-  }
-  if (previewFile.size > 50 * 1024 * 1024 || originalFile.size > 50 * 1024 * 1024) {
-    setMessage("Chaque fichier doit faire au maximum 50 Mo.");
-    return;
-  }
+  if (!galleryId) { setMessage("Choisissez d’abord une galerie ouverte."); return; }
+  if (photoGallerySelect.selectedOptions[0]?.dataset.tariff === "tarif0") return; // galerie gratuite : dépôt direct
+  const pairs = buildPairs().filter((pair) => !pair.problem);
+  if (!pairs.length) { setMessage("Aucune paire aperçu + original complète à envoyer."); return; }
 
-  button.disabled = true;
-  button.textContent = "Préparation du téléversement…";
-  try {
-    const upload = await callAdmin({
-      action: "prepare-photo-upload",
-      galleryId,
-      photoNumber,
-      previewFileName: previewFile.name,
-      originalFileName: originalFile.name
-    });
-    button.textContent = "Téléversement des fichiers…";
-    await Promise.all([
-      uploadSignedObject(upload.preview.bucket, upload.preview.path, upload.preview.token, previewFile),
-      uploadSignedObject(upload.original.bucket, upload.original.path, upload.original.token, originalFile)
-    ]);
-    await callAdmin({
-      action: "register-photo",
-      galleryId,
-      photoId: upload.photoId,
-      photoNumber: upload.photoNumber,
-      previewPath: upload.preview.path,
-      originalPath: upload.original.path
-    });
-    form.reset();
-    setMessage(`Photo ${String(photoNumber).padStart(3, "0")} ajoutée à la galerie.`, false);
-    await loadDashboard();
-  } catch (error) {
-    setMessage(error.message);
-  } finally {
-    button.disabled = false;
-    button.textContent = "Téléverser les deux fichiers";
+  pairsSubmit.disabled = true;
+  paidProgress.replaceChildren();
+  setMessage(`Envoi de ${pairs.length} photo(s)… Gardez cette page ouverte.`, false);
+  let done = 0, failed = 0;
+  for (const pair of pairs) {
+    const label = String(pair.number).padStart(3, "0");
+    const row = makeText("li", "", `Photo ${label} — envoi…`);
+    paidProgress.append(row);
+    try {
+      const upload = await callAdmin({
+        action: "prepare-photo-upload",
+        galleryId,
+        photoNumber: pair.number,
+        previewFileName: pair.preview[0].name,
+        originalFileName: pair.original[0].name
+      });
+      await Promise.all([
+        uploadSignedObject(upload.preview.bucket, upload.preview.path, upload.preview.token, pair.preview[0]),
+        uploadSignedObject(upload.original.bucket, upload.original.path, upload.original.token, pair.original[0])
+      ]);
+      try {
+        await callAdmin({
+          action: "register-photo",
+          galleryId,
+          photoId: upload.photoId,
+          photoNumber: pair.number,
+          previewPath: upload.preview.path,
+          originalPath: upload.original.path
+        });
+      } catch (error) {
+        if (/n’a pas pu traiter la demande/.test(String(error.message))) throw new Error("ce numéro existe peut-être déjà dans la galerie");
+        throw error;
+      }
+      row.textContent = `Photo ${label} — ajoutée`;
+      row.dataset.kind = "done";
+      done += 1;
+    } catch (error) {
+      row.textContent = `Photo ${label} — échec : ${error.message}`;
+      row.dataset.kind = "error";
+      failed += 1;
+    }
   }
+  previewFiles = [];
+  originalFiles = [];
+  previewInput.value = "";
+  originalInput.value = "";
+  renderPairs();
+  await loadDashboard().catch(() => {});
+  setMessage(`${done} photo(s) ajoutée(s)${failed ? `, ${failed} en échec (voir la liste)` : ""}.`, failed > 0);
 });
 
 if (accessToken) {
+  // Déjà connecté : les cases de connexion restent masquées pendant le chargement.
+  loginForm.hidden = true;
   loadDashboard().catch((error) => {
     window.sessionStorage.removeItem(accessTokenKey);
     accessToken = null;
+    loginForm.hidden = false;
     setMessage(error.message);
   });
 }

@@ -69,7 +69,10 @@ document.getElementById("admin-logout").addEventListener("click", () => {
 
 const existingToken = window.sessionStorage.getItem(accessTokenKey);
 if (existingToken) {
+  // Déjà connecté : on masque tout de suite les cases de connexion pendant la vérification.
+  loginForm.hidden = true;
   verifyAdmin(existingToken).then(showChoice).catch(() => {
     window.sessionStorage.removeItem(accessTokenKey);
+    loginForm.hidden = false;
   });
 }

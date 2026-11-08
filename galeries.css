@@ -965,3 +965,25 @@ button {
 @media (max-width: 620px) {
   .gallery-grid { --row-height: 140px; }
 }
+
+/* Administration : galerie payante, aperçus et originaux couplés */
+.admin-pair-drops { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 700px) { .admin-pair-drops { grid-template-columns: 1fr; } }
+.admin-drop-count { color: #c6d6c1; font-size: 0.78rem; font-style: normal; }
+.admin-pairs { border: 1px solid rgba(245, 243, 239, 0.15); border-radius: 10px; }
+.admin-pairs summary { padding: 12px 14px; cursor: pointer; font-size: 0.85rem; }
+.admin-pairs-table { display: grid; gap: 6px; max-height: 460px; padding: 0 10px 10px; overflow: auto; }
+.admin-pair-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) minmax(0, 1fr) 150px; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px; background: rgba(245, 243, 239, 0.04); font-size: 0.76rem; }
+.admin-pair-row[data-kind="error"] { background: rgba(230, 170, 162, 0.1); }
+.admin-pair-number { font-weight: 600; letter-spacing: 0.06em; }
+.admin-pair-file { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.admin-pair-file img { width: 56px; height: 56px; flex: none; border-radius: 6px; object-fit: cover; background: #111; }
+.admin-pair-name { overflow: hidden; color: #cfcbc4; text-overflow: ellipsis; white-space: nowrap; }
+.admin-pair-missing { color: #e6aaa2; }
+.admin-pair-status { color: #c6d6c1; }
+.admin-pair-row[data-kind="error"] .admin-pair-status { color: #e6aaa2; }
+@media (max-width: 700px) { .admin-pair-row { grid-template-columns: 40px 1fr 1fr; } .admin-pair-status { grid-column: 1 / -1; } .admin-pair-name { display: none; } }
+
+/* Un élément masqué (attribut hidden) reste masqué même si son style l'affiche en grille :
+   le formulaire de connexion disparaît bien une fois connecté. */
+[hidden] { display: none !important; }

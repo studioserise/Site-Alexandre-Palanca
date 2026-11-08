@@ -27,3 +27,6 @@ verify_jwt = false
 
 [functions.commerce-api]
 verify_jwt = false
+
+[functions.cleanup]
+verify_jwt = false
