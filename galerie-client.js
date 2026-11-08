@@ -152,6 +152,12 @@ function createPhotoCard(photo, index) {
   image.alt = `${isFree ? "Aperçu" : "Aperçu filigrané"} de la photo ${photo.photoNumber}`;
   image.loading = "lazy";
   image.dataset.photoId = photo.id;
+  // Le cadre prend les proportions de la photo dès qu'elle est chargée : elle le remplit sans être coupée.
+  image.addEventListener("load", () => {
+    if (image.naturalWidth && image.naturalHeight) {
+      card.style.setProperty("--ratio", (image.naturalWidth / image.naturalHeight).toFixed(4));
+    }
+  });
   openButton.append(image);
 
   if (!isFree) {

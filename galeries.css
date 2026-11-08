@@ -266,9 +266,8 @@ button {
 .gallery-photo-open img {
   width: 100%;
   height: 100%;
-  /* La photo est toujours affichée en entier dans sa case, quel que soit son format (portrait, paysage, carré) :
-     jamais rognée. Les bords éventuels prennent la couleur du fond de la case. */
-  object-fit: contain;
+  /* Le cadre a les proportions de la photo (voir .gallery-photo) : elle le remplit entièrement, sans être coupée. */
+  object-fit: cover;
   transition: transform 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
@@ -946,3 +945,23 @@ button {
 .admin-upload-progress { display: grid; gap: 4px; max-height: 240px; margin: 0; padding: 0; overflow: auto; list-style: none; font-size: 0.78rem; color: #cfcbc4; }
 .admin-upload-progress li[data-kind="done"] { color: #c6d6c1; }
 .admin-upload-progress li[data-kind="error"] { color: #e6aaa2; }
+
+/* Galerie client : rangées de hauteur égale (comme Google Photos).
+   Chaque cadre prend les proportions de sa photo (--ratio, posé par galerie-client.js quand l'aperçu est chargé),
+   donc la photo remplit son cadre sans être rognée ; les rangées s'étirent pour occuper toute la largeur.
+   Ordre de lecture conservé : de gauche à droite, puis rangée suivante. */
+.gallery-grid {
+  --row-height: clamp(180px, 22vw, 300px);
+  display: flex;
+  flex-wrap: wrap;
+}
+.gallery-grid > .gallery-photo {
+  flex: var(--ratio, 0.8) 1 calc(var(--ratio, 0.8) * var(--row-height));
+  aspect-ratio: var(--ratio, 0.8);
+  min-width: 0;
+}
+/* Dernière rangée : les cadres gardent leur taille au lieu de s'étirer sur toute la largeur */
+.gallery-grid::after { content: ""; flex: 1000 1 0; }
+@media (max-width: 620px) {
+  .gallery-grid { --row-height: 140px; }
+}
