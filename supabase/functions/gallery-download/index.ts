@@ -107,6 +107,9 @@ Deno.serve(async (request) => {
     if (!["image/jpeg", "image/png", "image/webp"].includes(contentType)) {
       return jsonResponse(request, 415, { message: "Format de fichier non autorisé." });
     }
+    await databaseRequest("rpc/count_gallery_download", {
+      method: "POST", body: JSON.stringify({ p_gallery: galleryId })
+    }).catch(() => {});
     const headers = corsHeaders(request);
     headers.set("Content-Type", contentType);
     headers.set(

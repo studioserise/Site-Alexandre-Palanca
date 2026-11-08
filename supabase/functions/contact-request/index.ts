@@ -146,8 +146,8 @@ async function sendContactEmail(data: {
 
 // Crée la fiche client d'une demande reçue par le site, sauf si une fiche existe déjà pour cet e-mail
 // (on complète alors seulement le téléphone s'il manquait). Marquée « formulaire » pour le nettoyage à 6 mois.
-async function saveContactClient(name: string, email: string, phone: string) {
-  if (!isEmail(email)) return;
+async function saveContactClient(name: string, email: string, phone: string): Promise<string | null> {
+  if (!isEmail(email)) return null;
   const existing = await databaseRequest(
     `clients?select=id,phone&email=ilike.${encodeURIComponent(email.replace(/[%_*]/g, ""))}&limit=1`
   ) as Array<{ id: string; phone: string }>;
@@ -159,12 +159,26 @@ async function saveContactClient(name: string, email: string, phone: string) {
         body: JSON.stringify({ phone, updated_at: new Date().toISOString() })
       });
     }
-    return;
+    return existing[0].id;
   }
-  await databaseRequest("clients", {
+  const created = await databaseRequest("clients?select=id", {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({ type: "particulier", name: (name || email).slice(0, 200), email, phone, source: "formulaire" })
+  }) as Array<{ id: string }>;
+  return created[0]?.id ?? null;
+}
+
+// Demande conservée pour le centre de notifications (« créer un devis ») et le planning (date à confirmer).
+async function saveContactRequest(data: Record<string, string>, clientId: string | null) {
+  await databaseRequest("contact_requests", {
     method: "POST",
     headers: { Prefer: "return=minimal" },
-    body: JSON.stringify({ type: "particulier", name: (name || email).slice(0, 200), email, phone, source: "formulaire" })
+    body: JSON.stringify({
+      ...data,
+      wanted_date: /^\d{4}-\d{2}-\d{2}$/.test(data.date_text) ? data.date_text : null,
+      client_id: clientId
+    })
   });
 }
 
@@ -230,10 +244,17 @@ Deno.serve(async (request) => {
 
     // Fiche client dans la gestion commerciale (jamais bloquant : le mail est déjà parti).
     stage = "client";
+    let clientId: string | null = null;
     try {
-      await saveContactClient(name, email, phone);
+      clientId = await saveContactClient(name, email, phone);
     } catch (error) {
       console.error("Contact client record failed", { error });
+    }
+    stage = "request-record";
+    try {
+      await saveContactRequest({ name, email, phone, service, type, date_text: date, message, notes: notes.join(" · ") }, clientId);
+    } catch (error) {
+      console.error("Contact request record failed", { error });
     }
     return reply(request, 200, { ok: true });
   } catch (error) {

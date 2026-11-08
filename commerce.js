@@ -306,7 +306,7 @@ function depositOf(ttc) {
   return draft.depositEnabled ? Math.round(ttc * (parseFloat(String(draft.depositPct).replace(",", ".")) || 0) / 100) : 0;
 }
 
-async function quoteEditor(id, presetClient) {
+async function quoteEditor(id, presetClient, preset = {}) {
   view.innerHTML = "<p>Chargement…</p>";
   currentTab = "quotes";
   renderTabs();
@@ -321,7 +321,9 @@ async function quoteEditor(id, presetClient) {
     servicePeriod: "", serviceDate: "", serviceTime: "", serviceLocation: "", projectDescription: "", specialConditions: "",
     paymentTerms: s.default_payment_terms || "", cancellationTerms: s.default_cancellation_terms || "",
     deliveryTerms: s.default_delivery_terms || "", usageTerms: s.default_usage_terms || "",
-    depositEnabled: true, depositPct: String((s.default_deposit_bps ?? 3000) / 100)
+    depositEnabled: true, depositPct: String((s.default_deposit_bps ?? 3000) / 100),
+    contactRequestId: null,
+    ...preset
   };
   if (id) {
     const data = await run(() => api("get-quote", { id }));
@@ -459,7 +461,8 @@ function stepReview(body) {
       serviceDate: draft.serviceDate || null, serviceTime: draft.serviceTime, serviceLocation: draft.serviceLocation, projectDescription: draft.projectDescription,
       specialConditions: draft.specialConditions, paymentTerms: draft.paymentTerms, cancellationTerms: draft.cancellationTerms,
       deliveryTerms: draft.deliveryTerms, usageTerms: draft.usageTerms, depositEnabled: draft.depositEnabled,
-      depositBps: Math.round((parseFloat(String(draft.depositPct).replace(",", ".")) || 0) * 100)
+      depositBps: Math.round((parseFloat(String(draft.depositPct).replace(",", ".")) || 0) * 100),
+      contactRequestId: draft.contactRequestId || undefined
     }));
     if (data) draft.id = data.quote.id;
     return data;
@@ -602,4 +605,30 @@ async function invoiceDetail(id) {
   }
 }
 
-if (token) go("dashboard");
+// Liens directs depuis le centre de notifications : #devis=…, #brouillon=…, #facture=…, #demande=…
+async function openFromHash() {
+  const [key, id] = window.location.hash.slice(1).split("=");
+  history.replaceState(null, "", window.location.pathname);
+  if (key === "devis" && id) return quoteDetail(id);
+  if (key === "brouillon" && id) return quoteEditor(id);
+  if (key === "facture" && id) return invoiceDetail(id);
+  if (key === "demande" && id) {
+    // Nouveau devis pré-rempli à partir d'une demande du formulaire du site
+    const data = await run(() => api("get-contact-request", { id }));
+    if (!data) return go("dashboard");
+    const r = data.request;
+    const client = data.client
+      ? clientFromRow(data.client)
+      : { name: r.name, email: r.email, phone: r.phone };
+    const project = [r.service, r.type].filter(Boolean).join(" — ");
+    return quoteEditor(null, client, {
+      contactRequestId: r.id,
+      serviceDate: r.wanted_date || "",
+      servicePeriod: r.wanted_date ? "" : (r.date_text || ""),
+      projectDescription: [project, r.message].filter(Boolean).join("\n\n")
+    });
+  }
+  go("dashboard");
+}
+
+if (token) openFromHash();

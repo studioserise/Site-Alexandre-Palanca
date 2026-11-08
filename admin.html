@@ -9,12 +9,13 @@
   <title>Espace administrateur — Alexandre Palanca</title>
   <link rel="stylesheet" href="galeries.css?v=outil">
   <link rel="stylesheet" href="commerce.css?v=1">
+  <link rel="stylesheet" href="admin-center.css?v=1">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=langue">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script src="site-nav.js?v=langue" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="admin.js?v=connexion"></script>
+  <script type="module" src="admin.js?v=centre"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -70,7 +71,32 @@
           <span class="admin-hub-arrow" aria-hidden="true">↗︎</span>
         </a>
       </div>
+
+      <section class="admin-center gallery-admin-panel" aria-labelledby="notif-heading">
+        <div class="admin-center-head">
+          <div><h2 id="notif-heading">Notifications</h2><p class="admin-center-sub" id="notif-count" role="status"></p></div>
+          <button class="gallery-quiet-button" id="notif-refresh" type="button">Actualiser</button>
+        </div>
+        <div class="notif-filters" id="notif-filters"></div>
+        <ul class="notif-list" id="notif-list"></ul>
+      </section>
+
+      <section class="admin-center gallery-admin-panel" aria-labelledby="plan-heading">
+        <div class="admin-center-head">
+          <div><h2 id="plan-heading">Planning</h2>
+            <p class="admin-center-sub plan-legend"><span class="is-confirmed">Séance confirmée</span><span class="is-pending">À confirmer</span><span class="is-other">Autre</span></p></div>
+          <div class="plan-nav">
+            <button class="gallery-quiet-button" id="plan-prev" type="button" aria-label="Mois précédent">←︎</button>
+            <strong id="plan-title"></strong>
+            <button class="gallery-quiet-button" id="plan-next" type="button" aria-label="Mois suivant">→︎</button>
+            <button class="gallery-quiet-button" id="plan-today" type="button">Aujourd'hui</button>
+          </div>
+        </div>
+        <div class="plan-grid" id="plan-grid"></div>
+        <div class="plan-day" id="plan-day"></div>
+      </section>
     </section>
+    <dialog class="request-dialog" id="request-dialog"><div id="request-content"></div></dialog>
   </main>
 </body>
 </html>

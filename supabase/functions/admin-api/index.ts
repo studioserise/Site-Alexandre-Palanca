@@ -171,6 +171,13 @@ Deno.serve(async (request) => {
         return jsonResponse(request, 400, { message: "La durée d’accès doit être comprise entre 1 et 15 jours." });
       }
       const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+      // Séance liée (facultatif) : éteint le rappel « publier la galerie sous 72 h »
+      const session = typeof body.session === "string" ? body.session : "";
+      const link = /^quote:[0-9a-f-]{36}$/i.test(session)
+        ? { quote_id: session.slice(6) }
+        : /^event:[0-9a-f-]{36}$/i.test(session)
+        ? { event_id: session.slice(6) }
+        : {};
       const created = await databaseRequest("galleries?select=id,name,type,tariff,status,expires_at", {
         method: "POST",
         headers: { Prefer: "return=representation" },
@@ -180,7 +187,8 @@ Deno.serve(async (request) => {
           tariff,
           access_code_hash: await sha256(code),
           access_code_encrypted: await encryptCode(code),
-          expires_at: expiresAt
+          expires_at: expiresAt,
+          ...link
         })
       }) as Array<{ id: string; name: string; type: string; status: string; expires_at: string }>;
       return jsonResponse(request, 201, { gallery: created[0], accessCode: code });

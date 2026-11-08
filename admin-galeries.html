@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="cursor.css?v=7">
   <script src="site-nav.js?v=langue" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="admin-galeries.js?v=code"></script>
+  <script type="module" src="admin-galeries.js?v=seance"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -95,6 +95,13 @@
                 <input class="gallery-admin-input" id="admin-gallery-days" type="number" min="1" max="15" value="15" required>
               </label>
             </div>
+            <label class="gallery-admin-label" for="admin-gallery-session">
+              Séance liée (facultatif)
+              <select class="gallery-admin-select" id="admin-gallery-session">
+                <option value="">Aucune</option>
+              </select>
+              <span class="gallery-admin-note">Lier la galerie à sa séance retire le rappel « publier la galerie sous 72 h ».</span>
+            </label>
             <label class="gallery-admin-label" for="admin-gallery-code">
               Code d’accès à communiquer
               <input class="gallery-admin-input" id="admin-gallery-code" minlength="10" maxlength="64" pattern="[A-Za-z0-9-]+" required>

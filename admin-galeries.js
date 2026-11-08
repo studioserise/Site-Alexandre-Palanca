@@ -262,7 +262,24 @@ function renderOrders(orders, orderPhotos, galleries) {
   }
 }
 
+// Séances (devis acceptés, séances du planning) proposées pour lier une nouvelle galerie
+async function loadSessions() {
+  const select = document.getElementById("admin-gallery-session");
+  try {
+    const { sessions } = await callGalleryFunction("commerce-api", { body: { action: "list-sessions" }, accessToken });
+    const current = select.value;
+    select.replaceChildren(new Option("Aucune", ""), ...sessions.map((session) => new Option(
+      `${new Date(`${session.date}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })} — ${session.label}`,
+      session.value
+    )));
+    select.value = current;
+  } catch (error) {
+    console.error("Séances indisponibles", error);
+  }
+}
+
 async function loadDashboard() {
+  loadSessions();
   const data = await callAdmin();
   const galleries = data.galleries || [];
   renderGalleries(galleries);
@@ -300,7 +317,8 @@ document.getElementById("admin-logout").addEventListener("click", () => {
 
 document.getElementById("admin-create-gallery-form").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const button = event.currentTarget.querySelector("button[type=submit]");
+  const form = event.currentTarget;
+  const button = form.querySelector("button[type=submit]");
   button.disabled = true;
   const code = document.getElementById("admin-gallery-code").value.trim().toUpperCase();
   try {
@@ -310,11 +328,12 @@ document.getElementById("admin-create-gallery-form").addEventListener("submit", 
       type: document.getElementById("admin-gallery-type").value,
       tariff: tariffSelect.value,
       daysOpen: Number(document.getElementById("admin-gallery-days").value),
+      session: document.getElementById("admin-gallery-session").value,
       code
     });
     document.getElementById("admin-created-code").textContent =
       `Galerie créée. Communiquez maintenant le code ${result.accessCode} au client ; il n’est pas conservé en clair.`;
-    event.currentTarget.reset();
+    form.reset();
     document.getElementById("admin-gallery-days").value = "15";
     await loadDashboard();
     document.getElementById("admin-created-code").textContent =

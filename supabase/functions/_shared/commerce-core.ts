@@ -1,6 +1,7 @@
 // Logique de la gestion commerciale (devis, factures, PDF, règlements), partagée entre
 // commerce-api (administration) et quote-response / quote-payment (pages client).
 import { databaseRequest } from "./http.ts";
+import * as center from "./admin-center.ts";
 import {
   computeTotals,
   depositCents,
@@ -369,6 +370,13 @@ export async function saveQuote(body: Row) {
     headers: { Prefer: "return=minimal" },
     body: JSON.stringify(itemRows("quote_id", quote.id, items, totals.lineTotals, true))
   });
+  // Devis créé à partir d'une demande du formulaire : la notification « créer un devis » s'éteint.
+  if (typeof body.contactRequestId === "string" && UUID.test(body.contactRequestId)) {
+    await databaseRequest(`contact_requests?id=${eq(body.contactRequestId)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: "quoted", quote_id: quote.id, client_id: client.id })
+    });
+  }
   return await loadQuote(quote.id);
 }
 
@@ -1232,6 +1240,31 @@ export async function handle(body: Row) {
     }
     case "send-document":
       return await sendDocument(body);
+
+    // Centre de notifications et planning (page d'accueil de l'administration)
+    case "notifications":
+    case "dismiss-notification":
+    case "planning":
+    case "save-event":
+    case "delete-event":
+    case "get-contact-request":
+    case "dismiss-contact-request":
+    case "list-sessions":
+      try {
+        if (body.action === "notifications") return await center.notifications();
+        if (body.action === "dismiss-notification") return await center.dismissNotification(body.key);
+        if (body.action === "planning") return await center.planning(body.from, body.to);
+        if (body.action === "save-event") return await center.saveEvent(body.event ?? {});
+        if (body.action === "delete-event") return await center.deleteEvent(body.id);
+        if (body.action === "get-contact-request") return await center.contactRequest(body.id);
+        if (body.action === "dismiss-contact-request") return await center.dismissContactRequest(body.id);
+        return await center.listSessions();
+      } catch (error) {
+        if (error instanceof UserError) throw error;
+        const message = error instanceof Error ? error.message : "";
+        if (/invalide|obligatoire|maximum|introuvable/.test(message)) throw new UserError(message);
+        throw error;
+      }
 
     default:
       throw new UserError("Requête invalide : action inconnue.");

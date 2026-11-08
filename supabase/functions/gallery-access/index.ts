@@ -58,6 +58,11 @@ Deno.serve(async (request) => {
       return jsonResponse(request, 410, { message: "Cette galerie est fermée." });
     }
 
+    // Statistique (centre de notifications) : jamais bloquant
+    await databaseRequest("rpc/count_gallery_view", {
+      method: "POST", body: JSON.stringify({ p_gallery: gallery.id })
+    }).catch(() => {});
+
     return jsonResponse(request, 200, {
       accessToken: await createGallerySession(gallery.id)
     });

@@ -6,6 +6,7 @@ import { databaseRequest } from "../_shared/http.ts";
 //   de la galerie, les photos commandées et les commandes restent (traces de vente pour la comptabilité).
 // - Devis refusés depuis plus de RETENTION_DAYS jours : supprimés avec leur PDF (lignes du devis en cascade).
 // - Fiches clients créées par le formulaire du site, sans devis ni facture au bout de 6 mois : supprimées.
+// - Demandes reçues par le formulaire (centre de notifications) : supprimées au bout de 6 mois.
 // Appel protégé (secret rangé dans le coffre de la base, ou clé de service). Ajouter ?dry_run=1 pour voir ce qui serait supprimé, sans rien supprimer.
 
 const RETENTION_DAYS = 61; // environ deux mois
@@ -167,10 +168,26 @@ Deno.serve(async (request) => {
   }
   (report as Record<string, unknown>).clients = clientsReport;
 
+  // ---- Demandes du formulaire de plus de 6 mois (centre de notifications, planning) ----
+  let requestsCount = 0;
+  try {
+    const sixMonths = new Date(Date.now() - 183 * 24 * 3600 * 1000).toISOString();
+    const old = await databaseRequest(
+      `contact_requests?select=id&created_at=lt.${encodeURIComponent(sixMonths)}`
+    ) as Array<{ id: string }>;
+    requestsCount = old.length;
+    if (!dryRun && old.length) {
+      await databaseRequest(`contact_requests?created_at=lt.${encodeURIComponent(sixMonths)}`, { method: "DELETE" });
+    }
+  } catch (error) {
+    report.errors.push(`Demandes : ${error instanceof Error ? error.message : String(error)}`);
+  }
+  (report as Record<string, unknown>).requests = requestsCount;
+
   if (report.errors.length) console.error("Nettoyage automatique : erreurs", report.errors);
   console.log(
     `Nettoyage automatique${dryRun ? " (MODE ESSAI : rien n’a été supprimé)" : ""}`,
-    JSON.stringify({ galeries: report.galleries, devis: report.quotes, fiches: clientsReport, erreurs: report.errors })
+    JSON.stringify({ galeries: report.galleries, devis: report.quotes, fiches: clientsReport, demandes: requestsCount, erreurs: report.errors })
   );
   return reply(200, report);
 });

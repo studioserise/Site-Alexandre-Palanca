@@ -39,6 +39,9 @@ function showChoice() {
   loginForm.hidden = true;
   choice.hidden = false;
   setMessage("");
+  // Centre de notifications et planning (chargés une fois connecté)
+  import("./admin-center.js?v=1").then((module) => module.startAdminCenter())
+    .catch((error) => console.error("Centre de notifications indisponible", error));
 }
 
 loginForm.addEventListener("submit", async (event) => {
