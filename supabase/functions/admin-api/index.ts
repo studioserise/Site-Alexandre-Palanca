@@ -35,7 +35,7 @@ async function decryptCode(value: string | null) {
 }
 function validCode(value: unknown) {
   const code = requiredText(value, "Code d’accès", 64).toUpperCase();
-  if (!/^[A-Z0-9-]{10,64}$/.test(code)) throw new Error("Code d’accès invalide : 10 à 64 lettres, chiffres ou tirets.");
+  if (!/^[A-Z0-9-]{3,64}$/.test(code)) throw new Error("Code d’accès invalide : 3 à 64 lettres, chiffres ou tirets.");
   return code;
 }
 
@@ -161,9 +161,9 @@ Deno.serve(async (request) => {
         return jsonResponse(request, 400, { message: "Tarif de galerie invalide." });
       }
       const code = requiredText(body.code, "Code d’accès", 64).toUpperCase();
-      if (!/^[A-Z0-9-]{10,64}$/.test(code)) {
+      if (!/^[A-Z0-9-]{3,64}$/.test(code)) {
         return jsonResponse(request, 400, {
-          message: "Le code doit contenir 10 à 64 lettres, chiffres ou tirets."
+          message: "Le code doit contenir 3 à 64 lettres, chiffres ou tirets."
         });
       }
       const days = Number(body.daysOpen);

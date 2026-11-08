@@ -98,7 +98,7 @@ function renderAccessCode(gallery) {
     const input = document.createElement("input");
     input.className = "gallery-admin-input";
     input.placeholder = "NOUVEAU-CODE-2026";
-    input.minLength = 10;
+    input.minLength = 3;
     input.maxLength = 64;
     input.value = randomCode();
     const save = makeText("button", "gallery-primary-button", "Enregistrer");

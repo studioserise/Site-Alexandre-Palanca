@@ -27,7 +27,7 @@ Deno.serve(async (request) => {
     }
     const body = await readJson(request);
     const code = typeof body.code === "string" ? body.code.trim().toUpperCase() : "";
-    if (code.length < 4 || code.length > 64) {
+    if (code.length < 3 || code.length > 64) {
       return jsonResponse(request, 400, { message: "Code d’accès invalide." });
     }
 
