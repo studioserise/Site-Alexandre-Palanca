@@ -8,6 +8,37 @@ import {
   sha256
 } from "../_shared/http.ts";
 
+// Chiffrement du code d'accès pour pouvoir l'afficher à l'administrateur (AES-GCM).
+// La clé est dérivée du secret serveur GALLERY_SESSION_SECRET : sans lui, le code chiffré est illisible.
+async function codeKey() {
+  const secret = requiredEnv("GALLERY_SESSION_SECRET");
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`gallery-access-code:${secret}`));
+  return crypto.subtle.importKey("raw", digest, "AES-GCM", false, ["encrypt", "decrypt"]);
+}
+async function encryptCode(code: string) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await codeKey(), new TextEncoder().encode(code)));
+  const packed = new Uint8Array(iv.length + data.length);
+  packed.set(iv);
+  packed.set(data, iv.length);
+  return `v1:${btoa(String.fromCharCode(...packed))}`;
+}
+async function decryptCode(value: string | null) {
+  if (!value || !value.startsWith("v1:")) return null;
+  try {
+    const packed = Uint8Array.from(atob(value.slice(3)), (c) => c.charCodeAt(0));
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: packed.slice(0, 12) }, await codeKey(), packed.slice(12));
+    return new TextDecoder().decode(plain);
+  } catch {
+    return null;
+  }
+}
+function validCode(value: unknown) {
+  const code = requiredText(value, "Code d’accès", 64).toUpperCase();
+  if (!/^[A-Z0-9-]{10,64}$/.test(code)) throw new Error("Code d’accès invalide : 10 à 64 lettres, chiffres ou tirets.");
+  return code;
+}
+
 function requiredEnv(name: string) {
   const value = Deno.env.get(name);
   if (!value) throw new Error(`Le réglage serveur ${name} est manquant.`);
@@ -96,7 +127,7 @@ Deno.serve(async (request) => {
 
     if (request.method === "GET") {
       const [galleries, orders] = await Promise.all([
-        databaseRequest("galleries?select=id,name,type,tariff,status,expires_at,created_at&order=created_at.desc"),
+        databaseRequest("galleries?select=id,name,type,tariff,status,expires_at,created_at,access_code_encrypted&order=created_at.desc"),
         databaseRequest("gallery_orders?select=id,gallery_id,customer_email,status,currency,subtotal_cents,discount_bps,discount_cents,total_cents,created_at,paid_at,sent_at&order=created_at.desc")
       ]);
       const orderIds = (orders as Array<{ id: string }>).map((order) => order.id);
@@ -106,7 +137,12 @@ Deno.serve(async (request) => {
           `gallery_order_photos?select=order_id,photo_number&order_id=in.(${orderIds.join(",")})&order=photo_number.asc`
         ) as unknown[];
       }
-      return jsonResponse(request, 200, { galleries, orders, orderPhotos });
+      // Code d'accès déchiffré pour l'affichage (null pour les galeries créées avant cette fonction)
+      const visibleGalleries = await Promise.all((galleries as Array<Record<string, unknown>>).map(async (gallery) => {
+        const { access_code_encrypted, ...rest } = gallery;
+        return { ...rest, accessCode: await decryptCode(access_code_encrypted as string | null) };
+      }));
+      return jsonResponse(request, 200, { galleries: visibleGalleries, orders, orderPhotos });
     }
 
     if (request.method !== "POST") {
@@ -143,10 +179,26 @@ Deno.serve(async (request) => {
           type,
           tariff,
           access_code_hash: await sha256(code),
+          access_code_encrypted: await encryptCode(code),
           expires_at: expiresAt
         })
       }) as Array<{ id: string; name: string; type: string; status: string; expires_at: string }>;
       return jsonResponse(request, 201, { gallery: created[0], accessCode: code });
+    }
+
+    // Nouveau code d'accès pour une galerie (l'ancien cesse de fonctionner)
+    if (body.action === "set-access-code") {
+      const id = requiredText(body.galleryId, "Identifiant de galerie", 36);
+      if (!/^[0-9a-f-]{36}$/i.test(id)) {
+        return jsonResponse(request, 400, { message: "Identifiant de galerie invalide." });
+      }
+      const code = validCode(body.code);
+      await databaseRequest(`galleries?id=eq.${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({ access_code_hash: await sha256(code), access_code_encrypted: await encryptCode(code) })
+      });
+      return jsonResponse(request, 200, { ok: true, accessCode: code });
     }
 
     if (body.action === "close-gallery") {

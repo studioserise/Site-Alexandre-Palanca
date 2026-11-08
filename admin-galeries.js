@@ -71,6 +71,65 @@ async function signIn(email, password) {
   return result.access_token;
 }
 
+// Code d'accès de la galerie : affiché avec un bouton « Copier » ; pour les galeries créées avant
+// la conservation des codes, possibilité d'en définir un nouveau (l'ancien cesse alors de fonctionner).
+function renderAccessCode(gallery) {
+  const box = document.createElement("div");
+  box.className = "admin-code";
+  if (gallery.accessCode) {
+    box.append(makeText("span", "admin-code-label", "Code d’accès :"), makeText("code", "admin-code-value", gallery.accessCode));
+    const copy = makeText("button", "gallery-quiet-button", "Copier");
+    copy.type = "button";
+    copy.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(gallery.accessCode); copy.textContent = "Copié ✓"; }
+      catch { copy.textContent = "Sélectionnez le code"; }
+      setTimeout(() => { copy.textContent = "Copier"; }, 1800);
+    });
+    box.append(copy);
+  } else {
+    box.append(makeText("span", "admin-code-label", "Code d’accès non conservé (galerie créée avant)."));
+  }
+  if (gallery.status === "open") {
+    const change = makeText("button", "gallery-quiet-button", gallery.accessCode ? "Changer le code" : "Définir un nouveau code");
+    change.type = "button";
+    const form = document.createElement("form");
+    form.className = "admin-code-form";
+    form.hidden = true;
+    const input = document.createElement("input");
+    input.className = "gallery-admin-input";
+    input.placeholder = "NOUVEAU-CODE-2026";
+    input.minLength = 10;
+    input.maxLength = 64;
+    input.value = randomCode();
+    const save = makeText("button", "gallery-primary-button", "Enregistrer");
+    save.type = "submit";
+    const note = makeText("small", "", "L’ancien code ne fonctionnera plus : pensez à transmettre le nouveau à votre client.");
+    form.append(input, save, note);
+    change.addEventListener("click", () => { form.hidden = !form.hidden; });
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      save.disabled = true;
+      try {
+        const result = await callAdmin({ action: "set-access-code", galleryId: gallery.id, code: input.value.trim().toUpperCase() });
+        await loadDashboard();
+        setMessage(`Nouveau code enregistré pour « ${gallery.name} » : ${result.accessCode}`, false);
+      } catch (error) {
+        setMessage(error.message);
+        save.disabled = false;
+      }
+    });
+    box.append(change, form);
+  }
+  return box;
+}
+
+function randomCode() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const values = crypto.getRandomValues(new Uint8Array(12));
+  const chars = [...values].map((value) => alphabet[value % alphabet.length]).join("");
+  return `${chars.slice(0, 4)}-${chars.slice(4, 8)}-${chars.slice(8)}`;
+}
+
 function renderGalleries(galleries) {
   galleryList.replaceChildren();
   const openGalleries = galleries.filter((gallery) =>
@@ -109,6 +168,7 @@ function renderGalleries(galleries) {
     );
     record.append(header);
     record.append(makeText("small", "", `${gallery.type === "event" ? "Événement partagé" : "Individuelle"} · ${tariffLabel(gallery.tariff)} · ferme le ${new Date(gallery.expires_at).toLocaleDateString("fr-FR")}`));
+    record.append(renderAccessCode(gallery));
     if (gallery.status === "open") {
       const button = makeText("button", "gallery-quiet-button", "Fermer cette galerie");
       button.type = "button";
