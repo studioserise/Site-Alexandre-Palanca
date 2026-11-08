@@ -1,3 +1,16 @@
+# Sécurité, sur toutes les pages
+# - X-Frame-Options / frame-ancestors : le site ne peut pas être affiché dans un cadre d'un autre site (anti « clickjacking »).
+# - Strict-Transport-Security : les navigateurs utilisent toujours HTTPS (1 an).
+# - Content-Security-Policy : seuls les fichiers du site (et le serveur Supabase des formulaires / galeries)
+#   peuvent être chargés ou contactés. À compléter ici si un nouveau service externe est ajouté.
+/*
+  X-Frame-Options: DENY
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://rrytedgilrwsczoqeyzx.supabase.co; media-src 'self' blob: https://rrytedgilrwsczoqeyzx.supabase.co; font-src 'self'; connect-src 'self' https://rrytedgilrwsczoqeyzx.supabase.co https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+
 # Durée de conservation des fichiers dans le navigateur des visiteurs (Cloudflare).
 # Les visites suivantes s'ouvrent quasi instantanément : rien n'est retéléchargé.
 

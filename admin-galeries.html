@@ -7,13 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <title>Administration des galeries — Alexandre Palanca</title>
-  <link rel="stylesheet" href="galeries.css?v=black2">
+  <link rel="stylesheet" href="galeries.css?v=depot">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=langue">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script src="site-nav.js?v=langue" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="admin-galeries.js?v=tarifs-downloads"></script>
+  <script type="module" src="admin-galeries.js?v=depot"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -108,6 +108,21 @@
             Galerie ouverte
             <select class="gallery-admin-select" id="admin-photo-gallery" required></select>
           </label>
+          <!-- Galerie gratuite : on glisse directement toutes les photos finales -->
+          <div class="admin-free-upload" id="admin-free-upload" hidden>
+            <label class="gallery-admin-label" for="admin-free-start">
+              Numéroter à partir de
+              <input class="gallery-admin-input" id="admin-free-start" type="number" min="1" value="1">
+            </label>
+            <label class="admin-dropzone" id="admin-dropzone" for="admin-free-files">
+              <strong>Glissez ici toutes les photos</strong>
+              <span>ou cliquez pour les choisir — JPG, PNG ou WebP, 50 Mo max. par photo</span>
+              <input id="admin-free-files" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+            </label>
+            <p class="gallery-admin-note">Galerie gratuite : les photos envoyées sont les photos finales, téléchargeables par le client. L’aperçu affiché dans la galerie est préparé automatiquement. Les numéros déjà utilisés sont sautés.</p>
+            <ul class="admin-upload-progress" id="admin-free-progress" aria-live="polite"></ul>
+          </div>
+          <div class="admin-paid-upload" id="admin-paid-upload">
           <label class="gallery-admin-label" for="admin-photo-number">
             Numéro de référence
             <input class="gallery-admin-input" id="admin-photo-number" type="number" min="1" required>
@@ -122,6 +137,7 @@
           </label>
           <p class="gallery-admin-note" id="admin-photo-upload-note">Pour une galerie payante, intégrez le filigrane dans l’aperçu avant son envoi. Pour une galerie gratuite, envoyez un aperçu sans filigrane. Les deux fichiers restent dans des espaces privés.</p>
           <button class="gallery-primary-button" type="submit">Téléverser les deux fichiers</button>
+          </div>
         </form>
       </section>
 

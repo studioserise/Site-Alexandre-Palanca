@@ -931,3 +931,16 @@ button {
   .gallery-message-card h1 { font-size: clamp(2.16rem, 9.72vw, 3.67rem); }
   .gallery-page-header h1 { font-size: clamp(1.94rem, 8.64vw, 3.24rem); }
 }
+
+/* Administration : dépôt de plusieurs photos (galerie gratuite) */
+.admin-free-upload, .admin-paid-upload { display: grid; gap: inherit; }
+.admin-free-upload[hidden], .admin-paid-upload[hidden] { display: none; }
+.admin-dropzone { position: relative; display: grid; place-items: center; gap: 6px; min-height: 170px; padding: 24px; border: 1.5px dashed rgba(245, 243, 239, 0.35); border-radius: 12px; text-align: center; cursor: pointer; transition: border-color 160ms ease, background-color 160ms ease; }
+.admin-dropzone strong { font-size: 1rem; font-weight: 600; }
+.admin-dropzone span { color: #a9a59e; font-size: 0.8rem; }
+.admin-dropzone input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.admin-dropzone.is-over { border-color: #f5f3ef; background: rgba(245, 243, 239, 0.06); }
+.admin-dropzone.is-busy { opacity: 0.6; pointer-events: none; }
+.admin-upload-progress { display: grid; gap: 4px; max-height: 240px; margin: 0; padding: 0; overflow: auto; list-style: none; font-size: 0.78rem; color: #cfcbc4; }
+.admin-upload-progress li[data-kind="done"] { color: #c6d6c1; }
+.admin-upload-progress li[data-kind="error"] { color: #e6aaa2; }

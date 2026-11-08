@@ -38,11 +38,19 @@ function updatePhotoUploadNote() {
   const previewLabel = document.getElementById("admin-photo-preview-label");
   const uploadNote = document.getElementById("admin-photo-upload-note");
   if (!tariff) {
+    document.getElementById("admin-free-upload").hidden = true;
+    document.getElementById("admin-paid-upload").hidden = false;
     previewLabel.textContent = "Aperçu (JPG, PNG ou WebP, max. 50 Mo)";
     uploadNote.textContent = "Créez ou ouvrez une galerie avant d’ajouter des photos.";
     return;
   }
   const isFree = tariff === "tarif0";
+  // Galerie gratuite : zone de dépôt multiple ; galerie payante : aperçu filigrané + original.
+  document.getElementById("admin-free-upload").hidden = !isFree;
+  document.getElementById("admin-paid-upload").hidden = isFree;
+  ["admin-photo-number", "admin-photo-preview", "admin-photo-original"].forEach((id) => {
+    document.getElementById(id).required = !isFree;
+  });
   previewLabel.textContent =
     `${isFree ? "Aperçu sans filigrane" : "Aperçu déjà filigrané"} (JPG, PNG ou WebP, max. 50 Mo)`;
   uploadNote.textContent = isFree
@@ -335,3 +343,122 @@ if (accessToken) {
     setMessage(error.message);
   });
 }
+
+
+/* =========================
+   Galerie gratuite : dépôt de plusieurs photos d'un coup
+   Pour chaque photo : un aperçu allégé (2000 px max.) est préparé dans le navigateur pour l'affichage
+   dans la galerie, et la photo d'origine est envoyée telle quelle pour le téléchargement.
+   Numérotation automatique à partir du numéro choisi ; un numéro déjà pris est sauté.
+========================= */
+const PREVIEW_MAX = 2000;
+const freeFilesInput = document.getElementById("admin-free-files");
+const dropzone = document.getElementById("admin-dropzone");
+const progressList = document.getElementById("admin-free-progress");
+let freeQueueRunning = false;
+
+async function makePreview(file) {
+  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  const scale = Math.min(1, PREVIEW_MAX / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close?.();
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.86));
+  if (!blob) throw new Error("Aperçu impossible à préparer.");
+  return new File([blob], "preview.jpg", { type: "image/jpeg" });
+}
+
+async function uploadFreePhoto(file, galleryId, wantedNumber, row) {
+  row.textContent = `${file.name} — préparation de l’aperçu…`;
+  const preview = await makePreview(file);
+  row.textContent = `${file.name} — envoi…`;
+  const upload = await callAdmin({
+    action: "prepare-photo-upload",
+    galleryId,
+    photoNumber: wantedNumber,
+    previewFileName: preview.name,
+    originalFileName: file.name
+  });
+  await Promise.all([
+    uploadSignedObject(upload.preview.bucket, upload.preview.path, upload.preview.token, preview),
+    uploadSignedObject(upload.original.bucket, upload.original.path, upload.original.token, file)
+  ]);
+  // Enregistrement : si le numéro est déjà pris, le serveur refuse (message générique) et on essaie le suivant.
+  // Seul le premier envoi peut avoir à sauter des numéros : les suivants repartent juste après.
+  let number = wantedNumber;
+  for (let attempt = 0; attempt < 500; attempt += 1, number += 1) {
+    try {
+      await callAdmin({
+        action: "register-photo",
+        galleryId,
+        photoId: upload.photoId,
+        photoNumber: number,
+        previewPath: upload.preview.path,
+        originalPath: upload.original.path
+      });
+      return number;
+    } catch (error) {
+      if (!/n’a pas pu traiter la demande|duplicate|unique|23505/i.test(String(error.message))) throw error;
+      if (number === wantedNumber) row.textContent = `${file.name} — recherche d’un numéro libre…`;
+    }
+  }
+  throw new Error("Aucun numéro libre trouvé.");
+}
+
+async function uploadFreeFiles(fileList) {
+  const galleryId = photoGallerySelect.value;
+  if (!galleryId) { setMessage("Choisissez d’abord une galerie ouverte."); return; }
+  if (freeQueueRunning) { setMessage("Un envoi est déjà en cours, patientez jusqu’à la fin."); return; }
+  const files = [...fileList].filter((file) => /^image\/(jpeg|png|webp)$/.test(file.type));
+  if (!files.length) { setMessage("Aucune photo JPG, PNG ou WebP dans la sélection."); return; }
+  files.sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true }));
+
+  freeQueueRunning = true;
+  dropzone.classList.add("is-busy");
+  progressList.replaceChildren();
+  let next = Math.max(1, Number(document.getElementById("admin-free-start").value) || 1);
+  let done = 0, failed = 0;
+  setMessage(`Envoi de ${files.length} photo(s)… Gardez cette page ouverte.`, false);
+
+  for (const file of files) {
+    const row = document.createElement("li");
+    progressList.append(row);
+    if (file.size > 50 * 1024 * 1024) {
+      row.textContent = `${file.name} — trop lourde (50 Mo max.), ignorée`;
+      row.dataset.kind = "error";
+      failed += 1;
+      continue;
+    }
+    try {
+      const number = await uploadFreePhoto(file, galleryId, next, row);
+      row.textContent = `${file.name} — ajoutée (photo ${String(number).padStart(3, "0")})`;
+      row.dataset.kind = "done";
+      next = number + 1;
+      done += 1;
+    } catch (error) {
+      row.textContent = `${file.name} — échec : ${error.message}`;
+      row.dataset.kind = "error";
+      failed += 1;
+    }
+  }
+
+  document.getElementById("admin-free-start").value = next;
+  freeQueueRunning = false;
+  dropzone.classList.remove("is-busy");
+  freeFilesInput.value = "";
+  await loadDashboard().catch(() => {});
+  setMessage(`${done} photo(s) ajoutée(s)${failed ? `, ${failed} en échec (voir la liste)` : ""}.`, failed > 0);
+}
+
+freeFilesInput.addEventListener("change", () => uploadFreeFiles(freeFilesInput.files));
+["dragenter", "dragover"].forEach((type) => dropzone.addEventListener(type, (event) => {
+  event.preventDefault();
+  dropzone.classList.add("is-over");
+}));
+["dragleave", "drop"].forEach((type) => dropzone.addEventListener(type, () => dropzone.classList.remove("is-over")));
+dropzone.addEventListener("drop", (event) => {
+  event.preventDefault();
+  uploadFreeFiles(event.dataTransfer.files);
+});
