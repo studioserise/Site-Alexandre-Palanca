@@ -30,3 +30,6 @@ verify_jwt = false
 
 [functions.cleanup]
 verify_jwt = false
+
+[functions.quote-response]
+verify_jwt = false

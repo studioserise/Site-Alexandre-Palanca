@@ -182,7 +182,8 @@ async function upsertClient(input: Row) {
   const data = parseClient(input);
   if (input.id) {
     const id = uuid(input.id, "Client");
-    return await patchOne("clients", id, data);
+    // Une fiche venue du formulaire du site, modifiée à la main, est conservée (plus de suppression automatique).
+    return await patchOne("clients", id, { ...data, source: "manuel" });
   }
   if (data.email) {
     const duplicate = await rows(
@@ -707,11 +708,15 @@ async function invoiceFromQuote(quoteId: string, mode: string) {
   }
 
   const { totals, fields } = invoiceTotals(items, deducted);
+  const currentClient = quote.client_id
+    ? (await rows(`clients?select=*&id=${eq(quote.client_id)}`))[0]
+    : null;
   const invoice = await insertOne("invoices", {
     kind,
     quote_id: quote.id,
     client_id: quote.client_id,
-    client_snapshot: quote.client_snapshot,
+    // Coordonnées à jour (le client a pu compléter son adresse en acceptant le devis)
+    client_snapshot: currentClient ? clientSnapshot(currentClient) : quote.client_snapshot,
     issue_date: todayParis(),
     due_date: addDays(todayParis(), settings.invoice_payment_days),
     service_period: quote.service_period,
@@ -830,6 +835,38 @@ async function signedUrl(path: string, expiresIn: number) {
   return `${requiredEnv("SUPABASE_URL").replace(/\/$/, "")}/storage/v1${result.signedURL}`;
 }
 
+// Nom de fichier lisible : « Devis Photo Ethan Martin D-2026-0007.pdf ».
+// Photo / Vidéo / Photo & vidéo d'après les prestations (catégorie du catalogue, sinon mots du titre).
+async function documentFileName(kind: string, record: Row) {
+  let items: Array<{ title: string; category: string }> = [];
+  const quoteId = kind === "quote" ? record.id : record.quote_id;
+  if (quoteId) {
+    const quoteItems = await rows(`quote_items?select=title,service_id&quote_id=${eq(quoteId)}`) as Row[];
+    const serviceIds = quoteItems.map((item) => item.service_id).filter(Boolean);
+    const services = serviceIds.length
+      ? await rows(`services?select=id,category&id=in.(${serviceIds.map(encodeURIComponent).join(",")})`) as Row[]
+      : [];
+    const categories = new Map(services.map((service) => [service.id, String(service.category || "")]));
+    items = quoteItems.map((item) => ({ title: String(item.title), category: categories.get(item.service_id) || "" }));
+  } else if (kind === "invoice") {
+    items = (await rows(`invoice_items?select=title&invoice_id=${eq(record.id)}`) as Row[])
+      .map((item) => ({ title: String(item.title), category: "" }));
+  }
+  const photo = items.some((item) => /photo/i.test(item.category) || /photo|portrait|séance|reportage/i.test(item.title));
+  const video = items.some((item) => /vid[ée]o/i.test(item.category) || /vid[ée]o|film|captation|tournage|clip|montage|production/i.test(item.title));
+  const media = photo && video ? "Photo & vidéo" : photo ? "Photo" : video ? "Vidéo" : "";
+  const label = kind === "quote" ? "Devis" : record.kind === "deposit" ? "Facture d'acompte" : "Facture";
+  const client = String(record.client_snapshot?.name ?? "").trim();
+  const name = [label, media, client, record.number].filter(Boolean).join(" ")
+    .replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+  return `${name}.pdf`;
+}
+
+function randomToken() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return toBase64(bytes).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+}
+
 function toBase64(bytes: Uint8Array) {
   let binary = "";
   for (let offset = 0; offset < bytes.length; offset += 0x8000) {
@@ -853,9 +890,33 @@ async function sendDocument(body: Row) {
   const download = await storageRequest(`object/${BUCKET}/${storagePath(record.pdf_path)}`, { method: "GET" });
   if (!download.ok) throw new UserError("Le PDF archivé est introuvable.", 500);
   const bytes = new Uint8Array(await download.arrayBuffer());
-  const fileName = record.pdf_path.split("/").pop() as string;
-  const label = body.kind === "quote" ? "Devis" : "Facture";
-  const text = message || "Bonjour,\n\nVeuillez trouver ci-joint votre document.";
+  const fileName = await documentFileName(String(body.kind), record);
+  const isQuote = body.kind === "quote";
+  const label = isQuote ? "Devis" : "Facture";
+  const snapshot = record.client_snapshot ?? {};
+  const firstName = snapshot.type === "professionnel" ? "" : String(snapshot.name ?? "").trim().split(/\s+/)[0] ?? "";
+  const hello = firstName ? `Bonjour ${firstName},` : "Bonjour,";
+
+  // Devis : lien « Répondre à la proposition » vers la page du site (clé secrète propre au devis).
+  let responseUrl = "";
+  if (isQuote) {
+    let token = record.response_token as string | null;
+    if (!token) {
+      token = randomToken();
+      await patchOne("quotes", record.id, { response_token: token });
+    }
+    responseUrl = `${requiredEnv("FRONTEND_ORIGIN").replace(/\/$/, "")}/reponse-devis.html?t=${token}`;
+  }
+  const validity = isQuote && record.valid_until
+    ? `, valable jusqu'au ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${record.valid_until}T12:00:00Z`))}`
+    : "";
+  const text = message || (isQuote
+    ? `${hello}\n\nMerci pour votre confiance. Vous trouverez ci-joint le devis ${record.number} correspondant à votre projet${validity}.\n\nPour l'accepter ou me faire part de vos remarques, il vous suffit de cliquer sur le bouton « Répondre à la proposition » ci-dessous.\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`
+    : `${hello}\n\nVous trouverez ci-joint votre facture ${record.number}.\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`);
+  const button = responseUrl
+    ? `<p style="margin:28px 0"><a href="${escapeHtml(responseUrl)}" style="display:inline-block;padding:15px 30px;background:#111111;color:#ffffff;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">Répondre à la proposition</a></p>
+      <p style="color:#777777;font-size:12px">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>${escapeHtml(responseUrl)}</p>`
+    : "";
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -866,9 +927,10 @@ async function sendDocument(body: Row) {
     body: JSON.stringify({
       from: requiredEnv("ORDER_EMAIL_FROM"),
       to: [to],
-      subject: `${label} ${record.number} — Alexandre Palanca`,
-      text: `${text}\n\nAlexandre Palanca`,
-      html: `<p>${escapeHtml(text).replace(/\n/g, "<br>")}</p><p>Alexandre Palanca</p>`,
+      subject: `Votre ${label.toLowerCase()} ${record.number} — Alexandre Palanca`,
+      text: `${text}\n\nAlexandre Palanca${responseUrl ? `\n\nRépondre à la proposition : ${responseUrl}` : ""}`,
+      html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
+        <p>${escapeHtml(text).replace(/\n/g, "<br>")}</p><p>Alexandre Palanca</p>${button}</div>`,
       attachments: [{ filename: fileName, content: toBase64(bytes) }]
     })
   });
@@ -1102,9 +1164,13 @@ async function handle(body: Row) {
       const record = await documentRecord(body.kind, body.id);
       if (!record?.pdf_path) throw new UserError("Requête invalide : le document n'est pas encore validé.", 409);
       const days = integer(body.days ?? 1, "Durée", 1, 30);
+      const fileName = await documentFileName(String(body.kind), record);
+      const url = await signedUrl(record.pdf_path, days * 24 * 3600);
       return {
-        url: await signedUrl(record.pdf_path, days * 24 * 3600),
-        fileName: String(record.pdf_path).split("/").pop()
+        url,
+        // Même lien, mais le navigateur enregistre le fichier sous ce nom au lieu de l'afficher
+        downloadUrl: `${url}${url.includes("?") ? "&" : "?"}download=${encodeURIComponent(fileName)}`,
+        fileName
       };
     }
     case "send-document":

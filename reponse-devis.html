@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png?v=3">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Répondre à votre devis Alexandre Palanca.">
+  <title>Votre devis — Alexandre Palanca</title>
+  <link rel="stylesheet" href="galeries.css?v=outil">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css?v=langue">
+  <link rel="stylesheet" href="reponse-devis.css?v=1">
+  <script src="site-nav.js?v=langue" defer></script>
+  <script type="module" src="reponse-devis.js?v=1"></script>
+</head>
+<body>
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+      </a>
+    </div>
+  </header>
+  <main class="gallery-error-page">
+    <section class="gallery-message-card quote-card">
+      <p class="gallery-eyebrow" id="q-eyebrow">Devis</p>
+      <h1 id="q-title">Votre devis</h1>
+      <p class="gallery-intro" id="q-intro" role="status">Chargement de votre devis…</p>
+
+      <div id="q-summary" hidden>
+        <dl class="quote-summary" id="q-facts"></dl>
+        <ul class="quote-items" id="q-items"></ul>
+        <div class="quote-choice" id="q-choice">
+          <button class="gallery-primary-button" id="q-accept" type="button">Accepter le devis</button>
+          <button class="quote-ghost-button" id="q-refuse" type="button">Refuser le devis</button>
+        </div>
+      </div>
+
+      <form class="quote-form" id="accept-form" hidden novalidate>
+        <h2>Vos coordonnées de facturation</h2>
+        <p class="quote-help">Vérifiez et complétez vos informations : elles serviront à établir la facture.</p>
+        <fieldset class="quote-type">
+          <legend>Vous êtes</legend>
+          <label><input type="radio" name="type" value="particulier" checked> Un particulier</label>
+          <label><input type="radio" name="type" value="professionnel"> Une entreprise ou une association</label>
+        </fieldset>
+        <label class="quote-field"><span id="name-label">Nom et prénom *</span><input name="name" autocomplete="name" maxlength="200" required></label>
+        <div class="quote-row">
+          <label class="quote-field"><span>E-mail *</span><input name="email" type="email" autocomplete="email" maxlength="254" required></label>
+          <label class="quote-field"><span>Téléphone</span><input name="phone" type="tel" autocomplete="tel" maxlength="40"></label>
+        </div>
+        <label class="quote-field"><span>Adresse *</span><input name="address" autocomplete="street-address" maxlength="300" required></label>
+        <div class="quote-row">
+          <label class="quote-field"><span>Code postal *</span><input name="postalCode" autocomplete="postal-code" maxlength="20" required></label>
+          <label class="quote-field"><span>Ville *</span><input name="city" autocomplete="address-level2" maxlength="120" required></label>
+        </div>
+        <label class="quote-field"><span>Pays</span><input name="country" autocomplete="country-name" maxlength="80"></label>
+        <div class="quote-row" id="pro-fields" hidden>
+          <label class="quote-field"><span>SIRET (14 chiffres) *</span><input name="siret" inputmode="numeric" maxlength="20"></label>
+          <label class="quote-field"><span>N° de TVA</span><input name="vatNumber" maxlength="30"></label>
+        </div>
+        <button class="quote-link-button" id="add-comment" type="button">+ Ajouter un commentaire</button>
+        <label class="quote-field" id="accept-comment-field" hidden><span>Votre commentaire</span><textarea name="comment" rows="4" maxlength="3000" placeholder="Une précision, une question, un détail pour la prestation…"></textarea></label>
+        <p class="quote-help" id="deposit-note"></p>
+        <div class="quote-choice">
+          <button class="gallery-primary-button" type="submit">Confirmer l'acceptation</button>
+          <button class="quote-ghost-button" data-back type="button">Retour</button>
+        </div>
+        <p class="gallery-form-message" role="alert"></p>
+      </form>
+
+      <form class="quote-form" id="refuse-form" hidden novalidate>
+        <h2>Refuser le devis</h2>
+        <label class="quote-check"><input type="checkbox" name="redo"> Je souhaite recevoir un nouveau devis</label>
+        <label class="quote-field"><span>Votre commentaire</span><textarea name="comment" rows="5" maxlength="3000" placeholder="Les modifications souhaitées, la raison du refus…"></textarea></label>
+        <div class="quote-choice">
+          <button class="gallery-primary-button" type="submit">Envoyer ma réponse</button>
+          <button class="quote-ghost-button" data-back type="button">Retour</button>
+        </div>
+        <p class="gallery-form-message" role="alert"></p>
+      </form>
+
+      <a class="gallery-back-link" href="index.html">Retour au site</a>
+    </section>
+  </main>
+</body>
+</html>

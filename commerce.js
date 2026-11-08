@@ -476,7 +476,17 @@ function stepReview(body) {
 // ------------------------------------------------------------ documents
 
 async function documentActions(kind, id, defaultEmail) {
-  const open = async () => { const d = await run(() => api("document-url", { kind, id, days: 1 })); if (d) window.open(d.url, "_blank", "noopener"); };
+  // Téléchargement direct (fichier enregistré sous un nom lisible), sans ouvrir d'onglet
+  const open = async () => {
+    const d = await run(() => api("document-url", { kind, id, days: 1 }));
+    if (!d) return;
+    const link = document.createElement("a");
+    link.href = d.downloadUrl || d.url;
+    link.download = d.fileName || "";
+    document.body.append(link);
+    link.click();
+    link.remove();
+  };
   const copy = async () => {
     const d = await run(() => api("document-url", { kind, id, days: 7 }));
     if (!d) return;
@@ -485,7 +495,7 @@ async function documentActions(kind, id, defaultEmail) {
   const send = async () => {
     const to = window.prompt("Envoyer à (e-mail) :", defaultEmail || "");
     if (!to) return;
-    const message = window.prompt("Message (laisser vide pour le message par défaut) :", "") || "";
+    const message = window.prompt(kind === "quote" ? "Message (laisser vide pour le message par défaut, avec le bouton « Répondre à la proposition ») :" : "Message (laisser vide pour le message par défaut) :", "") || "";
     if (await run(() => api("send-document", { kind, id, to, message }))) say("E-mail envoyé.", true);
   };
   return { open, copy, send };
@@ -507,6 +517,8 @@ async function quoteDetail(id) {
     <dt>Acompte facturé</dt><dd>${money(data.deposit.invoicedCents)}</dd><dt>Acompte reçu</dt><dd>${money(data.deposit.receivedCents)}</dd></dl>
     <div class="com-actions"><button class="gallery-primary-button" id="dl" type="button">Télécharger le PDF</button>
     <button class="gallery-quiet-button" id="cp" type="button">Copier le lien</button><button class="gallery-quiet-button" id="sd" type="button">Envoyer par e-mail</button></div>
+    ${q.responded_at ? `<h3>Réponse du client</h3><p>${q.status === "accepted" ? "Devis accepté" : "Devis refusé"} en ligne le ${dateFr(q.responded_at.slice(0, 10))}${q.status === "refused" ? (q.response_redo ? " — <strong>souhaite un nouveau devis</strong>" : " — ne demande pas de nouveau devis") : ""}.</p>
+      ${q.response_comment ? `<p><em>Commentaire :</em><br>${esc(q.response_comment).replace(/\n/g, "<br>")}</p>` : ""}` : ""}
     <h3>Statut</h3><div class="com-actions">${["sent", "accepted", "refused"].map((s) => `<button class="gallery-quiet-button" type="button" data-st="${s}">Marquer ${QUOTE_STATUS[s][0].toLowerCase()}</button>`).join("")}</div>
     ${q.status === "accepted" ? `<h3>Facturation</h3><div class="com-actions">
       ${data.deposit.requestedCents ? '<button class="gallery-quiet-button" type="button" data-inv="deposit">Créer la facture d\'acompte</button>' : ""}

@@ -5,6 +5,7 @@ import { databaseRequest } from "../_shared/http.ts";
 //   Sans commande, la galerie et ses photos sont supprimées entièrement. Avec des commandes, la fiche
 //   de la galerie, les photos commandées et les commandes restent (traces de vente pour la comptabilité).
 // - Devis refusés depuis plus de RETENTION_DAYS jours : supprimés avec leur PDF (lignes du devis en cascade).
+// - Fiches clients créées par le formulaire du site, sans devis ni facture au bout de 6 mois : supprimées.
 // Appel protégé (secret rangé dans le coffre de la base, ou clé de service). Ajouter ?dry_run=1 pour voir ce qui serait supprimé, sans rien supprimer.
 
 const RETENTION_DAYS = 61; // environ deux mois
@@ -137,10 +138,39 @@ Deno.serve(async (request) => {
     report.errors.push(`Devis : ${error instanceof Error ? error.message : String(error)}`);
   }
 
+  // ---- Fiches clients créées par le formulaire du site, jamais utilisées depuis 6 mois ----
+  const clientsReport: unknown[] = [];
+  try {
+    const sixMonths = new Date(Date.now() - 183 * 24 * 3600 * 1000).toISOString();
+    const candidates = await databaseRequest(
+      `clients?select=id,name,email&source=eq.formulaire&created_at=lt.${encodeURIComponent(sixMonths)}`
+    ) as Array<{ id: string; name: string; email: string }>;
+    if (candidates.length) {
+      const ids = inList(candidates.map((c) => c.id));
+      const [usedQuotes, usedInvoices] = await Promise.all([
+        databaseRequest(`quotes?select=client_id&client_id=in.${ids}`) as Promise<Array<{ client_id: string }>>,
+        databaseRequest(`invoices?select=client_id&client_id=in.${ids}`) as Promise<Array<{ client_id: string }>>
+      ]);
+      const used = new Set([...usedQuotes, ...usedInvoices].map((row) => row.client_id));
+      for (const client of candidates.filter((c) => !used.has(c.id))) {
+        clientsReport.push({ name: client.name, email: client.email });
+        if (dryRun) continue;
+        try {
+          await databaseRequest(`clients?id=eq.${encodeURIComponent(client.id)}`, { method: "DELETE" });
+        } catch (error) {
+          report.errors.push(`Fiche ${client.email} : ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+    }
+  } catch (error) {
+    report.errors.push(`Fiches clients : ${error instanceof Error ? error.message : String(error)}`);
+  }
+  (report as Record<string, unknown>).clients = clientsReport;
+
   if (report.errors.length) console.error("Nettoyage automatique : erreurs", report.errors);
   console.log(
     `Nettoyage automatique${dryRun ? " (MODE ESSAI : rien n’a été supprimé)" : ""}`,
-    JSON.stringify({ galeries: report.galleries, devis: report.quotes, erreurs: report.errors })
+    JSON.stringify({ galeries: report.galleries, devis: report.quotes, fiches: clientsReport, erreurs: report.errors })
   );
   return reply(200, report);
 });

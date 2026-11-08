@@ -1,0 +1,266 @@
+import { databaseRequest, sha256 } from "../_shared/http.ts";
+
+// Réponse du client à un devis, depuis la page reponse-devis.html (lien reçu avec le devis).
+// Le lien contient une clé secrète propre au devis : sans elle, rien n'est lisible ni modifiable.
+// Accepter : le client complète ses coordonnées de facturation (sa fiche est mise à jour).
+// Refuser : il peut demander un nouveau devis et laisser un commentaire.
+// Alex reçoit un e-mail à chaque réponse.
+
+// deno-lint-ignore no-explicit-any
+type Row = Record<string, any>;
+
+class UserError extends Error {
+  status: number;
+  constructor(message: string, status = 400) {
+    super(message);
+    this.status = status;
+  }
+}
+
+function allowedOrigins() {
+  const configured = Deno.env.get("FRONTEND_ORIGIN") ?? "";
+  const set = new Set<string>();
+  if (configured) {
+    set.add(configured);
+    try {
+      const url = new URL(configured);
+      const bare = url.hostname.replace(/^www\./, "");
+      set.add(`${url.protocol}//${bare}`);
+      set.add(`${url.protocol}//www.${bare}`);
+    } catch { /* valeur non standard : gardée telle quelle */ }
+  }
+  return set;
+}
+function cors(request: Request) {
+  const headers = new Headers({ "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+  const origin = request.headers.get("Origin") ?? "";
+  if (allowedOrigins().has(origin)) {
+    headers.set("Access-Control-Allow-Origin", origin);
+    headers.set("Vary", "Origin");
+    headers.set("Access-Control-Allow-Headers", "authorization, apikey, content-type");
+    headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  }
+  return headers;
+}
+function reply(request: Request, status: number, body: unknown) {
+  return new Response(JSON.stringify(body), { status, headers: cors(request) });
+}
+
+function requiredEnv(name: string) {
+  const value = Deno.env.get(name);
+  if (!value) throw new Error(`Le réglage serveur ${name} est manquant.`);
+  return value;
+}
+
+function text(value: unknown, label: string, max: number, required = false) {
+  const value2 = typeof value === "string" ? value.trim() : "";
+  if (required && !value2) throw new UserError(`${label} : champ obligatoire.`);
+  if (value2.length > max) throw new UserError(`${label} : ${max} caractères maximum.`);
+  return value2;
+}
+
+const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+function escapeHtml(value: string) {
+  const map: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return value.replace(/[&<>"']/g, (char) => map[char]);
+}
+
+function todayParis() {
+  return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Paris" }).format(new Date());
+}
+
+function money(cents: number) {
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format((cents || 0) / 100);
+}
+
+async function rows(path: string, init: RequestInit = {}) {
+  return await databaseRequest(path, init) as Row[];
+}
+
+async function patch(table: string, id: string, body: Row) {
+  await databaseRequest(`${table}?id=eq.${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ ...body, updated_at: new Date().toISOString() })
+  });
+}
+
+async function findQuote(token: unknown) {
+  if (typeof token !== "string" || !/^[A-Za-z0-9_-]{32,64}$/.test(token)) {
+    throw new UserError("Ce lien n'est pas valide.", 404);
+  }
+  const quote = (await rows(
+    `quotes?select=*&response_token=eq.${encodeURIComponent(token)}&number=not.is.null&limit=1`
+  ))[0];
+  if (!quote) throw new UserError("Ce lien n'est pas valide.", 404);
+  const client = quote.client_id
+    ? (await rows(`clients?select=*&id=eq.${encodeURIComponent(quote.client_id)}`))[0]
+    : null;
+  return { quote, client };
+}
+
+function stateOf(quote: Row) {
+  if (quote.status === "accepted") return "accepted";
+  if (quote.status === "refused") return "refused";
+  if (quote.status === "expired") return "expired";
+  if (quote.status === "sent" && quote.valid_until && quote.valid_until < todayParis()) return "expired";
+  return quote.status === "sent" ? "open" : "closed";
+}
+
+async function consumeRateLimit(request: Request) {
+  const ip = request.headers.get("cf-connecting-ip") ??
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "inconnu";
+  const secret = requiredEnv("GALLERY_SESSION_SECRET");
+  const attempts = await databaseRequest("rpc/consume_gallery_rate_limit", {
+    method: "POST",
+    body: JSON.stringify({ p_key: await sha256(`quote-response:${ip}:${secret}`) })
+  }) as number;
+  if (attempts > 10) throw new UserError("Trop de tentatives. Réessayez dans quelques minutes.", 429);
+}
+
+async function notifyAlex(subject: string, lines: string[], replyTo: string) {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: requiredEnv("ORDER_EMAIL_FROM"),
+      to: [requiredEnv("CONTACT_EMAIL_TO")],
+      ...(isEmail(replyTo) ? { reply_to: replyTo } : {}),
+      subject,
+      text: lines.join("\n"),
+      html: `<p>${lines.map(escapeHtml).join("<br>")}</p>`
+    })
+  });
+  if (!response.ok) console.error("Resend rejected a quote response notification", response.status);
+}
+
+function publicView(quote: Row, client: Row | null) {
+  const snapshot = quote.client_snapshot ?? {};
+  const source = client ?? snapshot;
+  return {
+    state: stateOf(quote),
+    quote: {
+      number: quote.number,
+      issueDate: quote.issue_date,
+      validUntil: quote.valid_until,
+      totalCents: quote.total_ttc_cents,
+      depositCents: quote.deposit_enabled ? quote.deposit_cents : 0,
+      projectDescription: quote.project_description || "",
+      servicePeriod: quote.service_period || ""
+    },
+    client: {
+      type: source.type === "professionnel" ? "professionnel" : "particulier",
+      name: source.name ?? "",
+      email: source.email ?? "",
+      phone: source.phone ?? "",
+      address: source.address ?? "",
+      postalCode: source.postal_code ?? "",
+      city: source.city ?? "",
+      country: source.country || "France",
+      siret: source.siret ?? "",
+      vatNumber: source.vat_number ?? ""
+    }
+  };
+}
+
+async function load(token: unknown) {
+  const { quote, client } = await findQuote(token);
+  const view = publicView(quote, client);
+  const items = await rows(
+    `quote_items?select=title,quantity,unit,total_ht_cents&quote_id=eq.${encodeURIComponent(quote.id)}&order=position.asc`
+  );
+  return { ...view, items: items.map((item) => ({ title: item.title })) };
+}
+
+async function accept(body: Row) {
+  const { quote, client } = await findQuote(body.token);
+  if (stateOf(quote) !== "open") throw new UserError("Ce devis n'attend plus de réponse.", 409);
+  const input = body.client ?? {};
+  const type = input.type === "professionnel" ? "professionnel" : "particulier";
+  const data = {
+    type,
+    name: text(input.name, type === "professionnel" ? "Nom de la société" : "Nom et prénom", 200, true),
+    email: text(input.email, "Adresse e-mail", 254, true),
+    phone: text(input.phone, "Téléphone", 40),
+    address: text(input.address, "Adresse", 300, true),
+    postal_code: text(input.postalCode, "Code postal", 20, true),
+    city: text(input.city, "Ville", 120, true),
+    country: text(input.country, "Pays", 80) || "France",
+    siret: text(input.siret, "SIRET", 20).replace(/\s/g, ""),
+    vat_number: text(input.vatNumber, "Numéro de TVA", 30).toUpperCase()
+  };
+  if (!isEmail(data.email)) throw new UserError("Adresse e-mail invalide.");
+  if (type === "professionnel" && !/^\d{14}$/.test(data.siret)) {
+    throw new UserError("SIRET invalide : 14 chiffres attendus.");
+  }
+  if (type === "particulier" && data.siret && !/^\d{9}(\d{5})?$/.test(data.siret)) data.siret = "";
+  const comment = text(body.comment, "Commentaire", 3000);
+
+  if (client) await patch("clients", client.id, { ...data, source: "manuel" });
+  await patch("quotes", quote.id, {
+    status: "accepted",
+    responded_at: new Date().toISOString(),
+    response_comment: comment,
+    response_redo: false
+  });
+
+  const before = client ?? {};
+  const changed = (Object.keys(data) as Array<keyof typeof data>)
+    .filter((key) => String(before[key] ?? "") !== String(data[key] ?? ""));
+  await notifyAlex(`Devis ${quote.number} accepté — ${data.name}`, [
+    `Bonne nouvelle : ${data.name} a accepté le devis ${quote.number} (${money(quote.total_ttc_cents)}).`,
+    "",
+    "Coordonnées de facturation :",
+    `${data.name}${type === "professionnel" ? ` — SIRET ${data.siret}` : ""}`,
+    `${data.address}, ${data.postal_code} ${data.city}, ${data.country}`,
+    `${data.email}${data.phone ? ` — ${data.phone}` : ""}`,
+    ...(changed.length ? ["", "La fiche client a été mise à jour automatiquement."] : []),
+    ...(comment ? ["", "Commentaire du client :", comment] : []),
+    "",
+    "Le devis est passé en « Accepté » dans la gestion commerciale : vous pouvez créer la facture d'acompte."
+  ], data.email);
+  return { state: "accepted" };
+}
+
+async function refuse(body: Row) {
+  const { quote, client } = await findQuote(body.token);
+  if (stateOf(quote) !== "open") throw new UserError("Ce devis n'attend plus de réponse.", 409);
+  const redo = body.redo === true;
+  const comment = text(body.comment, "Commentaire", 3000);
+  await patch("quotes", quote.id, {
+    status: "refused",
+    responded_at: new Date().toISOString(),
+    response_comment: comment,
+    response_redo: redo
+  });
+  const name = client?.name || quote.client_snapshot?.name || "Le client";
+  await notifyAlex(`Devis ${quote.number} refusé${redo ? " — nouveau devis souhaité" : ""} — ${name}`, [
+    `${name} a refusé le devis ${quote.number} (${money(quote.total_ttc_cents)}).`,
+    "",
+    redo ? "Le client souhaite recevoir un nouveau devis." : "Le client ne demande pas de nouveau devis.",
+    ...(comment ? ["", "Commentaire du client :", comment] : [])
+  ], client?.email || quote.client_snapshot?.email || "");
+  return { state: "refused" };
+}
+
+Deno.serve(async (request) => {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: allowedOrigins().has(request.headers.get("Origin") ?? "") ? 204 : 403, headers: cors(request) });
+  }
+  try {
+    if (!allowedOrigins().has(request.headers.get("Origin") ?? "")) throw new UserError("Origine non autorisée.", 403);
+    if (request.method !== "POST") throw new UserError("Méthode non autorisée.", 405);
+    const body = await request.json().catch(() => null) as Row | null;
+    if (!body || typeof body !== "object") throw new UserError("Requête invalide.");
+    if (body.action === "get") return reply(request, 200, await load(body.token));
+    await consumeRateLimit(request);
+    if (body.action === "accept") return reply(request, 200, await accept(body));
+    if (body.action === "refuse") return reply(request, 200, await refuse(body));
+    throw new UserError("Requête invalide.");
+  } catch (error) {
+    if (error instanceof UserError) return reply(request, error.status, { message: error.message });
+    console.error("Quote response error", error);
+    return reply(request, 500, { message: "Une erreur est survenue. Réessayez ou contactez-nous directement." });
+  }
+});

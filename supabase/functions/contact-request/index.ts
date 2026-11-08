@@ -144,6 +144,30 @@ async function sendContactEmail(data: {
   }
 }
 
+// Crée la fiche client d'une demande reçue par le site, sauf si une fiche existe déjà pour cet e-mail
+// (on complète alors seulement le téléphone s'il manquait). Marquée « formulaire » pour le nettoyage à 6 mois.
+async function saveContactClient(name: string, email: string, phone: string) {
+  if (!isEmail(email)) return;
+  const existing = await databaseRequest(
+    `clients?select=id,phone&email=ilike.${encodeURIComponent(email.replace(/[%_*]/g, ""))}&limit=1`
+  ) as Array<{ id: string; phone: string }>;
+  if (existing[0]) {
+    if (!existing[0].phone && phone) {
+      await databaseRequest(`clients?id=eq.${encodeURIComponent(existing[0].id)}`, {
+        method: "PATCH",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({ phone, updated_at: new Date().toISOString() })
+      });
+    }
+    return;
+  }
+  await databaseRequest("clients", {
+    method: "POST",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ type: "particulier", name: (name || email).slice(0, 200), email, phone, source: "formulaire" })
+  });
+}
+
 function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -203,6 +227,14 @@ Deno.serve(async (request) => {
 
     stage = "email";
     await sendContactEmail({ name, email, phone, service, type, date, message, notes: notes.join(" · ") });
+
+    // Fiche client dans la gestion commerciale (jamais bloquant : le mail est déjà parti).
+    stage = "client";
+    try {
+      await saveContactClient(name, email, phone);
+    } catch (error) {
+      console.error("Contact client record failed", { error });
+    }
     return reply(request, 200, { ok: true });
   } catch (error) {
     console.error("Contact request failed", { stage, error });
