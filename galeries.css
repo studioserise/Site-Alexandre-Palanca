@@ -995,3 +995,9 @@ button {
 .admin-code-form { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
 .admin-code-form .gallery-admin-input { flex: 1 1 220px; text-transform: uppercase; }
 .admin-code-form small { width: 100%; color: #a9a59e; }
+
+/* Administration : encadré du logiciel de filigrane */
+.admin-tool { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 28px; margin-bottom: 28px; }
+.admin-tool > div { flex: 1 1 420px; }
+.admin-tool h2 { margin-top: 0; }
+.admin-tool-download { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; white-space: nowrap; }

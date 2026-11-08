@@ -11,6 +11,10 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://rrytedgilrwsczoqeyzx.supabase.co; media-src 'self' blob: https://rrytedgilrwsczoqeyzx.supabase.co; font-src 'self'; connect-src 'self' https://rrytedgilrwsczoqeyzx.supabase.co https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
 
+# Outils à télécharger : jamais référencés par les moteurs de recherche
+/outils/*
+  X-Robots-Tag: noindex, nofollow
+
 # Durée de conservation des fichiers dans le navigateur des visiteurs (Cloudflare).
 # Les visites suivantes s'ouvrent quasi instantanément : rien n'est retéléchargé.
 

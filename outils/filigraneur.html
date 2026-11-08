@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filigraneur</title>
+<style>
+  :root{
+    --bg:#f6f5f2; --panel:#ffffff; --ink:#1d1d1f; --muted:#6e6e73; --line:#e3e1dc;
+    --accent:#2f6f5e; --accent-ink:#fff; --soft:#eef4f1; --danger:#b4412f; --free:#b07a1e;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#161616; --panel:#202020; --ink:#f2f2f2; --muted:#a0a0a5; --line:#333;
+      --accent:#5fb39b; --accent-ink:#0f1f1a; --soft:#1f2b27; --danger:#e07a66; --free:#e0a84a; }
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{padding:22px 28px 6px}
+  h1{margin:0;font-size:22px;letter-spacing:-.01em}
+  header p{margin:4px 0 0;color:var(--muted)}
+  main{display:grid;grid-template-columns:340px 1fr;gap:20px;padding:16px 28px 40px;align-items:start}
+  @media (max-width:900px){main{grid-template-columns:1fr;padding:12px 16px 40px}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 12px}
+  .stack{display:flex;flex-direction:column;gap:16px;position:sticky;top:12px}
+  .drop{border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s;font-size:14px}
+  .drop.over{border-color:var(--accent);background:var(--soft);color:var(--ink)}
+  .drop strong{color:var(--ink)}
+  .wm-prev{display:flex;align-items:center;gap:12px;margin-top:10px}
+  .wm-prev img{max-width:70px;max-height:56px;background:repeating-conic-gradient(#999 0 25%,#666 0 50%) 0 0/10px 10px;border-radius:6px}
+  .wm-prev .n{font-size:13px;word-break:break-all}
+  .sub{font-size:13px;font-weight:600;margin:14px 0 6px}
+  .sub:first-of-type{margin-top:0}
+  label.row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;margin:10px 0}
+  label.row span.v{color:var(--muted);font-variant-numeric:tabular-nums;font-size:13px}
+  label.row input[type=range]{grid-column:1/3;width:100%}
+  label.check{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:14px}
+  input[type=text],input[type=number],select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:100%}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid2 label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+  button{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:9px 14px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .actions{display:flex;flex-direction:column;gap:8px}
+  .hint{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .toolbar .left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .count{color:var(--muted)}
+  #photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+  .ph{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;position:relative;cursor:grab}
+  .ph.dragging{opacity:.4}
+  .ph.target{outline:2px solid var(--accent)}
+  .ph .thumb{aspect-ratio:4/3;background:var(--bg);display:flex;align-items:center;justify-content:center}
+  .ph canvas{max-width:100%;max-height:100%;display:block;pointer-events:none}
+  .ph .meta{padding:8px 10px;font-size:12px;display:flex;flex-direction:column;gap:6px}
+  .ph .new{font-weight:600}
+  .ph .old{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ph .btns{display:flex;gap:6px;flex-wrap:wrap}
+  .ph .btns button{padding:3px 8px;font-size:11.5px;border-radius:7px}
+  .ph .kind.free{border-color:var(--free);color:var(--free)}
+  .ph .x{position:absolute;top:6px;right:6px;width:26px;height:26px;padding:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:0;font-size:15px;line-height:26px}
+  .ph .num{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.6);color:#fff;border-radius:7px;padding:1px 7px;font-size:12px;font-weight:600}
+  .empty{border:2px dashed var(--line);border-radius:14px;padding:60px 20px;text-align:center;color:var(--muted)}
+  .empty.over{border-color:var(--accent);background:var(--soft)}
+  .progress{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:10px;display:none}
+  .progress div{height:100%;width:0;background:var(--accent);transition:width .2s}
+  #status{font-size:13px;color:var(--muted);margin-top:6px;min-height:18px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{border:0;border-radius:0;padding:6px 11px;font-size:13px}
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button.on{background:var(--accent);color:var(--accent-ink)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Filigraneur</h1>
+  <p>Glisse tes photos : elles sont numérotées, filigranées en copie, et les originaux restent intacts au bit près.</p>
+</header>
+<main>
+  <div class="stack">
+    <section class="card">
+      <h2>1 · Tes filigranes</h2>
+      <div class="sub">Filigrane plein (photos protégées)</div>
+      <div class="drop" id="fullDrop"><strong>Dépose ton PNG carré</strong><br>remplit toute la photo, centré</div>
+      <div class="wm-prev" id="fullPrev" hidden><img alt=""><div><div class="n"></div><button class="clr" style="padding:3px 8px;font-size:12px;margin-top:4px">Retirer</button></div></div>
+
+      <div class="sub" style="margin-top:16px">Signature (photos gratuites)</div>
+      <div class="drop" id="sigDrop"><strong>Dépose ton PNG signature</strong><br>posé dans le coin choisi</div>
+      <div class="wm-prev" id="sigPrev" hidden><img alt=""><div><div class="n"></div><button class="clr" style="padding:3px 8px;font-size:12px;margin-top:4px">Retirer</button></div></div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted)">Coin :
+        <div class="seg" id="cornerSeg"><button data-v="bl">Bas gauche</button><button data-v="br">Bas droite</button></div>
+      </div>
+      <label class="row">Largeur de la signature <span class="v" id="sigSizeV"></span><input type="range" id="sigSize" min="5" max="60" step="1"></label>
+      <p class="hint" style="margin-top:0">En % du plus grand côté de la photo : même taille en portrait et en paysage.</p>
+      <p class="hint">Les deux PNG sont mémorisés pour la prochaine fois.</p>
+    </section>
+
+    <section class="card">
+      <h2>2 · Réglages</h2>
+      <label class="row">Qualité JPEG (filigranées) <span class="v" id="qualityV"></span><input type="range" id="quality" min="50" max="100" step="1"></label>
+      <div class="grid2">
+        <label>Largeur max (px)<input type="number" id="maxW" min="0" placeholder="aucune"></label>
+        <label>&nbsp;<span class="hint" style="margin:0">Réduit les filigranées (vide = taille d'origine)</span></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3 · Noms des fichiers</h2>
+      <div class="grid2">
+        <label>Commencer à<input type="number" id="start" min="0"></label>
+        <label>Chiffres<select id="pad"><option value="auto">auto (01…)</option><option value="2">2 (01)</option><option value="3">3 (001)</option><option value="4">4 (0001)</option></select></label>
+        <label>Préfixe<input type="text" id="prefix" placeholder="ex : mariage-"></label>
+        <label>Suffixe filigrane<input type="text" id="suffix"></label>
+      </div>
+      <p class="hint" id="nameExample"></p>
+    </section>
+
+    <section class="card">
+      <h2>4 · Récupérer</h2>
+      <div class="actions">
+        <button class="primary" id="btnZip" disabled>Télécharger les 2 dossiers (.zip)</button>
+        <button id="btnZipSep" disabled>Télécharger 2 zips séparés</button>
+        <button id="btnFolder" disabled hidden>Enregistrer directement dans un dossier…</button>
+      </div>
+      <div class="progress" id="prog"><div></div></div>
+      <div id="status"></div>
+      <p class="hint">« originales » = tes fichiers d'origine simplement renommés, sans aucune recompression.<br>« filigranees » = copies JPEG avec le filigrane ou la signature.</p>
+    </section>
+  </div>
+
+  <section id="right">
+    <div class="toolbar">
+      <div class="left">
+        <button id="btnAdd">+ Ajouter des photos</button>
+        <div class="seg" id="allSeg" title="Appliquer à toutes les photos"><button data-v="full">Toutes protégées</button><button data-v="sig">Toutes gratuites</button><button data-v="none">Sans filigrane</button></div>
+        <select id="sort" style="width:auto">
+          <option value="">Trier…</option>
+          <option value="name">Par nom de fichier</option>
+          <option value="date">Par date du fichier</option>
+          <option value="reverse">Inverser l'ordre</option>
+        </select>
+        <span class="count" id="count"></span>
+      </div>
+      <button id="btnClear" style="color:var(--danger)" hidden>Tout vider</button>
+    </div>
+    <input type="file" id="phInput" accept="image/*" multiple hidden>
+    <input type="file" id="wmInput" accept="image/png,image/*" hidden>
+    <div class="empty" id="empty"><strong style="color:var(--ink);font-size:17px">Glisse tes photos ici</strong><br>JPG, PNG, WebP… L'ordre d'affichage = l'ordre de numérotation.<br>Fais glisser les vignettes pour les réordonner.</div>
+    <div id="photos"></div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k, d){ try{ const v = localStorage.getItem('fg_'+k); return v===null? d : JSON.parse(v);}catch(e){return d;} },
+    set(k, v){ try{ localStorage.setItem('fg_'+k, JSON.stringify(v)); }catch(e){} }
+  };
+  // IndexedDB pour garder les PNG (trop gros pour localStorage)
+  const idb = {
+    db: null,
+    open(){ return this.db || (this.db = new Promise((res,rej)=>{ try{ const r = indexedDB.open('filigraneur',1); r.onupgradeneeded=()=>r.result.createObjectStore('wm'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);}catch(e){rej(e);} })); },
+    async get(k){ try{ const db = await this.open(); return await new Promise(res=>{ const q = db.transaction('wm').objectStore('wm').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>res(null); }); }catch(e){ return null; } },
+    async set(k,v){ try{ const db = await this.open(); db.transaction('wm','readwrite').objectStore('wm').put(v,k); }catch(e){} },
+    async del(k){ try{ const db = await this.open(); db.transaction('wm','readwrite').objectStore('wm').delete(k); }catch(e){} }
+  };
+
+  // ---------- état ----------
+  const S = Object.assign({
+    corner:'bl', sigSize:17, quality:90, maxW:'', defKind:'full',
+    start:1, pad:'auto', prefix:'', suffix:'-filigrane'
+  }, (()=>{ const o = store.get('settings2', {}); if (!o.sigV){ delete o.sigSize; } return o; })());
+  let photos = []; // {id, file, url, kind:'full'|'sig', natW, natH, base(canvas)}
+  const WM = { full:null, sig:null }; // {img, name}
+  let uid = 0, busy = false;
+
+  // ---------- filigranes ----------
+  async function setWm(kind, blob, name, save){
+    const url = URL.createObjectURL(blob);
+    try{
+      const img = await loadImg(url);
+      WM[kind] = { img, name };
+      const box = $(kind+'Prev'); box.hidden = false;
+      box.querySelector('img').src = url; box.querySelector('.n').textContent = name;
+      if (save) idb.set(kind, {blob, name});
+      photos.forEach(p => p.dirty = true); refresh();
+    }catch(e){ alert('Impossible de lire ce PNG.'); }
+  }
+  ['full','sig'].forEach(kind => {
+    const drop = $(kind+'Drop');
+    drop.onclick = () => { $('wmInput').dataset.kind = kind; $('wmInput').click(); };
+    bindDrop(drop, files => files[0] && setWm(kind, files[0], files[0].name, true));
+    $(kind+'Prev').querySelector('.clr').onclick = () => { WM[kind]=null; $(kind+'Prev').hidden=true; idb.del(kind); photos.forEach(p=>p.dirty=true); refresh(); };
+    idb.get(kind).then(v => { if (v && v.blob && !WM[kind]) setWm(kind, v.blob, v.name, false); });
+  });
+  $('wmInput').onchange = e => { const f = e.target.files[0]; if (f) setWm(e.target.dataset.kind, f, f.name, true); e.target.value=''; };
+
+  // ---------- réglages ----------
+  $('quality').value = S.quality; $('quality').oninput = () => { S.quality = +$('quality').value; save(false); };
+  $('sigSize').value = S.sigSize; $('sigSize').oninput = () => { S.sigSize = +$('sigSize').value; save(true); };
+  ['start','prefix','suffix','maxW'].forEach(k => { $(k).value = S[k]; $(k).oninput = () => { S[k] = k==='start'? Math.max(0, parseInt($(k).value)||0) : $(k).value; save(k==='maxW'); }; });
+  $('pad').value = S.pad; $('pad').onchange = () => { S.pad = $('pad').value; save(false); };
+  document.querySelectorAll('#cornerSeg button').forEach(b => b.onclick = () => { S.corner = b.dataset.v; save(true); });
+  document.querySelectorAll('#allSeg button').forEach(b => b.onclick = () => { S.defKind = b.dataset.v; photos.forEach(p=>{p.kind=b.dataset.v; p.dirty=true;}); renderGrid(); save(false); });
+  function save(redraw){ S.sigV = 2; store.set('settings2', S); if (redraw) photos.forEach(p=>p.dirty=true); refresh(); }
+
+  // ---------- noms ----------
+  function cleanPart(s){ return s.replace(/[\\/:*?"<>|]/g,'').trim(); }
+  function ext(name){ const m = name.match(/\.[^.]+$/); return m ? m[0] : ''; }
+  function names(i){
+    const n = S.start + i;
+    const last = S.start + Math.max(photos.length,1) - 1;
+    const digits = S.pad==='auto' ? Math.max(2, String(last).length) : +S.pad;
+    const base = cleanPart(S.prefix) + String(n).padStart(digits,'0');
+    return { orig: base + ext(photos[i]?.file.name || '.jpg'), wm: base + cleanPart(S.suffix) + '.jpg', base };
+  }
+
+  // ---------- géométrie ----------
+  // w,h = taille du canevas ; finalW = largeur de la photo filigranée finale (pour l'échelle de la signature)
+  function geom(kind, w, h, finalW){
+    const img = WM[kind].img, iw = img.naturalWidth, ih = img.naturalHeight;
+    if (kind==='full'){
+      // le carré prend la taille du plus grand côté de la photo : il remplit tout,
+      // et fait la même taille en portrait et en paysage (ex. 6000×4000 et 4000×6000 → carré de 6000)
+      const s = Math.max(w, h) / Math.min(iw, ih);
+      const dw = iw*s, dh = ih*s;
+      return { x:(w-dw)/2, y:(h-dh)/2, dw, dh };
+    }
+    // signature proportionnelle au plus grand côté : même taille en portrait et en paysage
+    const L = Math.max(w, h);
+    const dw = L * S.sigSize/100, dh = dw * ih/iw;
+    const m = L * 0.015;
+    return { x: S.corner==='br' ? w-dw-m : m, y: h-dh-m, dw, dh };
+  }
+
+
+  function finalSize(p){
+    let w = p.natW, h = p.natH; const mx = parseInt(S.maxW);
+    if (mx>0 && w>mx){ h = Math.round(h*mx/w); w = mx; }
+    return {w,h};
+  }
+  function drawWm(ctx, p, w, h, finalW){
+    const W = p.kind!=='none' && WM[p.kind]; if (!W) return;
+    const g = geom(p.kind, w, h, finalW);
+    ctx.drawImage(W.img, g.x, g.y, g.dw, g.dh);
+  }
+
+  // ---------- photos ----------
+  function addPhotos(list){
+    const imgs = [...list].filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|webp|tiff?|heic|avif)$/i.test(f.name));
+    imgs.sort((a,b)=>a.name.localeCompare(b.name, undefined, {numeric:true}));
+    for (const f of imgs) photos.push({id:++uid, file:f, url:URL.createObjectURL(f), kind:S.defKind, dirty:true});
+    renderGrid(); refresh();
+  }
+  $('btnAdd').onclick = () => $('phInput').click();
+  $('phInput').onchange = e => { addPhotos(e.target.files); e.target.value=''; };
+  $('empty').onclick = () => $('phInput').click();
+  bindDrop($('right'), addPhotos, $('empty'));
+  $('btnClear').onclick = () => { photos.forEach(p=>URL.revokeObjectURL(p.url)); photos=[]; renderGrid(); refresh(); };
+  $('sort').onchange = () => {
+    const v = $('sort').value;
+    if (v==='name') photos.sort((a,b)=>a.file.name.localeCompare(b.file.name, undefined, {numeric:true}));
+    if (v==='date') photos.sort((a,b)=>a.file.lastModified-b.file.lastModified);
+    if (v==='reverse') photos.reverse();
+    $('sort').value=''; renderGrid(); refresh();
+  };
+
+  let dragId = null;
+  function renderGrid(){
+    const g = $('photos'); g.innerHTML='';
+    photos.forEach((p,i) => {
+      const d = document.createElement('div');
+      d.className='ph'; d.draggable=true; d.dataset.id=p.id; p.el = d;
+      d.innerHTML = `<div class="thumb"><canvas></canvas></div><span class="num">${i+1}</span><button class="x" title="Retirer">×</button>
+        <div class="meta"><div class="new"></div><div class="old"></div><div class="btns"><button class="kind"></button></div></div>`;
+      d.querySelector('.old').textContent = p.file.name; d.querySelector('.old').title = p.file.name;
+      d.querySelector('.x').onclick = ev => { ev.stopPropagation(); URL.revokeObjectURL(p.url); photos = photos.filter(x=>x!==p); renderGrid(); refresh(); };
+      d.querySelector('.kind').onclick = () => { p.kind = {full:'sig', sig:'none', none:'full'}[p.kind]; p.dirty=true; refresh(); };
+      d.addEventListener('dragstart', e => { dragId=p.id; d.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/x-fg', String(p.id)); });
+      d.addEventListener('dragend', () => { dragId=null; d.classList.remove('dragging'); document.querySelectorAll('.ph.target').forEach(x=>x.classList.remove('target')); });
+      d.addEventListener('dragover', e => { if (dragId===null) return; e.preventDefault(); e.stopPropagation(); d.classList.add('target'); });
+      d.addEventListener('dragleave', () => d.classList.remove('target'));
+      d.addEventListener('drop', e => {
+        if (dragId===null) return;
+        e.preventDefault(); e.stopPropagation();
+        const from = photos.findIndex(x=>x.id===dragId), to = photos.findIndex(x=>x.id===p.id);
+        if (from<0||to<0||from===to) return;
+        const [m] = photos.splice(from,1); photos.splice(to,0,m);
+        renderGrid(); refresh();
+      });
+      p.dirty = true;
+      g.appendChild(d);
+    });
+  }
+
+  function bindDrop(el, cb, highlight){
+    const hl = highlight || el;
+    el.addEventListener('dragover', e => { if (dragId!==null) return; e.preventDefault(); hl.classList.add('over'); });
+    el.addEventListener('dragleave', e => { if (!el.contains(e.relatedTarget)) hl.classList.remove('over'); });
+    el.addEventListener('drop', e => { if (dragId!==null) return; e.preventDefault(); e.stopPropagation(); hl.classList.remove('over'); if (e.dataTransfer.files.length) cb(e.dataTransfer.files); });
+  }
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => e.preventDefault());
+
+  // ---------- vignettes (aperçu réel) ----------
+  const TH = 480;
+  let thumbRunning = false;
+  async function processThumbs(){
+    if (thumbRunning) return; thumbRunning = true;
+    try{
+      let p;
+      while ((p = photos.find(x => x.dirty && x.el))){
+        p.dirty = false;
+        if (!p.base){
+          try{
+            const img = await loadImg(p.url);
+            p.natW = img.naturalWidth; p.natH = img.naturalHeight;
+            const s = Math.min(1, TH/Math.max(p.natW,p.natH));
+            const c = document.createElement('canvas'); c.width = Math.round(p.natW*s); c.height = Math.round(p.natH*s);
+            c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+            p.base = c;
+          }catch(e){ p.err = true; updateCard(p); continue; }
+        }
+        const fw = finalSize(p).w;
+        const cv = p.el.querySelector('canvas');
+        cv.width = p.base.width; cv.height = p.base.height;
+        const ctx = cv.getContext('2d');
+        ctx.drawImage(p.base,0,0);
+        drawWm(ctx, p, cv.width, cv.height, fw);
+        updateCard(p);
+        await new Promise(r=>setTimeout(r,0));
+      }
+    } finally { thumbRunning = false; }
+  }
+  function updateCard(p){
+    if (!p.el) return;
+    const kb = p.el.querySelector('.kind');
+    kb.textContent = {full:'Protégée', sig:'Gratuite', none:'Sans filigrane'}[p.kind];
+    kb.classList.toggle('free', p.kind==='sig');
+    kb.title = 'Cliquer pour basculer protégée / gratuite / sans filigrane';
+    if (p.err) p.el.querySelector('.thumb').textContent = 'Aperçu impossible';
+  }
+
+  // ---------- rendu UI ----------
+  function refresh(){
+    $('qualityV').textContent = S.quality;
+    document.querySelectorAll('#cornerSeg button').forEach(b => b.classList.toggle('on', b.dataset.v===S.corner));
+    $('sigSizeV').textContent = S.sigSize + ' %';
+    const n = photos.length;
+    $('empty').style.display = n ? 'none':'';
+    $('btnClear').hidden = !n;
+    const nf = photos.filter(p=>p.kind==='sig').length, nn = photos.filter(p=>p.kind==='none').length;
+    $('count').textContent = n ? `${n} photo${n>1?'s':''}` + (nf ? ` · ${nf} gratuite${nf>1?'s':''}` : '') + (nn && nn<n ? ` · ${nn} sans filigrane` : '') : '';
+    const ro = renameOnly();
+    $('btnZip').textContent = ro ? 'Télécharger le dossier renommé (.zip)' : 'Télécharger les 2 dossiers (.zip)';
+    $('btnZipSep').hidden = ro;
+    $('btnFolder').textContent = ro ? 'Enregistrer le dossier renommé…' : 'Enregistrer directement dans un dossier…';
+    document.querySelectorAll('#allSeg button').forEach(b => b.classList.toggle('on', n>0 && photos.every(p=>p.kind===b.dataset.v)));
+    photos.forEach((p,i) => { if (p.el){ p.el.querySelector('.new').textContent = (p.kind==='none' ? names(i).orig : names(i).orig + '  ↔  ' + names(i).wm); p.el.querySelector('.num').textContent = i+1; updateCard(p);} });
+    const ex = n ? names(0) : (()=>{const d = S.pad==='auto'?2:+S.pad; const b = cleanPart(S.prefix)+String(S.start).padStart(d,'0'); return {orig:b+'.jpg', wm:b+cleanPart(S.suffix)+'.jpg'};})();
+    $('nameExample').textContent = `Exemple : ${ex.orig}  et  ${ex.wm}`;
+    const missFull = photos.some(p=>p.kind==='full') && !WM.full;
+    const missSig = photos.some(p=>p.kind==='sig') && !WM.sig;
+    const ok = n>0 && !missFull && !missSig && !busy;
+    $('btnZip').disabled = $('btnZipSep').disabled = $('btnFolder').disabled = !ok;
+    if (!busy) $('status').textContent = !n ? 'Ajoute des photos.' : missFull ? 'Ajoute ton filigrane plein (PNG carré).' : missSig ? 'Ajoute ton PNG signature pour les photos gratuites.' : 'Prêt.';
+    processThumbs();
+  }
+
+  function loadImg(src){
+    return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=()=>rej(new Error('Image illisible')); i.src=src; });
+  }
+
+  async function makeWatermarked(p){
+    const img = await loadImg(p.url);
+    const {w,h} = finalSize({natW:img.naturalWidth, natH:img.naturalHeight});
+    const c = document.createElement('canvas'); c.width=w; c.height=h;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
+    ctx.imageSmoothingQuality='high';
+    ctx.drawImage(img,0,0,w,h);
+    drawWm(ctx, p, w, h, w);
+    const blob = await new Promise(r => c.toBlob(r,'image/jpeg', S.quality/100));
+    c.width = c.height = 0;
+    return blob;
+  }
+
+  // ---------- ZIP (sans compression : les fichiers sont copiés tels quels) ----------
+  const CRC = (()=>{ const t=new Uint32Array(256); for(let n=0;n<256;n++){let c=n; for(let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0;} return t; })();
+  async function crc32(blob){
+    let c = 0xFFFFFFFF;
+    const CH = 16*1024*1024;
+    for (let o=0; o<blob.size; o+=CH){
+      const b = new Uint8Array(await blob.slice(o,o+CH).arrayBuffer());
+      for (let i=0;i<b.length;i++) c = CRC[(c^b[i])&0xFF]^(c>>>8);
+    }
+    return (c^0xFFFFFFFF)>>>0;
+  }
+  function dosTime(d){
+    return { time: (d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),
+             date: ((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate() };
+  }
+  class Zip{
+    constructor(){ this.parts=[]; this.central=[]; this.offset=0; this.count=0; }
+    async add(path, blob, mtime){
+      const name = new TextEncoder().encode(path);
+      const crc = await crc32(blob), size = blob.size, {time,date} = dosTime(new Date(mtime||Date.now()));
+      const h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0,0x04034b50,true); h.setUint16(4,20,true); h.setUint16(6,0x0800,true); h.setUint16(8,0,true);
+      h.setUint16(10,time,true); h.setUint16(12,date,true); h.setUint32(14,crc,true);
+      h.setUint32(18,size,true); h.setUint32(22,size,true); h.setUint16(26,name.length,true); h.setUint16(28,0,true);
+      this.parts.push(h.buffer, name, blob);
+      const c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0,0x02014b50,true); c.setUint16(4,20,true); c.setUint16(6,20,true); c.setUint16(8,0x0800,true); c.setUint16(10,0,true);
+      c.setUint16(12,time,true); c.setUint16(14,date,true); c.setUint32(16,crc,true);
+      c.setUint32(20,size,true); c.setUint32(24,size,true); c.setUint16(28,name.length,true);
+      c.setUint32(42,this.offset,true);
+      this.central.push(c.buffer, name);
+      this.offset += 30 + name.length + size; this.count++;
+      if (this.offset > 0xFFFFFFFF) throw new Error('Trop volumineux pour un zip (> 4 Go). Utilise « 2 zips séparés » ou moins de photos.');
+    }
+    blob(){
+      const cdSize = this.central.reduce((s,p)=>s+p.byteLength,0);
+      const e = new DataView(new ArrayBuffer(22));
+      e.setUint32(0,0x06054b50,true); e.setUint16(8,this.count,true); e.setUint16(10,this.count,true);
+      e.setUint32(12,cdSize,true); e.setUint32(16,this.offset,true);
+      return new Blob([...this.parts, ...this.central, e.buffer], {type:'application/zip'});
+    }
+  }
+
+  function download(blob, name){
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 60000);
+  }
+
+  // ---------- traitement ----------
+  function progress(done, total, msg){
+    $('prog').style.display='block';
+    $('prog').firstElementChild.style.width = (100*done/total)+'%';
+    $('status').textContent = msg;
+  }
+  function stamp(){ const d=new Date(); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}h${p(d.getMinutes())}`; }
+
+  function renameOnly(){ return photos.length>0 && photos.every(p=>p.kind==='none'); }
+
+  async function run(mode){
+    if (busy) return;
+    busy = true; refresh();
+    try{
+      while (thumbRunning || photos.some(p=>p.dirty)) { await processThumbs(); await new Promise(r=>setTimeout(r,50)); }
+      const total = photos.length;
+      let sink;
+      const ro = renameOnly();
+      if (ro && mode==='folder'){
+        const root = await window.showDirectoryPicker({mode:'readwrite'});
+        const dO = await root.getDirectoryHandle('photos_renommees',{create:true});
+        sink = { o: async (n,b)=>{ const fh = await dO.getFileHandle(n,{create:true}); const w = await fh.createWritable(); await w.write(b); await w.close(); }, end(){} };
+      } else if (ro){
+        const z = new Zip();
+        sink = { o:(n,b,t)=>z.add(n,b,t), end(){ download(z.blob(), `photos_renommees_${stamp()}.zip`); } };
+      } else if (mode==='folder'){
+        const root = await window.showDirectoryPicker({mode:'readwrite'});
+        const dO = await root.getDirectoryHandle('originales',{create:true});
+        const dW = await root.getDirectoryHandle('filigranees',{create:true});
+        const write = async (dir,name,blob)=>{ const fh = await dir.getFileHandle(name,{create:true}); const w = await fh.createWritable(); await w.write(blob); await w.close(); };
+        sink = { o:(n,b)=>write(dO,n,b), w:(n,b)=>write(dW,n,b), end(){} };
+      } else {
+        const zO = new Zip(), zW = mode==='one' ? zO : new Zip();
+        const pO = mode==='one' ? 'originales/' : '', pW = mode==='one' ? 'filigranees/' : '';
+        sink = { o:(n,b,t)=>zO.add(pO+n,b,t), w:(n,b)=>zW.add(pW+n,b),
+          end(){ const s=stamp();
+            if (mode==='one') download(zO.blob(), `galerie_${s}.zip`);
+            else { download(zO.blob(), `originales_${s}.zip`); setTimeout(()=>download(zW.blob(), `filigranees_${s}.zip`), 600); } } };
+      }
+      for (let i=0;i<total;i++){
+        const p = photos[i], nm = names(i);
+        progress(i, total, `Photo ${i+1}/${total} : ${nm.base}…`);
+        await sink.o(nm.orig, p.file, p.file.lastModified);   // fichier original, octets intacts
+        if (p.kind!=='none') await sink.w(nm.wm, await makeWatermarked(p));
+      }
+      progress(total,total,'Finalisation…');
+      sink.end();
+      $('status').textContent = renameOnly() ? `Terminé : ${total} photo${total>1?'s':''} renommée${total>1?'s':''}.` : `Terminé : ${total} photo${total>1?'s':''} traitée${total>1?'s':''}.`;
+    } catch(e){
+      if (e.name !== 'AbortError') { $('status').textContent = 'Erreur : ' + e.message; console.error(e); }
+      else $('status').textContent = 'Annulé.';
+    } finally {
+      busy = false;
+      const st = $('status').textContent;
+      refresh(); $('status').textContent = st;
+      setTimeout(()=>{ $('prog').style.display='none'; }, 1500);
+    }
+  }
+  $('btnZip').onclick = () => run('one');
+  $('btnZipSep').onclick = () => run('two');
+  if (window.showDirectoryPicker){ $('btnFolder').hidden = false; $('btnFolder').onclick = () => run('folder'); }
+
+  refresh();
+})();
+</script>
+</body>
+</html>
