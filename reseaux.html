@@ -3,21 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Les contenus pour les réseaux sociaux par Alex & Elisa : page en préparation.">
+  <meta name="description" content="Création de contenus photo et vidéo pour les réseaux sociaux : Reels, stories, photographies et carrousels pour les lieux, marques et projets, à Sarlat et dans le Périgord.">
   <script src="page-transition.js?v=ivoire"></script>
-  <title>Contenus réseaux — bientôt disponibles</title>
+  <title>Contenus pour les réseaux sociaux — Alexandre Palanca</title>
   <link rel="icon" type="image/png" href="/favicon.png?v=5">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Alexandre Palanca">
+  <meta property="og:title" content="Contenus pour les réseaux sociaux — Alexandre Palanca">
+  <meta property="og:description" content="Des images qui font vivre votre présence en ligne : Reels, stories, photographies et carrousels.">
+  <meta property="og:image" content="https://alexandrepalanca.fr/images/Lieux-et-marques/hero-lieux-et-marques-poster.webp">
+  <link rel="canonical" href="https://alexandrepalanca.fr/reseaux">
   <link rel="preload" href="fonts/introrust.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="fonts.css?v=2">
   <link rel="stylesheet" href="site-nav.css?v=contacts6">
   <link rel="stylesheet" href="redesign.css?v=70">
-  <script src="i18n.js?v=contacts2" defer></script>
-  <script src="site-nav.js?v=contacts3" defer></script>
   <link rel="stylesheet" href="cursor.css?v=7">
   <link rel="stylesheet" href="section-marker.css?v=bord">
+  <link rel="stylesheet" href="reseaux.css?v=2">
+  <script src="i18n.js?v=contacts2" defer></script>
+  <script src="site-nav.js?v=contacts3" defer></script>
+  <script src="redesign.js?v=29" defer></script>
   <script src="cursor.js?v=3" defer></script>
   <script src="section-marker.js?v=10" defer></script>
+  <script src="reseaux.js?v=1" defer></script>
   <link rel="stylesheet" href="frames.css?v=3">
   <link rel="stylesheet" href="touch.css?v=7" media="(hover: none)">
 </head>
@@ -31,12 +40,289 @@
       <nav aria-label="Navigation principale"><ul class="site-nav-links" id="site-nav-links"></ul></nav>
     </div>
   </header>
-  <main>
-    <section class="redesign-development" aria-labelledby="networks-title">
-      <p class="studio-eyebrow">Une nouvelle page se prépare</p>
-      <h1 id="networks-title">Contenus réseaux</h1>
-      <p>Cette partie de notre studio est en cours de développement. À retrouver prochainement, avec des idées et des contenus imaginés pour vos réseaux.</p>
-      <a class="studio-button" href="index.html#univers">Découvrir nos autres prestations <span aria-hidden="true">↗︎</span></a>
+
+  <!--
+    VISUELS TEMPORAIRES : toutes les images et vidéos marquées data-temp="…" sont des emplacements
+    provisoires, repris des autres pages du site. Les remplacer par les visuels définitifs
+    (coulisses, contenus réseaux réalisés) en changeant simplement les attributs src.
+    Les téléphones affichent un compte générique « @votre.marque » : ce ne sont pas des comptes clients.
+  -->
+  <main class="rs-page">
+
+    <!-- 01 · HERO -->
+    <section class="rs-hero" aria-labelledby="rs-title">
+      <div class="rs-hero-copy" data-rs-reveal>
+        <p class="studio-eyebrow">Contenus réseaux sociaux</p>
+        <h1 id="rs-title">Des images qui font vivre votre présence en ligne.</h1>
+        <p>Nous imaginons et réalisons des contenus photographiques et vidéo pour donner vie à votre communication sur les réseaux sociaux.</p>
+        <p>Des images soignées, des formats adaptés et une direction visuelle cohérente pour raconter votre activité, valoriser votre savoir-faire et créer du lien avec votre audience.</p>
+        <a class="studio-button" href="#site-footer">Parlons de votre projet <span aria-hidden="true">↓︎</span></a>
+      </div>
+      <div class="rs-hero-visual" aria-hidden="true">
+        <figure class="rs-float rs-float--a" data-rs-depth="0.10" data-rs-reveal data-temp="photo de contenu">
+          <img src="images/Lieux-et-marques/letm-02-1200.webp" alt="" loading="eager" decoding="async">
+        </figure>
+        <figure class="rs-float rs-float--b" data-rs-depth="0.22" data-rs-reveal data-temp="photo d'Alexandre en prise de vue">
+          <img src="images/photo-alexandre.webp" alt="" decoding="async">
+          <figcaption>En prise de vue</figcaption>
+        </figure>
+        <div class="rs-phone rs-phone--hero" data-rs-depth="0.04" data-rs-reveal>
+          <div class="rs-phone-screen">
+            <video class="rs-reel" muted loop playsinline preload="none" poster="images/video/interview-affiche-800.webp" data-rs-video data-temp="Reel vertical">
+              <source src="images/video/interview-720.webm" type="video/webm">
+              <source src="images/video/interview-720.mp4" type="video/mp4">
+            </video>
+            <div class="rs-reel-ui">
+              <span class="rs-reel-tag">Reels</span>
+              <div class="rs-reel-side"><i></i><i></i><i></i></div>
+              <p class="rs-reel-caption"><strong>@votre.marque</strong><br>Un savoir-faire, en 30 secondes.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 · LES UNIVERS -->
+    <section class="rs-section rs-universes" aria-labelledby="rs-universes-title">
+      <div class="rs-intro" data-rs-reveal>
+        <p class="studio-eyebrow">Les univers</p>
+        <h2 id="rs-universes-title">Chaque activité mérite son propre regard.</h2>
+        <p>Derrière chaque établissement, chaque marque et chaque projet, il y a une histoire à raconter. Nous créons des contenus adaptés à votre univers, à vos objectifs et à votre identité.</p>
+      </div>
+      <div class="rs-universe-grid">
+        <article class="rs-universe rs-universe--1" data-rs-reveal>
+          <figure class="rs-zoom" data-temp="lieu / établissement"><img src="images/Lieux-et-marques/letm-01-1200.webp" alt="Lieu photographié pour sa communication" loading="lazy" decoding="async"></figure>
+          <span class="rs-index">01</span>
+          <h3>Lieux &amp; établissements</h3>
+          <p>Hôtels, restaurants, boutiques, lieux touristiques et espaces de réception.</p>
+        </article>
+        <article class="rs-universe rs-universe--2" data-rs-reveal>
+          <figure class="rs-zoom" data-temp="marque / savoir-faire"><img src="images/Lieux-et-marques/letm-03-1200.webp" alt="Savoir-faire mis en images" loading="lazy" decoding="async"></figure>
+          <span class="rs-index">02</span>
+          <h3>Marques &amp; savoir-faire</h3>
+          <p>Artisans, créateurs, entreprises et indépendants.</p>
+        </article>
+        <article class="rs-universe rs-universe--3" data-rs-reveal>
+          <figure class="rs-zoom" data-temp="projet / événement"><img src="images/evenementiel/festival-01-800.webp" alt="Événement culturel" loading="lazy" decoding="async"></figure>
+          <span class="rs-index">03</span>
+          <h3>Projets &amp; événements</h3>
+          <p>Artistes, associations, organisateurs et projets culturels.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 03 · LES FORMATS -->
+    <section class="rs-section rs-formats" aria-labelledby="rs-formats-title">
+      <div class="rs-intro" data-rs-reveal>
+        <p class="studio-eyebrow">Les formats</p>
+        <h2 id="rs-formats-title">Des formats pour raconter, montrer et partager.</h2>
+        <p>Chaque plateforme possède ses codes et chaque contenu son utilité. Nous adaptons les prises de vues et les créations aux différents usages des réseaux sociaux.</p>
+      </div>
+      <div class="rs-format-grid">
+        <article class="rs-format" data-rs-reveal>
+          <div class="rs-phone rs-phone--sm">
+            <div class="rs-phone-screen">
+              <video class="rs-reel" muted loop playsinline preload="none" poster="images/video/interview-affiche-800.webp" data-rs-video data-temp="Reel">
+                <source src="images/video/interview-720.webm" type="video/webm">
+                <source src="images/video/interview-720.mp4" type="video/mp4">
+              </video>
+              <div class="rs-reel-ui"><span class="rs-reel-tag">Reels</span><div class="rs-reel-side"><i></i><i></i><i></i></div></div>
+            </div>
+          </div>
+          <div class="rs-format-copy"><span class="rs-index">01</span><h3>Reels &amp; vidéos courtes</h3><p>Des vidéos verticales dynamiques pour présenter un lieu, un produit, un savoir-faire ou une expérience.</p></div>
+        </article>
+        <article class="rs-format rs-format--offset" data-rs-reveal>
+          <div class="rs-phone rs-phone--sm">
+            <div class="rs-phone-screen rs-profile">
+              <div class="rs-profile-head"><span class="rs-avatar"></span><div><strong>votre.marque</strong><small>124 publications</small></div></div>
+              <div class="rs-profile-grid" data-temp="grille de photos">
+                <img src="images/portraits/personnel-01-400.webp" alt="" loading="lazy"><img src="images/Lieux-et-marques/letm-01-300.webp" alt="" loading="lazy"><img src="images/portraits/personnel-02-400.webp" alt="" loading="lazy">
+                <img src="images/evenementiel/concert-01-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-11-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-02-400.webp" alt="" loading="lazy">
+                <img src="images/portraits/personnel-12-400.webp" alt="" loading="lazy"><img src="images/evenementiel/cabaret-11-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-21-400.webp" alt="" loading="lazy">
+                <img src="images/evenementiel/concert-11-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-13-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-03-400.webp" alt="" loading="lazy">
+                <img src="images/portraits/personnel-22-400.webp" alt="" loading="lazy"><img src="images/evenementiel/cabaret-21-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-23-400.webp" alt="" loading="lazy">
+              </div>
+            </div>
+          </div>
+          <div class="rs-format-copy"><span class="rs-index">02</span><h3>Photographies</h3><p>Des images travaillées pour valoriser une activité et construire un univers visuel cohérent.</p></div>
+        </article>
+        <article class="rs-format" data-rs-reveal>
+          <div class="rs-phone rs-phone--sm">
+            <div class="rs-phone-screen rs-story" data-temp="story">
+              <img src="images/Lieux-et-marques/letm-05.webp" alt="" loading="lazy">
+              <div class="rs-story-bars"><i class="is-done"></i><i class="is-live"></i><i></i></div>
+              <div class="rs-story-head"><span class="rs-avatar"></span><strong>votre.marque</strong><small>2 h</small></div>
+              <span class="rs-story-sticker">Dans les coulisses</span>
+            </div>
+          </div>
+          <div class="rs-format-copy"><span class="rs-index">03</span><h3>Stories</h3><p>Des formats courts pour partager les actualités, les coulisses et les temps forts.</p></div>
+        </article>
+        <article class="rs-format rs-format--offset" data-rs-reveal>
+          <div class="rs-post" data-rs-carousel>
+            <div class="rs-post-head"><span class="rs-avatar"></span><strong>votre.marque</strong></div>
+            <div class="rs-post-slides" data-temp="carrousel">
+              <div class="rs-slide rs-slide--text"><span>Nouveau</span><strong>Notre savoir-faire<br>en 3 étapes</strong><small>Faites défiler →</small></div>
+              <img class="rs-slide" src="images/Lieux-et-marques/letm-02-1200.webp" alt="" loading="lazy">
+              <img class="rs-slide" src="images/Lieux-et-marques/letm-03-1200.webp" alt="" loading="lazy">
+            </div>
+            <div class="rs-post-dots"><i class="is-on"></i><i></i><i></i></div>
+          </div>
+          <div class="rs-format-copy"><span class="rs-index">04</span><h3>Carrousels &amp; contenus graphiques</h3><p>Des compositions pour présenter une offre, transmettre une information ou développer un sujet.</p></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 04 · LA MÉTHODE -->
+    <section class="rs-section rs-method" aria-labelledby="rs-method-title">
+      <div class="rs-method-head" data-rs-reveal>
+        <p class="studio-eyebrow">La méthode</p>
+        <h2 id="rs-method-title">De l’idée à la création.</h2>
+        <p>Chaque production commence par un échange pour comprendre votre activité et imaginer les contenus les plus pertinents.</p>
+      </div>
+      <ol class="rs-steps">
+        <li class="rs-step" data-rs-reveal>
+          <figure class="rs-zoom" data-temp="coulisses : Alexandre avec son appareil"><img src="images/photo-alexandre.webp" alt="Alexandre avec son appareil photo" loading="lazy"></figure>
+          <div><span class="rs-index">01</span><h3>Échange &amp; définition des besoins</h3><p>Comprendre votre activité, vos objectifs et votre identité visuelle.</p></div>
+        </li>
+        <li class="rs-step rs-step--reverse" data-rs-reveal>
+          <figure class="rs-zoom" data-temp="coulisses : préparation d'un tournage"><img src="images/video/captation-affiche-800.webp" alt="Préparation d’un tournage" loading="lazy"></figure>
+          <div><span class="rs-index">02</span><h3>Conception &amp; préparation</h3><p>Imaginer les contenus, définir les formats et organiser la séance.</p></div>
+        </li>
+        <li class="rs-step" data-rs-reveal>
+          <figure class="rs-zoom" data-temp="coulisses : prise de vue dans un établissement"><img src="images/Lieux-et-marques/hero-lieux-et-marques-poster.webp" alt="Prise de vue dans un établissement" loading="lazy"></figure>
+          <div><span class="rs-index">03</span><h3>Production sur place</h3><p>Réaliser les prises de vues photographiques et vidéo, en mettant en valeur votre univers.</p></div>
+        </li>
+        <li class="rs-step rs-step--reverse" data-rs-reveal>
+          <figure class="rs-zoom" data-temp="coulisses : travail sur les détails"><img src="images/portraits/professionnel-11-800.webp" alt="Travail sur les détails" loading="lazy"></figure>
+          <div><span class="rs-index">04</span><h3>Postproduction &amp; création</h3><p>Sélection, retouche, montage et déclinaison des contenus.</p></div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 05 · LES FORMULES (même style que la page Photo & vidéo) -->
+    <section class="redesign-section rs-offers" aria-labelledby="rs-offers-title">
+      <p class="studio-eyebrow">Les formules</p>
+      <h2 class="studio-section-heading" id="rs-offers-title">Une production adaptée à vos besoins.</h2>
+      <div class="flip-card-grid flip-card-grid--aligned">
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">01 · Essentiel</span><h3>La séance</h3><p>Une production ponctuelle pour renouveler vos contenus.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻︎</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Brief préparatoire</li><li>Session photo et/ou vidéo</li><li>Sélection et retouche</li><li>Création de formats courts selon le devis</li></ul></div>
+        </div></article>
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">02 · Signature</span><h3>La collection</h3><p>Une production complète pour constituer une réserve de contenus.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻︎</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Direction visuelle</li><li>Session photo et vidéo</li><li>Plusieurs formats de contenus</li><li>Montage et déclinaisons</li><li>Banque de contenus organisée</li></ul></div>
+        </div></article>
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">03 · Sur mesure</span><h3>L’accompagnement</h3><p>Une collaboration régulière pour faire évoluer votre communication.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻︎</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Planification des productions</li><li>Sessions récurrentes</li><li>Création de contenus variés</li><li>Déclinaisons selon les besoins</li><li>Accompagnement éditorial selon le projet</li></ul></div>
+        </div></article>
+      </div>
+      <p class="studio-eyebrow studio-eyebrow--note">Chaque formule est ajustée en fonction du volume de contenus, du temps de production et des livrables souhaités.</p>
+    </section>
+
+    <!-- 06 · LA LIVRAISON -->
+    <section class="rs-section rs-delivery" aria-labelledby="rs-delivery-title">
+      <div class="rs-intro" data-rs-reveal>
+        <p class="studio-eyebrow">La livraison</p>
+        <h2 id="rs-delivery-title">Des contenus prêts à prendre leur place.</h2>
+        <p>Une fois la production terminée, vos contenus sont soigneusement sélectionnés, finalisés et organisés pour faciliter leur utilisation au quotidien.</p>
+      </div>
+      <div class="rs-delivery-grid">
+        <article class="rs-delivery-item" data-rs-reveal>
+          <div class="rs-laptop" aria-hidden="true">
+            <div class="rs-laptop-screen">
+              <div class="rs-window-bar"><i></i><i></i><i></i><span>Votre espace de livraison</span></div>
+              <div class="rs-window-body">
+                <ul class="rs-folders">
+                  <li class="is-open">Reels</li><li>Stories</li><li>Photos HD</li><li>Carrousels</li><li>Formats horizontaux</li>
+                </ul>
+                <div class="rs-files" data-temp="aperçus de fichiers">
+                  <figure><img src="images/video/interview-affiche-800.webp" alt="" loading="lazy"><figcaption>reel-01.mp4</figcaption></figure>
+                  <figure><img src="images/portraits/personnel-02-400.webp" alt="" loading="lazy"><figcaption>photo-012.jpg</figcaption></figure>
+                  <figure><img src="images/Lieux-et-marques/letm-01-300.webp" alt="" loading="lazy"><figcaption>story-03.mp4</figcaption></figure>
+                  <figure><img src="images/evenementiel/concert-02-400.webp" alt="" loading="lazy"><figcaption>photo-027.jpg</figcaption></figure>
+                  <figure><img src="images/portraits/personnel-13-400.webp" alt="" loading="lazy"><figcaption>carrousel-02.jpg</figcaption></figure>
+                  <figure><img src="images/evenementiel/festival-03-400.webp" alt="" loading="lazy"><figcaption>reel-04.mp4</figcaption></figure>
+                </div>
+              </div>
+            </div>
+            <div class="rs-laptop-base"></div>
+          </div>
+          <div class="rs-delivery-copy">
+            <span class="rs-index">01</span>
+            <h3>Votre espace de livraison</h3>
+            <p>Un accès privé à vos fichiers, organisés dans des dossiers selon les formats et les types de contenus.</p>
+            <ul class="rs-list"><li>Photographies HD</li><li>Vidéos finalisées</li><li>Formats verticaux et horizontaux</li><li>Déclinaisons pour les réseaux</li></ul>
+          </div>
+        </article>
+        <article class="rs-delivery-item rs-delivery-item--doc" data-rs-reveal>
+          <div class="rs-doc" aria-hidden="true">
+            <div class="rs-doc-page rs-doc-page--back"></div>
+            <div class="rs-doc-page">
+              <span class="rs-doc-kicker">Document récapitulatif</span>
+              <strong class="rs-doc-title">Vos contenus,<br>mode d’emploi.</strong>
+              <div class="rs-doc-thumbs" data-temp="vignettes du PDF"><img src="images/Lieux-et-marques/letm-02-1200.webp" alt="" loading="lazy"><img src="images/portraits/personnel-03-400.webp" alt="" loading="lazy"><img src="images/evenementiel/cabaret-12-400.webp" alt="" loading="lazy"></div>
+              <span class="rs-doc-line"></span><span class="rs-doc-line rs-doc-line--short"></span><span class="rs-doc-line"></span>
+              <span class="rs-doc-chip">Format 9:16 — Reels &amp; stories</span>
+              <span class="rs-doc-chip">Format 4:5 — Publications</span>
+              <span class="rs-doc-kicker rs-doc-kicker--sub">Suggestion de publication</span>
+              <span class="rs-doc-line"></span><span class="rs-doc-line rs-doc-line--short"></span>
+            </div>
+          </div>
+          <div class="rs-delivery-copy">
+            <span class="rs-index">02</span>
+            <h3>Votre document récapitulatif</h3>
+            <p>Un document PDF qui accompagne la livraison et facilite l’exploitation des contenus.</p>
+            <ul class="rs-list"><li>Présentation des contenus livrés</li><li>Suggestions de publications, si prévues dans la prestation</li><li>Textes ou légendes, si prévus dans la prestation</li><li>Recommandations de formats et d’utilisation</li></ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 07 · MINI-PORTFOLIO DYNAMIQUE (toujours la dernière section) -->
+    <section class="rs-section rs-showcase" id="rs-contact" aria-labelledby="rs-showcase-title">
+      <div class="rs-intro" data-rs-reveal>
+        <p class="studio-eyebrow">Mini-portfolio</p>
+        <h2 id="rs-showcase-title">Des univers, des histoires, des images.</h2>
+        <p>Une sélection de contenus imaginés et réalisés pour valoriser des lieux, des marques et des savoir-faire.</p>
+      </div>
+      <div class="rs-collage">
+        <figure class="rs-collage-photo rs-collage-photo--a rs-zoom" data-rs-depth="0.14" data-rs-reveal data-temp="Alexandre en production (hôtel, restaurant…)"><img src="images/photo-alexandre.webp" alt="Alexandre en production" loading="lazy"><figcaption>En production</figcaption></figure>
+        <figure class="rs-collage-photo rs-collage-photo--b rs-zoom" data-rs-depth="0.24" data-rs-reveal data-temp="photo finale"><img src="images/Lieux-et-marques/letm-01-1200.webp" alt="Photographie finale" loading="lazy"></figure>
+        <figure class="rs-collage-photo rs-collage-photo--c rs-zoom" data-rs-depth="0.08" data-rs-reveal data-temp="photo finale"><img src="images/evenementiel/concert-11-800.webp" alt="Photographie finale" loading="lazy"></figure>
+        <div class="rs-phone rs-collage-phone rs-collage-phone--1" data-rs-depth="0.06" data-rs-reveal>
+          <div class="rs-phone-screen rs-profile">
+            <div class="rs-profile-head"><span class="rs-avatar"></span><div><strong>votre.marque</strong><small>Grille de publications</small></div></div>
+            <div class="rs-profile-grid" data-temp="grille de publications">
+              <img src="images/Lieux-et-marques/letm-01-300.webp" alt="" loading="lazy"><img src="images/portraits/personnel-22-400.webp" alt="" loading="lazy"><img src="images/evenementiel/concert-12-400.webp" alt="" loading="lazy">
+              <img src="images/portraits/personnel-03-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-01-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-23-400.webp" alt="" loading="lazy">
+              <img src="images/evenementiel/concert-02-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-11-400.webp" alt="" loading="lazy"><img src="images/evenementiel/cabaret-12-400.webp" alt="" loading="lazy">
+              <img src="images/portraits/personnel-01-400.webp" alt="" loading="lazy"><img src="images/evenementiel/sport-competition-01-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-12-400.webp" alt="" loading="lazy">
+              <img src="images/evenementiel/concert-31-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-21-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-02-400.webp" alt="" loading="lazy">
+            </div>
+          </div>
+        </div>
+        <div class="rs-phone rs-collage-phone rs-collage-phone--2" data-rs-depth="0.18" data-rs-reveal>
+          <div class="rs-phone-screen">
+            <video class="rs-reel" muted loop playsinline preload="none" poster="images/video/interview-affiche-800.webp" data-rs-video data-temp="Reel">
+              <source src="images/video/interview-720.webm" type="video/webm">
+              <source src="images/video/interview-720.mp4" type="video/mp4">
+            </video>
+            <div class="rs-reel-ui"><span class="rs-reel-tag">Reels</span><div class="rs-reel-side"><i></i><i></i><i></i></div></div>
+          </div>
+        </div>
+        <div class="rs-phone rs-collage-phone rs-collage-phone--3" data-rs-depth="0.30" data-rs-reveal>
+          <div class="rs-phone-screen rs-story">
+            <img src="images/Lieux-et-marques/letm-05.webp" alt="" loading="lazy" data-temp="story">
+            <div class="rs-story-bars"><i class="is-done"></i><i class="is-live"></i><i></i></div>
+            <div class="rs-story-head"><span class="rs-avatar"></span><strong>votre.marque</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="rs-cta" data-rs-reveal>
+        <h3>Vous avez un projet de contenu ?</h3>
+        <a class="studio-button" href="#site-footer">Parlons de votre projet <span aria-hidden="true">↗︎</span></a>
+      </div>
     </section>
   </main>
 </body>
