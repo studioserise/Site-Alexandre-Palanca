@@ -1,16 +1,17 @@
 # Sécurité, sur toutes les pages
-# - X-Frame-Options / frame-ancestors : le site ne peut pas être affiché dans un cadre d'un autre site (anti « clickjacking »).
+# - X-Frame-Options / frame-ancestors : le site ne peut pas être affiché dans un cadre d'un autre site (anti « clickjacking ») ;
+#   seul le site lui-même peut s'afficher dans un cadre (aperçu dans le suivi de site de l'espace client).
 # - Strict-Transport-Security : les navigateurs utilisent toujours HTTPS (1 an).
 # - Content-Security-Policy : seuls les fichiers du site (et le serveur Supabase des formulaires / galeries)
 #   peuvent être chargés ou contactés. À compléter ici si un nouveau service externe est ajouté.
 # - frame-src https: : l'espace client affiche dans un cadre le site en cours du client et le guide PDF.
 /*
-  X-Frame-Options: DENY
+  X-Frame-Options: SAMEORIGIN
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://rrytedgilrwsczoqeyzx.supabase.co; media-src 'self' blob: https://rrytedgilrwsczoqeyzx.supabase.co; font-src 'self'; connect-src 'self' https://rrytedgilrwsczoqeyzx.supabase.co https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src https:; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://rrytedgilrwsczoqeyzx.supabase.co; media-src 'self' blob: https://rrytedgilrwsczoqeyzx.supabase.co; font-src 'self'; connect-src 'self' https://rrytedgilrwsczoqeyzx.supabase.co https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src https:; frame-ancestors 'self'; upgrade-insecure-requests
 
 # Outils à télécharger : jamais référencés par les moteurs de recherche
 /outils/*
