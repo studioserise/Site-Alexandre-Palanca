@@ -24,11 +24,11 @@ const issuerTag = (key) => `<span class="com-issuer is-${key === "elisa" ? "elis
 let listIssuer = "all";
 const issuerFilter = (current) => `<div class="com-issuer-filter">${[["all", "Tous"], ...ISSUERS.map(([k, n]) => [k, n])].map(([k, n]) =>
   `<button type="button" class="gallery-quiet-button${current === k ? " is-active" : ""}" data-issuer-filter="${k}">${n}</button>`).join("")}</div>`;
-const newQuoteButtons = () => ISSUERS.map(([k, n, what]) =>
-  `<button class="gallery-primary-button" type="button" data-new-quote="${k}">Nouveau devis — ${what} (${n.split(" ")[0]})</button>`).join("");
-function bindNewQuote() {
-  view.querySelectorAll("[data-new-quote]").forEach((b) => b.onclick = () => quoteEditor(null, null, { issuer: b.dataset.newQuote }));
-}
+// Boutons permanents sous les onglets : « Créer un devis — Alex » / « Créer un devis — Elisa »
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-new-quote]");
+  if (button) quoteEditor(null, null, { issuer: button.dataset.newQuote });
+});
 
 const QUOTE_STATUS = {
   draft: ["Brouillon", ""], sent: ["Envoyé", "warn"], accepted: ["Accepté", "ok"],
@@ -125,8 +125,7 @@ async function dashboard() {
     return `<h2 class="com-issuer-title">${issuerTag(key)} ${esc(name)} <small>${esc(what)}</small></h2>
       <div class="com-cards">${cards.map(([l, v]) => `<div class="com-card"><span>${l}</span><strong>${v}</strong></div>`).join("")}</div>`;
   };
-  view.innerHTML = `${ISSUERS.map(block).join("")}<div class="com-actions">${newQuoteButtons()}</div>`;
-  bindNewQuote();
+  view.innerHTML = ISSUERS.map(block).join("");
 }
 
 // ------------------------------------------------------------ listes
@@ -136,11 +135,10 @@ async function quotes() {
   const data = await run(() => api("list-quotes"));
   if (!data) return;
   const shown = data.quotes.filter((q) => listIssuer === "all" || q.issuer === listIssuer);
-  view.innerHTML = `<div class="com-actions">${newQuoteButtons()}</div>${issuerFilter(listIssuer)}
+  view.innerHTML = `${issuerFilter(listIssuer)}
     <div class="com-table-wrap"><table class="com-table"><thead><tr><th>Numéro</th><th>Client</th><th>Date</th><th>Validité</th><th class="com-num">Total TTC</th><th>Statut</th></tr></thead><tbody>
     ${shown.map((q) => `<tr class="is-click" data-id="${q.id}" data-num="${q.number ? 1 : ""}"><td>${issuerTag(q.issuer)} ${esc(q.number || "Brouillon")}</td><td>${esc(q.client_name)}</td><td>${dateFr(q.issue_date)}</td><td>${dateFr(q.valid_until)}</td><td class="com-num">${money(q.total_ttc_cents)}</td><td>${badge(QUOTE_STATUS, q.status)}</td></tr>`).join("") || '<tr><td colspan="6">Aucun devis.</td></tr>'}
     </tbody></table></div>`;
-  bindNewQuote();
   view.querySelectorAll("[data-issuer-filter]").forEach((b) => b.onclick = () => { listIssuer = b.dataset.issuerFilter; quotes(); });
   view.querySelectorAll("tr[data-id]").forEach((row) => {
     row.onclick = () => (row.dataset.num ? quoteDetail(row.dataset.id) : quoteEditor(row.dataset.id));
@@ -360,6 +358,8 @@ async function quoteEditor(id, presetClient, preset = {}) {
     deliveryTerms: s.default_delivery_terms || "", usageTerms: s.default_usage_terms || "",
     depositEnabled: true, depositPct: String((s.default_deposit_bps ?? 3000) / 100),
     contactRequestId: null,
+    partnerRequested: false,
+    partnerQuoteId: null,
     ...preset,
     issuer
   };
@@ -370,6 +370,7 @@ async function quoteEditor(id, presetClient, preset = {}) {
       id: q.id, client: clientFromRow({ id: q.client_id, ...q.client_snapshot, postal_code: q.client_snapshot?.postalCode ?? q.client_snapshot?.postal_code, vat_number: q.client_snapshot?.vatNumber ?? q.client_snapshot?.vat_number }),
       validUntil: q.valid_until || "", servicePeriod: q.service_period,
       serviceDate: q.service_date || "", serviceTime: q.service_time || "", serviceLocation: q.service_location || "", projectDescription: q.project_description,
+      partnerRequested: q.partner_requested === true, partnerQuoteId: q.partner_quote_id || null,
       specialConditions: q.special_conditions, paymentTerms: q.payment_terms, cancellationTerms: q.cancellation_terms,
       deliveryTerms: q.delivery_terms, usageTerms: q.usage_terms, depositEnabled: q.deposit_enabled !== false,
       depositPct: String((q.deposit_bps ?? 3000) / 100),
@@ -469,7 +470,11 @@ function stepItems(body, refresh) {
 }
 
 function stepTerms(body, refresh) {
-  body.innerHTML = `<div class="com-row">${field("Date de la prestation", input("serviceDate", draft.serviceDate, 'type="date"'))}${field("Heure du rendez-vous", input("serviceTime", draft.serviceTime, 'type="time"'))}</div>
+  const partnerLabel = draft.issuer === "elisa"
+    ? "Prestation photo & vidéo comprise (rappel pour créer le devis d'Alex, déjà pré-rempli)"
+    : "Création de site internet comprise (rappel pour créer le devis d'Elisa, déjà pré-rempli)";
+  body.innerHTML = `${draft.partnerQuoteId ? '<p class="com-hint">Devis associé à celui de l\'autre prestataire (même client, même projet).</p>' : `<label class="com-check com-partner"><input type="checkbox" id="partner-on" ${draft.partnerRequested ? "checked" : ""}> ${partnerLabel}</label>`}
+    <div class="com-row">${field("Date de la prestation", input("serviceDate", draft.serviceDate, 'type="date"'))}${field("Heure du rendez-vous", input("serviceTime", draft.serviceTime, 'type="time"'))}</div>
     ${field("Lieu du rendez-vous", input("serviceLocation", draft.serviceLocation, 'placeholder="Adresse ou lieu précis"'))}
     <p class="com-hint">La date, l'heure et le lieu servent aux rappels envoyés au client 72 h et 24 h avant (après ta validation), et à l'échéance de l'acompte (72 h avant).</p>
     <div class="com-row">${field("Valable jusqu'au", input("validUntil", draft.validUntil, 'type="date"'))}${field("Précisions sur la réalisation", input("servicePeriod", draft.servicePeriod, 'placeholder="Durée, plusieurs dates…"'))}</div>
@@ -479,6 +484,8 @@ function stepTerms(body, refresh) {
     ${field("Modalités de paiement", textarea("paymentTerms", draft.paymentTerms))}${field(appSettings.cancellation_heading || "Conditions d'annulation", textarea("cancellationTerms", draft.cancellationTerms))}
     ${field(appSettings.delivery_heading || "Livraison", textarea("deliveryTerms", draft.deliveryTerms))}${field(appSettings.usage_heading || "Utilisation des images", textarea("usageTerms", draft.usageTerms))}`;
   bindFields(body, draft, refresh);
+  const partner = document.getElementById("partner-on");
+  if (partner) partner.onchange = (e) => { draft.partnerRequested = e.target.checked; };
   document.getElementById("dep-on").onchange = (e) => { draft.depositEnabled = e.target.checked; refresh(); };
 }
 
@@ -500,7 +507,9 @@ function stepReview(body) {
       deliveryTerms: draft.deliveryTerms, usageTerms: draft.usageTerms, depositEnabled: draft.depositEnabled,
       depositBps: Math.round((parseFloat(String(draft.depositPct).replace(",", ".")) || 0) * 100),
       contactRequestId: draft.contactRequestId || undefined,
-      issuer: draft.issuer
+      issuer: draft.issuer,
+      partnerRequested: draft.partnerRequested === true,
+      partnerQuoteId: draft.partnerQuoteId || undefined
     }));
     if (data) draft.id = data.quote.id;
     return data;
@@ -560,6 +569,7 @@ async function quoteDetail(id) {
   view.innerHTML = `<div class="com-panel com-detail"><div class="com-top"><h2>${issuerTag(q.issuer)} Devis ${esc(q.number)} ${badge(QUOTE_STATUS, q.status)}</h2>
     <a class="gallery-quiet-button" href="#" id="back">←︎ Retour</a></div>
     <dl><dt>Client</dt><dd>${esc(c.name)}</dd><dt>Date</dt><dd>${dateFr(q.issue_date)}</dd>
+    ${data.partner ? `<dt>Devis associé</dt><dd>${issuerTag(data.partner.issuer)} <a href="#devis=${data.partner.id}" data-partner="${data.partner.id}" data-num="${data.partner.number ? 1 : ""}">${esc(data.partner.number || "Brouillon")}</a> — ${esc(issuerLabel(data.partner.issuer))}</dd>` : q.partner_requested ? `<dt>Devis associé</dt><dd>À créer — <a href="#associe=${q.id}" data-associe="${q.id}">créer le devis de ${q.issuer === "elisa" ? "Alex" : "Elisa"}</a></dd>` : ""}
     ${q.service_date ? `<dt>Rendez-vous</dt><dd>${dateFr(q.service_date)}${q.service_time ? ` à ${esc(q.service_time)}` : ""}${q.service_location ? ` — ${esc(q.service_location)}` : ""}</dd>` : ""}
     ${q.online_balance_paid_cents ? `<dt>Payé par carte (à reporter)</dt><dd>${money(q.online_balance_paid_cents)} — reporté automatiquement sur la facture finale à son émission</dd>` : ""}
     ${q.deposit_transfer_notified_at ? `<dt>Virement de l'acompte</dt><dd>signalé par le client le ${dateFr(q.deposit_transfer_notified_at)} — à vérifier, puis à enregistrer sur la facture</dd>` : ""}
@@ -577,6 +587,16 @@ async function quoteDetail(id) {
       <button class="gallery-primary-button" type="button" data-inv="final">Créer la facture finale</button></div>` : ""}
     <h3>Factures liées</h3>${data.invoices.map((i) => `<p><a href="#" data-i="${i.id}">${esc(i.number || "Brouillon")}</a> — ${i.kind === "deposit" ? "Acompte" : "Facture"} ${money(i.total_ttc_cents)} ${badge(INVOICE_STATUS, i.status)}</p>`).join("") || "<p>Aucune.</p>"}</div>`;
   document.getElementById("back").onclick = (e) => { e.preventDefault(); go("quotes"); };
+  view.querySelector("[data-partner]")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    const a = e.currentTarget;
+    a.dataset.num ? quoteDetail(a.dataset.partner) : quoteEditor(a.dataset.partner);
+  });
+  view.querySelector("[data-associe]")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.location.hash = `associe=${e.currentTarget.dataset.associe}`;
+    openFromHash();
+  });
   document.getElementById("dl").onclick = () => actions.open();
   if (q.signed_pdf_path) document.getElementById("dls").onclick = actions.openSigned;
   document.getElementById("cp").onclick = actions.copy;
@@ -651,6 +671,19 @@ async function openFromHash() {
   if (key === "devis" && id) return quoteDetail(id);
   if (key === "brouillon" && id) return quoteEditor(id);
   if (key === "facture" && id) return invoiceDetail(id);
+  if (key === "associe" && id) {
+    // Devis de l'autre prestataire, pré-rempli à partir du devis d'origine (client, projet, rendez-vous)
+    const data = await run(() => api("get-quote", { id }));
+    if (!data) return go("dashboard");
+    const q = data.quote;
+    const c = q.client_snapshot || {};
+    return quoteEditor(null, clientFromRow({ id: q.client_id, ...c }), {
+      issuer: q.issuer === "elisa" ? "alexandre" : "elisa",
+      partnerQuoteId: q.id,
+      projectDescription: q.project_description || "",
+      serviceDate: q.service_date || "", serviceTime: q.service_time || "", serviceLocation: q.service_location || ""
+    });
+  }
   if (key === "demande" && id) {
     // Nouveau devis pré-rempli à partir d'une demande du formulaire du site
     const data = await run(() => api("get-contact-request", { id }));

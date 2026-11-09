@@ -354,6 +354,9 @@ export async function saveQuote(body: Row) {
 
   const fields = {
     issuer,
+    // Prestation de l'autre prestataire comprise → rappel de créer son devis (centre de notifications)
+    partner_requested: body.partnerRequested === true,
+    ...(typeof body.partnerQuoteId === "string" && UUID.test(body.partnerQuoteId) ? { partner_quote_id: body.partnerQuoteId } : {}),
     client_id: client.id,
     client_snapshot: clientSnapshot(client),
     valid_until: date(body.validUntil, "Date de validité"),
@@ -1225,8 +1228,15 @@ export async function handle(body: Row) {
         `invoices?select=id,number,kind,status,total_ttc_cents,paid_cents&quote_id=${eq(quote.id)}&status=neq.cancelled`
       );
       const deposits = invoices.filter((entry) => entry.kind === "deposit");
+      // Devis associé de l'autre prestataire (dans un sens ou dans l'autre)
+      const partner = (await rows(
+        quote.partner_quote_id
+          ? `quotes?select=id,number,issuer,status&id=${eq(quote.partner_quote_id)}`
+          : `quotes?select=id,number,issuer,status&partner_quote_id=${eq(quote.id)}&limit=1`
+      ))[0] ?? null;
       return {
         quote: { ...quote, status: displayQuoteStatus(quote) },
+        partner,
         invoices,
         deposit: {
           requestedCents: quote.deposit_cents,

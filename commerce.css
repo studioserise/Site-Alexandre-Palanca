@@ -95,3 +95,7 @@
 .com-issuer-title small { color: #a9a59e; font-size: 0.8rem; font-weight: 400; }
 .com-issuer-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
 .com-issuer-filter .is-active { border-color: var(--gallery-text); background: var(--gallery-text); color: #080808; }
+
+.com-create { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 18px; }
+.com-create .gallery-primary-button { border-radius: 9px; }
+.com-partner { margin-bottom: 14px; padding: 12px 14px; border: 1px solid rgba(245, 243, 239, 0.2); border-radius: 10px; }
