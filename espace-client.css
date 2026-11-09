@@ -135,3 +135,5 @@ html[data-theme="light"] .client-space .gallery-primary-button:hover { backgroun
 html[data-theme="light"] .client-space .gallery-primary-button:disabled { border-color: rgba(23, 23, 21, 0.25); background: transparent; color: rgba(23, 23, 21, 0.4); }
 html[data-theme="light"] .client-space .gallery-form-message { color: #a33b2b; }
 html[data-theme="light"] .client-space .gallery-form-message[data-kind="success"] { color: #2e7d32; }
+
+.site-frame-help { margin-top: 8px; }
