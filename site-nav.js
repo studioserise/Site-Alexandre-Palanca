@@ -177,7 +177,7 @@ const FOOTER_PEOPLE = {
     email: "mtgcelisa@gmail.com",
     phone: "+33 6 65 47 73 51",
     tel: "+33665477351",
-    place: ""
+    place: "Sarlat-la-Canéda · Dordogne &amp; Périgord"
   }
 };
 const footerPage = (window.location.pathname.split("/").pop() || "index").replace(/\.html$/, "") || "index";
