@@ -162,3 +162,6 @@
 .pay-card .gallery-form-message { margin: 0; min-height: 0; }
 .pay-or { display: flex; gap: 12px; align-items: center; margin: 20px 0 12px; color: #a9a59e; font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; }
 .pay-or::before, .pay-or::after { flex: 1; height: 1px; background: rgba(245, 243, 239, 0.16); content: ""; }
+
+.quote-pay-link + .quote-pay-link { margin-left: 10px; }
+@media (max-width: 560px) { .quote-pay-link + .quote-pay-link { margin: 10px 0 0; } }

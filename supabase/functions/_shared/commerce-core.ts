@@ -10,8 +10,10 @@ import {
 import {
   formatMoney,
   formatRate,
+  mergePdfs,
   PdfDocumentData,
-  renderDocumentPdf
+  renderDocumentPdf,
+  renderSummaryPdf
 } from "./commerce-pdf.ts";
 
 export class UserError extends Error {
@@ -647,7 +649,99 @@ export async function validateQuote(id: string) {
     pdf_path: path,
     validated_at: new Date().toISOString()
   });
+  // Devis associé déjà validé : la proposition commune (3 pages) est générée tout de suite.
+  try {
+    await ensureCombined(await loadQuote(id));
+  } catch (error) {
+    console.error("Combined proposal could not be generated", error);
+  }
   return await loadQuote(id);
+}
+
+// ---------------------------------------------------------------- proposition commune (2 prestataires)
+
+// Devis associé de l'autre prestataire (lien dans un sens ou dans l'autre)
+export async function partnerOf(quote: Row): Promise<Row | null> {
+  const found = quote.partner_quote_id
+    ? await rows(`quotes?select=*&id=${eq(quote.partner_quote_id)}`)
+    : await rows(`quotes?select=*&partner_quote_id=${eq(quote.id)}&limit=1`);
+  return found[0] ?? null;
+}
+
+// Paire ordonnée (Alexandre puis Elisa) et état : complète quand les deux devis sont validés.
+export async function pairOf(quote: Row) {
+  const partner = await partnerOf(quote);
+  if (!partner) return null;
+  const alex = quote.issuer === "elisa" ? partner : quote;
+  const elisa = quote.issuer === "elisa" ? quote : partner;
+  return { alex, elisa, partner, complete: Boolean(alex.number && alex.pdf_path && elisa.number && elisa.pdf_path) };
+}
+
+function pairServiceLabel(quote: Row) {
+  if (quote.bundle === "reseaux") return quote.issuer === "elisa" ? "Création digitale" : "Shooting photo & vidéo";
+  return quote.issuer === "elisa" ? "Webdesign & création de site internet" : "Photographie & vidéo";
+}
+
+export function combinedFileName(pair: { alex: Row; elisa: Row }) {
+  const client = String(pair.alex.client_snapshot?.name ?? pair.elisa.client_snapshot?.name ?? "").trim();
+  const kind = pair.alex.bundle === "reseaux" ? "Contenus réseaux" : "Photo & vidéo + Site internet";
+  return `${["Proposition", kind, client, `${pair.alex.number} + ${pair.elisa.number}`].filter(Boolean).join(" ")
+    .replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim()}.pdf`;
+}
+
+// Proposition commune : page de synthèse + devis d'Alexandre + devis d'Elisa, archivée une fois.
+export async function ensureCombined(quote: Row): Promise<string | null> {
+  const pair = await pairOf(quote);
+  if (!pair?.complete) return null;
+  if (pair.alex.combined_pdf_path && pair.alex.combined_pdf_path === pair.elisa.combined_pdf_path) return pair.alex.combined_pdf_path;
+  const [alexSettings, elisaSettings] = await Promise.all([getSettings("alexandre"), getSettings("elisa")]);
+  const fetchPdf = async (path: string) => {
+    const response = await storageRequest(`object/${BUCKET}/${storagePath(path)}`, { method: "GET" });
+    if (!response.ok) throw new UserError("Un des devis archivés est introuvable.", 500);
+    return new Uint8Array(await response.arrayBuffer());
+  };
+  const client = pair.alex.client_snapshot ?? pair.elisa.client_snapshot ?? {};
+  const validity = [pair.alex.valid_until, pair.elisa.valid_until].filter(Boolean).sort()[0] ?? "";
+  const description = [pair.alex.project_description, pair.elisa.project_description]
+    .map((value) => String(value || "").trim()).find(Boolean) ?? "";
+  const summary = await renderSummaryPdf({
+    logo: await loadLogo(),
+    date: todayParis(),
+    validUntil: validity,
+    projectTitle: pair.alex.bundle === "reseaux"
+      ? `Contenus réseaux sociaux${pair.alex.bundle_formula ? ` — ${pair.alex.bundle_formula}` : ""}`
+      : `Projet ${client.name ?? ""}`.trim(),
+    description: description || "Une proposition réunissant la création des images et la réalisation digitale de votre projet.",
+    client: { name: client.name ?? "", lines: partyLines(client) },
+    rows: [
+      { service: pairServiceLabel(pair.alex), issuer: issuerName(alexSettings), number: pair.alex.number, cents: pair.alex.total_ttc_cents },
+      { service: pairServiceLabel(pair.elisa), issuer: issuerName(elisaSettings), number: pair.elisa.number, cents: pair.elisa.total_ttc_cents }
+    ],
+    totalCents: pair.alex.total_ttc_cents + pair.elisa.total_ttc_cents,
+    deposits: [
+      { issuer: issuerName(alexSettings), cents: pair.alex.deposit_enabled ? pair.alex.deposit_cents : 0 },
+      { issuer: issuerName(elisaSettings), cents: pair.elisa.deposit_enabled ? pair.elisa.deposit_cents : 0 }
+    ],
+    footer: `${footerText(alexSettings)}  |  ${footerText(elisaSettings)}`
+  });
+  const bytes = await mergePdfs([summary, await fetchPdf(pair.alex.pdf_path), await fetchPdf(pair.elisa.pdf_path)]);
+  const path = await uniquePdfPath(
+    "quotes",
+    `Proposition_${todayParis()}_${normalizeFileSegment(client.name ?? "client")}`,
+    `${pair.alex.number}_${pair.elisa.number}`
+  );
+  await archivePdf(path, bytes);
+  await Promise.all([
+    patchOne("quotes", pair.alex.id, { combined_pdf_path: path }),
+    patchOne("quotes", pair.elisa.id, { combined_pdf_path: path })
+  ]);
+  return path;
+}
+
+// Message expliquant ce qui manque avant que la proposition commune soit complète
+function incompleteMessage(pair: { alex: Row; elisa: Row }) {
+  const missing = !pair.alex.number ? "d'Alexandre" : "d'Elisa";
+  return `La proposition commune n'est pas encore complète : le devis ${missing} doit d'abord être validé. Le PDF de 3 pages pourra alors être téléchargé ou envoyé.`;
 }
 
 // ---------------------------------------------------------------- factures
@@ -1025,6 +1119,10 @@ export function escapeHtml(value: string) {
 export async function sendDocument(body: Row) {
   const record = await documentRecord(body.kind, body.id);
   if (!record?.pdf_path) throw new UserError("Requête invalide : le document n'est pas encore validé.", 409);
+  if (body.kind === "quote" && body.single !== true) {
+    const pair = await pairOf(record);
+    if (pair) return await sendCombined(record, pair, body);
+  }
   const to = str(body.to, "Destinataire", 254, true);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) throw new UserError("Adresse e-mail invalide.");
   const message = str(body.message, "Message", 4000);
@@ -1084,6 +1182,62 @@ export async function sendDocument(body: Row) {
     throw new UserError("L'e-mail n'a pas pu être envoyé.", 502);
   }
   return { sent: true };
+}
+
+// Envoi de la proposition commune : un seul e-mail, signé par les deux, avec le PDF de 3 pages.
+// Le lien « Répondre à la proposition » permet d'accepter ou de refuser les deux devis ensemble.
+async function sendCombined(record: Row, pair: { alex: Row; elisa: Row; complete: boolean }, body: Row) {
+  if (!pair.complete) throw new UserError(incompleteMessage(pair), 409);
+  const to = str(body.to, "Destinataire", 254, true);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) throw new UserError("Adresse e-mail invalide.");
+  const message = str(body.message, "Message", 4000);
+  const path = await ensureCombined(record);
+  const download = await storageRequest(`object/${BUCKET}/${storagePath(path!)}`, { method: "GET" });
+  if (!download.ok) throw new UserError("Le PDF de la proposition est introuvable.", 500);
+  const bytes = new Uint8Array(await download.arrayBuffer());
+  const [alexSettings, elisaSettings] = await Promise.all([getSettings("alexandre"), getSettings("elisa")]);
+  // Les deux devis ont leur clé de réponse (paiements séparés ensuite) ; le lien utilise celle d'Alexandre.
+  for (const quote of [pair.alex, pair.elisa]) {
+    if (!quote.response_token) {
+      quote.response_token = randomToken();
+      await patchOne("quotes", quote.id, { response_token: quote.response_token });
+    }
+  }
+  const responseUrl = `${requiredEnv("FRONTEND_ORIGIN").replace(/\/$/, "")}/reponse-devis.html?t=${pair.alex.response_token}`;
+  const snapshot = pair.alex.client_snapshot ?? {};
+  const firstName = snapshot.type === "professionnel" ? "" : String(snapshot.name ?? "").trim().split(/\s+/)[0] ?? "";
+  const hello = firstName ? `Bonjour ${firstName},` : "Bonjour,";
+  const total = formatMoney(pair.alex.total_ttc_cents + pair.elisa.total_ttc_cents);
+  const text = message || `${hello}\n\nMerci pour votre confiance. Vous trouverez ci-joint notre proposition globale pour votre projet (${total} au total). Elle réunit deux prestations indépendantes : le devis ${pair.alex.number} d'Alexandre Palanca et le devis ${pair.elisa.number} d'Elisa Martignac.\n\nPour accepter la proposition ou nous faire part de vos remarques, il vous suffit de cliquer sur le bouton « Répondre à la proposition » ci-dessous.\n\nNous restons à votre disposition pour toute question.\n\nBien cordialement,`;
+  const signature = "Alexandre Palanca & Elisa Martignac";
+  const address = /<([^>]+)>/.exec(requiredEnv("ORDER_EMAIL_FROM"))?.[1] ?? requiredEnv("ORDER_EMAIL_FROM").trim();
+  const replyTo = [...new Set([issuerReplyTo(alexSettings), issuerReplyTo(elisaSettings)])];
+  const button = `<p style="margin:28px 0"><a href="${escapeHtml(responseUrl)}" style="display:inline-block;padding:15px 30px;background:#111111;color:#ffffff;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">Répondre à la proposition</a></p>
+      <p style="color:#777777;font-size:12px">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>${escapeHtml(responseUrl)}</p>`;
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + requiredEnv("RESEND_API_KEY"), "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: `${signature} <${address}>`,
+      to: [to],
+      reply_to: replyTo,
+      subject: `Votre proposition ${pair.alex.number} + ${pair.elisa.number} — ${signature}`,
+      text: `${text}\n\n${signature}\n\nRépondre à la proposition : ${responseUrl}`,
+      html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
+        <p>${escapeHtml(text).replace(/\n/g, "<br>")}</p><p>${escapeHtml(signature)}</p>${button}</div>`,
+      attachments: [{ filename: combinedFileName(pair), content: toBase64(bytes) }]
+    })
+  });
+  if (!response.ok) {
+    console.error("Resend rejected a combined proposal", response.status);
+    throw new UserError("L'e-mail n'a pas pu être envoyé.", 502);
+  }
+  const now = new Date().toISOString();
+  await Promise.all([
+    patchOne("quotes", pair.alex.id, { combined_sent_at: now }),
+    patchOne("quotes", pair.elisa.id, { combined_sent_at: now })
+  ]);
+  return { sent: true, combined: true };
 }
 
 // ---------------------------------------------------------------- listes
@@ -1239,9 +1393,13 @@ export async function handle(body: Row) {
           ? `quotes?select=id,number,issuer,status,bundle&id=${eq(quote.partner_quote_id)}`
           : `quotes?select=id,number,issuer,status,bundle&partner_quote_id=${eq(quote.id)}&limit=1`
       ))[0] ?? null;
+      const pairInfo = partner
+        ? { complete: Boolean(quote.number && partner.number), sentAt: quote.combined_sent_at ?? null, partnerValidated: Boolean(partner.number) }
+        : null;
       return {
         quote: { ...quote, status: displayQuoteStatus(quote) },
         partner,
+        pair: pairInfo,
         invoices,
         deposit: {
           requestedCents: quote.deposit_cents,
@@ -1323,6 +1481,17 @@ export async function handle(body: Row) {
       const record = await documentRecord(body.kind, body.id);
       if (!record?.pdf_path) throw new UserError("Requête invalide : le document n'est pas encore validé.", 409);
       const days = integer(body.days ?? 1, "Durée", 1, 30);
+      // Devis associé à celui de l'autre prestataire : proposition commune de 3 pages, seulement une fois complète
+      if (body.kind === "quote" && body.signed !== true && body.single !== true) {
+        const pair = await pairOf(record);
+        if (pair) {
+          if (!pair.complete) throw new UserError(incompleteMessage(pair), 409);
+          const path = await ensureCombined(record);
+          const fileName = combinedFileName(pair);
+          const url = await signedUrl(path!, days * 24 * 3600);
+          return { url, downloadUrl: `${url}${url.includes("?") ? "&" : "?"}download=${encodeURIComponent(fileName)}`, fileName, combined: true };
+        }
+      }
       // Devis signé en ligne par le client (preuve d'acceptation)
       const wantSigned = body.signed === true && body.kind === "quote";
       if (wantSigned && !record.signed_pdf_path) throw new UserError("Aucun devis signé pour l'instant.", 404);

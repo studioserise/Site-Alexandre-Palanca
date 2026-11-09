@@ -68,6 +68,7 @@ function renderNotes() {
           ${timer ? `<span class="notif-timer${timer.late ? " is-late" : ""}" data-deadline="${esc(n.deadline)}">${esc(timer.text)}</span>` : ""}</p>
         <button type="button" class="notif-title" data-open="${esc(n.key)}">${esc(n.title)}</button>
         <p class="notif-detail">${esc(n.detail)}</p>
+        ${n.actions?.length ? `<div class="notif-actions">${n.actions.map((a, i) => `<button type="button" class="notif-action" data-act="${esc(n.key)}" data-index="${i}">${esc(a.label)}</button>`).join("")}</div>` : ""}
       </div>
       <button type="button" class="notif-close" data-dismiss="${esc(n.key)}" aria-label="Supprimer la notification" title="Supprimer la notification">×</button>
     </li>`;
@@ -103,6 +104,36 @@ async function openNote(key) {
   if (!note) return;
   if (note.contactRequestId) return openRequest(note);
   if (note.link) window.location.href = note.link;
+}
+
+// Boutons d'une notification : télécharger ou envoyer la proposition commune
+async function runAction(button) {
+  const note = notes.find((n) => n.key === button.dataset.act);
+  const action = note?.actions?.[Number(button.dataset.index)];
+  if (!action) return;
+  button.disabled = true;
+  try {
+    if (action.action === "download-quote") {
+      const d = await api("document-url", { kind: "quote", id: action.quoteId, days: 1 });
+      const link = document.createElement("a");
+      link.href = d.downloadUrl || d.url;
+      link.download = d.fileName || "";
+      document.body.append(link);
+      link.click();
+      link.remove();
+    } else if (action.action === "send-quote") {
+      const to = window.prompt("Envoyer la proposition à (e-mail du client) :", action.email || "");
+      if (!to) return;
+      const message = window.prompt("Message (laisser vide pour le message par défaut, avec le bouton « Répondre à la proposition ») :", "") || "";
+      await api("send-document", { kind: "quote", id: action.quoteId, to, message });
+      alert("Proposition envoyée au client.");
+      loadNotes();
+    }
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    button.disabled = false;
+  }
 }
 
 // Détail d'une demande reçue par le formulaire
@@ -262,6 +293,8 @@ function bind() {
     renderNotes();
   });
   $("notif-list").addEventListener("click", (event) => {
+    const act = event.target.closest("[data-act]");
+    if (act) return runAction(act);
     const close = event.target.closest("[data-dismiss]");
     if (close) return dismiss(close.dataset.dismiss);
     const open = event.target.closest("[data-open]");

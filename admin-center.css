@@ -232,3 +232,11 @@
   .notif-dot { display: none; }
   .request-dialog { padding: 20px; }
 }
+
+/* Boutons d'action dans une notification */
+.notif-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.notif-action { padding: 7px 12px; border: 1px solid rgba(245, 243, 239, 0.3); border-radius: 8px; background: transparent; color: var(--gallery-text); cursor: pointer; font-size: 0.78rem; }
+.notif-action:hover { background: var(--gallery-text); color: #080808; }
+.notif-action:disabled { opacity: .5; cursor: wait; }
+html[data-theme="light"] .notif-action { border-color: rgba(23, 23, 21, 0.35); color: #171715; }
+html[data-theme="light"] .notif-action:hover { background: #171715; color: #f1eee8; }

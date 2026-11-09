@@ -631,8 +631,8 @@ function stepReview(body) {
 
 async function documentActions(kind, id, defaultEmail) {
   // Téléchargement direct (fichier enregistré sous un nom lisible), sans ouvrir d'onglet
-  const open = async (signed = false) => {
-    const d = await run(() => api("document-url", { kind, id, days: 1, signed: signed === true }));
+  const open = async (signed = false, single = false) => {
+    const d = await run(() => api("document-url", { kind, id, days: 1, signed: signed === true, single: single === true }));
     if (!d) return;
     const link = document.createElement("a");
     link.href = d.downloadUrl || d.url;
@@ -652,7 +652,7 @@ async function documentActions(kind, id, defaultEmail) {
     const message = window.prompt(kind === "quote" ? "Message (laisser vide pour le message par défaut, avec le bouton « Répondre à la proposition ») :" : "Message (laisser vide pour le message par défaut) :", "") || "";
     if (await run(() => api("send-document", { kind, id, to, message }))) say("E-mail envoyé.", true);
   };
-  return { open, openSigned: () => open(true), copy, send };
+  return { open, openSigned: () => open(true), openSingle: () => open(false, true), copy, send };
 }
 
 async function quoteDetail(id) {
@@ -675,9 +675,13 @@ async function quoteDetail(id) {
     ${q.balance_transfer_notified_at ? `<dt>Virement du solde</dt><dd>signalé par le client le ${dateFr(q.balance_transfer_notified_at)} — à vérifier, puis à enregistrer sur la facture</dd>` : ""}<dt>Valable jusqu'au</dt><dd>${dateFr(q.valid_until)}</dd>
     <dt>Total TTC</dt><dd>${money(q.total_ttc_cents)}</dd><dt>Acompte demandé</dt><dd>${money(data.deposit.requestedCents)}</dd>
     <dt>Acompte facturé</dt><dd>${money(data.deposit.invoicedCents)}</dd><dt>Acompte reçu</dt><dd>${money(data.deposit.receivedCents)}</dd></dl>
-    <div class="com-actions"><button class="gallery-primary-button" id="dl" type="button">Télécharger le PDF</button>
+    ${data.pair ? `<p class="com-hint com-pair-note">${data.pair.complete
+      ? `Proposition commune complète : le PDF de 3 pages réunit la synthèse, le devis d'Alexandre et celui d'Elisa${data.pair.sentAt ? ` — envoyée au client le ${dateFr(data.pair.sentAt)}` : " — pas encore envoyée au client"}.`
+      : `Proposition commune incomplète : validez le devis ${q.issuer === "elisa" ? "d'Alexandre" : "d'Elisa"} pour pouvoir télécharger ou envoyer le PDF de 3 pages.`}</p>` : ""}
+    <div class="com-actions"><button class="gallery-primary-button" id="dl" type="button" ${data.pair && !data.pair.complete ? "disabled" : ""}>${data.pair ? "Télécharger la proposition commune (PDF)" : "Télécharger le PDF"}</button>
     ${q.signed_pdf_path ? '<button class="gallery-primary-button" id="dls" type="button">Télécharger le devis signé</button>' : ""}
-    <button class="gallery-quiet-button" id="cp" type="button">Copier le lien</button><button class="gallery-quiet-button" id="sd" type="button">Envoyer par e-mail</button></div>
+    <button class="gallery-quiet-button" id="cp" type="button" ${data.pair && !data.pair.complete ? "disabled" : ""}>Copier le lien</button><button class="gallery-quiet-button" id="sd" type="button" ${data.pair && !data.pair.complete ? "disabled" : ""}>${data.pair ? "Envoyer la proposition au client" : "Envoyer par e-mail"}</button>
+    ${data.pair ? '<button class="gallery-quiet-button" id="dl1" type="button">PDF de ce devis seul</button>' : ""}</div>
     ${q.responded_at ? `<h3>Réponse du client</h3><p>${q.status === "accepted" ? (q.signed_at ? "Devis accepté et signé" : "Devis accepté") : "Devis refusé"} en ligne le ${dateFr(q.responded_at.slice(0, 10))}${q.status === "refused" ? (q.response_redo ? " — <strong>souhaite un nouveau devis</strong>" : " — ne demande pas de nouveau devis") : ""}.</p>
       ${q.response_comment ? `<p><em>Commentaire :</em><br>${esc(q.response_comment).replace(/\n/g, "<br>")}</p>` : ""}` : ""}
     <h3>Statut</h3><div class="com-actions">${["sent", "accepted", "refused"].map((s) => `<button class="gallery-quiet-button" type="button" data-st="${s}">Marquer ${QUOTE_STATUS[s][0].toLowerCase()}</button>`).join("")}</div>
@@ -698,6 +702,7 @@ async function quoteDetail(id) {
   });
   document.getElementById("dl").onclick = () => actions.open();
   if (q.signed_pdf_path) document.getElementById("dls").onclick = actions.openSigned;
+  document.getElementById("dl1")?.addEventListener("click", actions.openSingle);
   document.getElementById("cp").onclick = actions.copy;
   document.getElementById("sd").onclick = actions.send;
   view.querySelectorAll("[data-st]").forEach((b) => b.onclick = async () => {

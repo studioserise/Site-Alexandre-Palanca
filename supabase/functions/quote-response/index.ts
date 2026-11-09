@@ -1,6 +1,6 @@
 import { databaseRequest, sha256 } from "../_shared/http.ts";
 import { signQuotePdf } from "../_shared/commerce-pdf.ts";
-import { getSettings, invoiceFromQuote, issueInvoice, issuerFrom, issuerName, issuerReplyTo, longDateFr, serviceSummary } from "../_shared/commerce-core.ts";
+import { getSettings, partnerOf, invoiceFromQuote, issueInvoice, issuerFrom, issuerName, issuerReplyTo, longDateFr, serviceSummary } from "../_shared/commerce-core.ts";
 
 const BUCKET = "commerce-documents";
 
@@ -226,9 +226,30 @@ function publicView(quote: Row, client: Row | null) {
 async function load(token: unknown) {
   const { quote, client } = await findQuote(token);
   const view = publicView(quote, client);
-  const items = await rows(
-    `quote_items?select=title,quantity,unit,total_ht_cents&quote_id=eq.${encodeURIComponent(quote.id)}&order=position.asc`
+  const itemsOf = async (q: Row) => await rows(
+    `quote_items?select=title,quantity,unit,total_ht_cents&quote_id=eq.${encodeURIComponent(q.id)}&order=position.asc`
   );
+  const items = await itemsOf(quote);
+  // Proposition commune : une seule réponse pour les deux devis
+  const partner = await partnerOf(quote);
+  if (partner?.number && stateOf(partner) === stateOf(quote)) {
+    const alex = quote.issuer === "elisa" ? partner : quote;
+    const elisa = quote.issuer === "elisa" ? quote : partner;
+    const partnerItems = await itemsOf(partner);
+    return {
+      ...view,
+      issuerName: "Alexandre Palanca & Elisa Martignac",
+      combined: true,
+      quote: {
+        ...view.quote,
+        number: `${alex.number} + ${elisa.number}`,
+        totalCents: alex.total_ttc_cents + elisa.total_ttc_cents,
+        depositCents: (alex.deposit_enabled ? alex.deposit_cents : 0) + (elisa.deposit_enabled ? elisa.deposit_cents : 0),
+        validUntil: [alex.valid_until, elisa.valid_until].filter(Boolean).sort()[0] ?? null
+      },
+      items: [...items, ...partnerItems].map((item) => ({ title: item.title }))
+    };
+  }
   return { ...view, items: items.map((item) => ({ title: item.title })) };
 }
 
@@ -338,6 +359,34 @@ async function accept(body: Row, request: Request) {
   const comment = text(body.comment, "Commentaire", 3000);
   const png = signaturePng(body.signature);
 
+  // Proposition commune : la même signature vaut pour le devis d'Alexandre et celui d'Elisa,
+  // chacun gardant sa propre trace (PDF signé, acompte, paiement).
+  const results = [await acceptOne(quote, client, data, comment, png, request, String(body.token))];
+  const partner = await partnerOf(quote);
+  if (partner?.number && stateOf(partner) === "open") {
+    const partnerToken = await ensureToken(partner);
+    const partnerClient = partner.client_id
+      ? (await rows(`clients?select=*&id=eq.${encodeURIComponent(partner.client_id)}`))[0] ?? null
+      : null;
+    results.push(await acceptOne(partner, partnerClient, data, comment, png, request, partnerToken));
+  }
+  const payments = results.filter((result) => result.payUrl)
+    .map((result) => ({ url: result.payUrl, cents: result.depositCents, issuer: result.issuer }));
+  return { state: "accepted", payUrl: results[0].payUrl, depositCents: results[0].depositCents, payments };
+}
+
+async function ensureToken(quote: Row) {
+  if (quote.response_token) return String(quote.response_token);
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  const token = btoa(String.fromCharCode(...bytes)).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+  await patch("quotes", quote.id, { response_token: token });
+  return token;
+}
+
+async function acceptOne(
+  quote: Row, client: Row | null, data: Row, comment: string, png: Uint8Array, request: Request, token: string
+) {
+  const type = data.type;
   // Devis signé : signature posée sur le PDF d'origine, archivé à côté de lui (preuve d'acceptation).
   if (!quote.pdf_path) throw new UserError("Ce devis n'est pas disponible. Contactez-nous directement.", 409);
   const original = await storage(`object/${BUCKET}/${objectPath(quote.pdf_path)}`);
@@ -388,7 +437,7 @@ async function accept(body: Row, request: Request) {
     }
   }
   const site = requiredEnv("FRONTEND_ORIGIN").replace(/\/$/, "");
-  const payUrl = deposit ? `${site}/paiement.html?t=${encodeURIComponent(String(body.token))}&p=acompte` : "";
+  const payUrl = deposit ? `${site}/paiement.html?t=${encodeURIComponent(token)}&p=acompte` : "";
   const fileSafe = (name: string) => name.replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
   const signedAttachment = { filename: fileSafe(`Devis ${quote.number} signé ${data.name}.pdf`), content: toBase64(signed) };
   const depositAttachment = deposit && depositPdf
@@ -435,7 +484,7 @@ async function accept(body: Row, request: Request) {
         : "Pas d'acompte prévu sur ce devis."]
     }
   ], data.email, [signedAttachment, ...(depositAttachment ? [depositAttachment] : [])], issuerSettings);
-  return { state: "accepted", payUrl, depositCents: deposit?.amount_due_cents ?? 0 };
+  return { payUrl, depositCents: deposit?.amount_due_cents ?? 0, issuer: issuerName(issuerSettings) };
 }
 
 async function refuse(body: Row) {
@@ -443,6 +492,14 @@ async function refuse(body: Row) {
   if (stateOf(quote) !== "open") throw new UserError("Ce devis n'attend plus de réponse.", 409);
   const redo = body.redo === true;
   const comment = text(body.comment, "Commentaire", 3000);
+  await refuseOne(quote, client, redo, comment);
+  // Proposition commune : le refus vaut pour les deux devis
+  const partner = await partnerOf(quote);
+  if (partner?.number && stateOf(partner) === "open") await refuseOne(partner, client, redo, comment);
+  return { state: "refused" };
+}
+
+async function refuseOne(quote: Row, client: Row | null, redo: boolean, comment: string) {
   await patch("quotes", quote.id, {
     status: "refused",
     responded_at: new Date().toISOString(),
@@ -468,7 +525,6 @@ async function refuse(body: Row) {
     },
     ...(await quoteSection(quote))
   ], who.email || "", [], await getSettings(quote.issuer));
-  return { state: "refused" };
 }
 
 Deno.serve(async (request) => {

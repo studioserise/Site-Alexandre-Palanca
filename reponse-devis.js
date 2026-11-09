@@ -211,15 +211,25 @@ acceptForm.addEventListener("submit", (event) => {
   );
   submit(acceptForm, { action: "accept", client: { ...client, type: f.type.value }, comment: f.comment.value.trim(), signature: pad.toDataURL("image/png") },
     (result) => {
-      finish("Merci, devis accepté !", result.payUrl
-        ? "Votre devis signé a bien été transmis. Vous allez recevoir par e-mail une copie du devis signé et la facture d'acompte. Vous pouvez aussi régler l'acompte dès maintenant :"
+      const payments = result.payments?.length ? result.payments : result.payUrl ? [{ url: result.payUrl, cents: result.depositCents }] : [];
+      const several = payments.length > 1;
+      finish(several ? "Merci, proposition acceptée !" : "Merci, devis accepté !", payments.length
+        ? several
+          ? "Vos deux devis signés ont bien été transmis. Vous allez recevoir par e-mail une copie de chacun, avec leur facture d'acompte. Chaque acompte se règle séparément, auprès de chaque prestataire :"
+          : "Votre devis signé a bien été transmis. Vous allez recevoir par e-mail une copie du devis signé et la facture d'acompte. Vous pouvez aussi régler l'acompte dès maintenant :"
         : "Votre devis signé a bien été transmis. Vous allez en recevoir une copie par e-mail.");
-      if (result.payUrl) {
-        const link = $("q-pay");
-        link.href = result.payUrl;
-        link.textContent = `Payer l'acompte (${money(result.depositCents)})`;
+      // Un bouton par acompte (proposition commune : un pour Alexandre, un pour Elisa)
+      const first = $("q-pay");
+      let last = first;
+      payments.forEach((payment, index) => {
+        const link = index === 0 ? first : first.cloneNode(false);
+        link.href = payment.url;
+        link.textContent = several && payment.issuer
+          ? `Acompte ${payment.issuer} (${money(payment.cents)})`
+          : `Payer l'acompte (${money(payment.cents)})`;
         link.hidden = false;
-      }
+        if (index > 0) { link.removeAttribute("id"); last.after(link); last = link; }
+      });
     });
 });
 

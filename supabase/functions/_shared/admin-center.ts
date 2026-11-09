@@ -18,6 +18,8 @@ export type Notification = {
   deadline?: string; // échéance (compte à rebours)
   link?: string; // page à ouvrir
   contactRequestId?: string; // ouvre le détail du formulaire
+  // Boutons directement dans la notification (ex. télécharger / envoyer la proposition commune)
+  actions?: Array<{ label: string; action: "download-quote" | "send-quote"; quoteId: string; email?: string }>;
 };
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -64,7 +66,7 @@ export async function notifications() {
   const now = Date.now();
   const site = (Deno.env.get("FRONTEND_ORIGIN") ?? "").replace(/\/$/, "");
   const [quotes, invoices, requests, reminders, galleries, orders, events, dismissed, feedback] = await Promise.all([
-    rows("quotes?select=id,number,issuer,status,client_id,client_snapshot,valid_until,validated_at,created_at,service_date,service_time,deposit_enabled,deposit_cents,total_ttc_cents,response_redo,responded_at,deposit_transfer_notified_at,balance_transfer_notified_at,partner_requested,partner_quote_id,bundle,bundle_formula&order=created_at.desc&limit=1000"),
+    rows("quotes?select=id,number,issuer,status,client_id,client_snapshot,valid_until,validated_at,created_at,service_date,service_time,deposit_enabled,deposit_cents,total_ttc_cents,response_redo,responded_at,deposit_transfer_notified_at,balance_transfer_notified_at,partner_requested,partner_quote_id,bundle,bundle_formula,combined_sent_at,pdf_path&order=created_at.desc&limit=1000"),
     rows("invoices?select=id,number,kind,status,quote_id,due_date,amount_due_cents,paid_cents,client_snapshot&status=neq.cancelled&limit=2000"),
     rows("contact_requests?select=*&status=eq.new&order=created_at.desc&limit=200"),
     rows("quote_reminders?select=quote_id,kind,token,prepared_at&sent_at=is.null&limit=200"),
@@ -140,6 +142,37 @@ export async function notifications() {
         .filter(Boolean).join(" · ") + ". Créer un devis à partir du formulaire.",
       contactRequestId: request.id
     });
+  }
+
+  // Proposition commune (devis d'Alexandre + devis d'Elisa) : à compléter, puis à envoyer au client
+  for (const second of quotes.filter((q) => q.partner_quote_id)) {
+    const first = quoteById.get(second.partner_quote_id);
+    if (!first) continue;
+    const alex = first.issuer === "elisa" ? second : first;
+    const elisa = first.issuer === "elisa" ? first : second;
+    if ([alex.status, elisa.status].some((status) => status === "refused" || status === "accepted")) continue;
+    const who = clientName(alex);
+    if (alex.number && elisa.number) {
+      if (alex.combined_sent_at) continue;
+      push({
+        key: `proposition-a-envoyer:${alex.id}:${elisa.id}`, priority: 77, category: "devis",
+        title: `Proposition commune prête — ${who}`,
+        detail: `Les devis ${alex.number} (Alex) et ${elisa.number} (Elisa) sont validés : le PDF de 3 pages est prêt mais n'a pas encore été envoyé au client.`,
+        link: quoteLink(alex.id),
+        actions: [
+          { label: "Télécharger", action: "download-quote", quoteId: alex.id },
+          { label: "Envoyer au client", action: "send-quote", quoteId: alex.id, email: alex.client_snapshot?.email ?? "" }
+        ]
+      });
+    } else if (alex.number || elisa.number) {
+      const missing = alex.number ? elisa : alex;
+      push({
+        key: `proposition-incomplete:${missing.id}`, priority: 72, category: "devis",
+        title: `Proposition commune à compléter — ${who}`,
+        detail: `Le devis ${(alex.number ? alex : elisa).number} est validé. Validez le devis ${missing.issuer === "elisa" ? "d'Elisa" : "d'Alexandre"} pour générer le PDF commun de 3 pages.`,
+        link: `gestion-commerciale.html#brouillon=${missing.id}`
+      });
+    }
   }
 
   // Devis de l'autre prestataire à créer (case cochée sur un devis) : s'éteint dès qu'il existe

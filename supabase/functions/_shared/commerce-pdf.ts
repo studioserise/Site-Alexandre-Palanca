@@ -451,3 +451,129 @@ export async function signQuotePdf(original: Uint8Array, signature: OnlineSignat
 
   return await pdf.save();
 }
+
+// ---------------------------------------------------------------- proposition commune
+
+export type SummaryData = {
+  logo: Uint8Array | null;
+  date: string;
+  validUntil: string;
+  projectTitle: string;
+  description: string;
+  client: { name: string; lines: string[] };
+  rows: Array<{ service: string; issuer: string; number: string; cents: number }>;
+  totalCents: number;
+  deposits: Array<{ issuer: string; cents: number }>;
+  footer: string;
+};
+
+// Page 1 de la proposition commune : synthèse commerciale (n'a pas valeur de devis).
+export async function renderSummaryPdf(data: SummaryData) {
+  const pdf = await PDFDocument.create();
+  pdf.setTitle(`Proposition globale — ${data.client.name}`);
+  pdf.setAuthor("Alexandre Palanca & Elisa Martignac");
+  const regular = await pdf.embedFont(StandardFonts.Helvetica);
+  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  const W = PAGE_WIDTH - 2 * MARGIN;
+  const text = (value: string, x: number, y: number, o: { size?: number; font?: PDFFont; color?: ReturnType<typeof rgb> } = {}) =>
+    page.drawText(pdfSafe(value), { x, y, size: o.size ?? 9, font: o.font ?? regular, color: o.color ?? BLACK });
+  const right = (value: string, xRight: number, y: number, o: { size?: number; font?: PDFFont; color?: ReturnType<typeof rgb> } = {}) => {
+    const size = o.size ?? 9;
+    const font = o.font ?? regular;
+    text(value, xRight - font.widthOfTextAtSize(pdfSafe(value), size), y, o);
+  };
+
+  let y = PAGE_HEIGHT - MARGIN;
+  if (data.logo) {
+    try {
+      const logo = await pdf.embedPng(data.logo);
+      const size = 54;
+      page.drawImage(logo, { x: MARGIN, y: y - size, width: size, height: size * (logo.height / logo.width) });
+    } catch { /* logo facultatif */ }
+  }
+  right("Proposition globale", PAGE_WIDTH - MARGIN, y - 14, { size: 9, font: bold, color: GREY });
+  right(`Le ${formatDateFr(data.date)}`, PAGE_WIDTH - MARGIN, y - 28, { size: 9, color: GREY });
+  if (data.validUntil) right(`Valable jusqu'au ${formatDateFr(data.validUntil)}`, PAGE_WIDTH - MARGIN, y - 41, { size: 9, color: GREY });
+  y -= 92;
+
+  text("Alexandre Palanca  ·  Elisa Martignac", MARGIN, y, { size: 9, color: GREY });
+  y -= 30;
+  for (const line of wrap(data.projectTitle, bold, 24, W)) {
+    text(line, MARGIN, y, { size: 24, font: bold });
+    y -= 28;
+  }
+  y -= 6;
+  for (const line of wrap(data.description, regular, 10, W).slice(0, 6)) {
+    if (!line.trim()) { y -= 6; continue; }
+    text(line, MARGIN, y, { size: 10, color: GREY });
+    y -= 14;
+  }
+  y -= 14;
+
+  // Client
+  text("Client", MARGIN, y, { size: 8, font: bold, color: GREY });
+  y -= 15;
+  text(data.client.name, MARGIN, y, { size: 11, font: bold });
+  y -= 14;
+  for (const line of data.client.lines.slice(0, 5)) {
+    text(line, MARGIN, y, { size: 9 });
+    y -= 12;
+  }
+  y -= 24;
+
+  // Les deux prestations
+  text("Les prestations", MARGIN, y, { size: 8, font: bold, color: GREY });
+  y -= 10;
+  page.drawLine({ start: { x: MARGIN, y }, end: { x: PAGE_WIDTH - MARGIN, y }, thickness: 0.6, color: rgb(0.8, 0.8, 0.8) });
+  for (const row of data.rows) {
+    y -= 22;
+    text(row.service, MARGIN, y, { size: 11, font: bold });
+    right(formatMoney(row.cents), PAGE_WIDTH - MARGIN, y, { size: 11, font: bold });
+    y -= 14;
+    text(`${row.issuer} — devis ${row.number}`, MARGIN, y, { size: 9, color: GREY });
+    y -= 12;
+    page.drawLine({ start: { x: MARGIN, y }, end: { x: PAGE_WIDTH - MARGIN, y }, thickness: 0.6, color: rgb(0.85, 0.85, 0.85) });
+  }
+  y -= 26;
+
+  // Total cumulé, bien en évidence
+  const boxH = 64;
+  page.drawRectangle({ x: MARGIN, y: y - boxH, width: W, height: boxH, color: rgb(0.08, 0.08, 0.075) });
+  text("Montant total du projet", MARGIN + 18, y - 26, { size: 10, color: rgb(0.8, 0.8, 0.78) });
+  text("Somme des deux devis (TTC)", MARGIN + 18, y - 41, { size: 8, color: rgb(0.6, 0.6, 0.58) });
+  right(formatMoney(data.totalCents), PAGE_WIDTH - MARGIN - 18, y - 40, { size: 24, font: bold, color: rgb(1, 1, 1) });
+  y -= boxH + 18;
+
+  if (data.deposits.some((d) => d.cents > 0)) {
+    text(`Acomptes à la validation : ${data.deposits.filter((d) => d.cents > 0).map((d) => `${d.issuer} ${formatMoney(d.cents)}`).join("  ·  ")}`, MARGIN, y, { size: 9 });
+    y -= 22;
+  }
+
+  // Mention : deux prestations indépendantes
+  const note = "Ce document présente une proposition globale composée de deux prestations indépendantes. Retrouvez le détail et les conditions de chaque prestation dans les devis individuels des pages suivantes. Chaque prestataire facture séparément sa propre prestation.";
+  const noteLines = wrap(note, regular, 9, W - 28);
+  const noteH = noteLines.length * 12 + 20;
+  page.drawRectangle({ x: MARGIN, y: y - noteH, width: W, height: noteH, borderColor: rgb(0.8, 0.8, 0.8), borderWidth: 0.6 });
+  let ny = y - 18;
+  for (const line of noteLines) {
+    text(line, MARGIN + 14, ny, { size: 9 });
+    ny -= 12;
+  }
+
+  wrap(data.footer, regular, 7, W).slice(0, 3).forEach((line, index) => {
+    page.drawText(line, { x: MARGIN, y: 36 - index * 9, size: 7, font: regular, color: GREY });
+  });
+  return await pdf.save();
+}
+
+// Assemble plusieurs PDF en un seul (synthèse + devis d'Alexandre + devis d'Elisa).
+export async function mergePdfs(parts: Uint8Array[]) {
+  const out = await PDFDocument.create();
+  for (const part of parts) {
+    const doc = await PDFDocument.load(part);
+    const pages = await out.copyPages(doc, doc.getPageIndices());
+    pages.forEach((page) => out.addPage(page));
+  }
+  return await out.save();
+}
