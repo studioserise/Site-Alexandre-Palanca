@@ -16,6 +16,12 @@
   var busy = false;
   var styled = false;
 
+  // Thème clair choisi par le visiteur (même mémoire que le bouton de thème du menu)
+  function isLight() {
+    if (document.documentElement.getAttribute('data-theme') === 'light') return true;
+    try { return localStorage.getItem('site-theme-v2') === 'light'; } catch (e) { return false; }
+  }
+
   function enabled() {
     return desktop.matches && !reduced.matches;
   }
@@ -38,7 +44,11 @@
       '.pt-bl{bottom:28px;left:28px;border-bottom-width:1px;border-left-width:1px}' +
       '.pt-br{bottom:28px;right:28px;border-bottom-width:1px;border-right-width:1px}' +
       '.pt-cross-h,.pt-cross-v{position:absolute;left:50%;top:50%;background:rgba(255,255,255,.7);transform:translate(-50%,-50%)}' +
-      '.pt-cross-h{width:22px;height:1px}.pt-cross-v{width:1px;height:22px}';
+      '.pt-cross-h{width:22px;height:1px}.pt-cross-v{width:1px;height:22px}' +
+      // Mode clair : voile ivoire (couleur du fond) et cadre foncé, au lieu du noir
+      '.pt-overlay.pt-light.pt-blur{background:rgba(241,238,232,.94)}' +
+      '.pt-light .pt-corner{border-color:rgba(23,23,21,.55)}' +
+      '.pt-light .pt-cross-h,.pt-light .pt-cross-v{background:rgba(23,23,21,.55)}';
     var style = document.createElement('style');
     style.setAttribute('data-page-transition', '');
     style.textContent = css;
@@ -48,7 +58,7 @@
   function buildOverlay() {
     injectStyle();
     var overlay = document.createElement('div');
-    overlay.className = 'pt-overlay';
+    overlay.className = 'pt-overlay' + (isLight() ? ' pt-light' : '');
     overlay.setAttribute('aria-hidden', 'true');
     overlay.innerHTML =
       '<div class="pt-frame">' +
