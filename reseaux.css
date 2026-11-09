@@ -267,3 +267,6 @@ html[data-theme="light"] .rs-zoom { background: #e4dfd5; }
 }
 html[data-theme="light"] .rs-showcase-intro { color: #494740; }
 html[data-theme="light"] .rs-mock-dots button { background: rgba(23, 23, 21, 0.25); }
+
+/* Formules : type de production sous le titre */
+.rs-offers .rs-offer-kind { margin-top: 2px; color: var(--studio-muted); font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; }
