@@ -20,13 +20,17 @@
   <link rel="stylesheet" href="redesign.css?v=70">
   <link rel="stylesheet" href="cursor.css?v=7">
   <link rel="stylesheet" href="section-marker.css?v=bord">
-  <link rel="stylesheet" href="reseaux.css?v=2">
+  <link rel="stylesheet" href="contact.css?v=4">
+  <link rel="stylesheet" href="reseaux.css?v=3">
   <script src="i18n.js?v=contacts2" defer></script>
   <script src="site-nav.js?v=contacts3" defer></script>
   <script src="redesign.js?v=29" defer></script>
   <script src="cursor.js?v=3" defer></script>
   <script src="section-marker.js?v=10" defer></script>
-  <script src="reseaux.js?v=1" defer></script>
+  <script src="reseaux.js?v=2" defer></script>
+  <script type="module" src="contact.js?v=5"></script>
+  <script src="contact-reveal.js?v=2" defer></script>
+  <link rel="stylesheet" href="mobile.css?v=3" media="(max-width: 800px)">
   <link rel="stylesheet" href="frames.css?v=3">
   <link rel="stylesheet" href="touch.css?v=7" media="(hover: none)">
 </head>
@@ -56,7 +60,7 @@
         <h1 id="rs-title">Des images qui font vivre votre présence en ligne.</h1>
         <p>Nous imaginons et réalisons des contenus photographiques et vidéo pour donner vie à votre communication sur les réseaux sociaux.</p>
         <p>Des images soignées, des formats adaptés et une direction visuelle cohérente pour raconter votre activité, valoriser votre savoir-faire et créer du lien avec votre audience.</p>
-        <a class="studio-button" href="#site-footer">Parlons de votre projet <span aria-hidden="true">↓︎</span></a>
+        <a class="studio-button" href="#demande-contenus">Parlons de votre projet <span aria-hidden="true">↓︎</span></a>
       </div>
       <div class="rs-hero-visual" aria-hidden="true">
         <figure class="rs-float rs-float--a" data-rs-depth="0.10" data-rs-reveal data-temp="photo de contenu">
@@ -172,7 +176,28 @@
       </div>
     </section>
 
-    <!-- 04 · LA MÉTHODE -->
+    <!-- 04 · LES FORMULES (juste après les formats) (même style que la page Photo & vidéo) -->
+    <section class="redesign-section rs-offers" aria-labelledby="rs-offers-title">
+      <p class="studio-eyebrow">Les formules</p>
+      <h2 class="studio-section-heading" id="rs-offers-title">Une production adaptée à vos besoins.</h2>
+      <div class="flip-card-grid flip-card-grid--aligned">
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">01 · Essentiel</span><h3>La séance</h3><p>Une production ponctuelle pour renouveler vos contenus.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻︎</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Brief préparatoire</li><li>Session photo et/ou vidéo</li><li>Sélection et retouche</li><li>Création de formats courts selon le devis</li></ul></div>
+        </div></article>
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">02 · Signature</span><h3>La collection</h3><p>Une production complète pour constituer une réserve de contenus.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻︎</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Direction visuelle</li><li>Session photo et vidéo</li><li>Plusieurs formats de contenus</li><li>Montage et déclinaisons</li><li>Banque de contenus organisée</li></ul></div>
+        </div></article>
+        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
+          <div class="flip-card-face"><span class="flip-hint">03 · Sur mesure</span><h3>L’accompagnement</h3><p>Une collaboration régulière pour faire évoluer votre communication.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻︎</span></div>
+          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Planification des productions</li><li>Sessions récurrentes</li><li>Création de contenus variés</li><li>Déclinaisons selon les besoins</li><li>Accompagnement éditorial selon le projet</li></ul></div>
+        </div></article>
+      </div>
+      <p class="studio-eyebrow studio-eyebrow--note">Chaque formule est ajustée en fonction du volume de contenus, du temps de production et des livrables souhaités.</p>
+    </section>
+
+    <!-- 05 · LA MÉTHODE -->
     <section class="rs-section rs-method" aria-labelledby="rs-method-title">
       <div class="rs-method-head" data-rs-reveal>
         <p class="studio-eyebrow">La méthode</p>
@@ -199,28 +224,36 @@
       </ol>
     </section>
 
-    <!-- 05 · LES FORMULES (même style que la page Photo & vidéo) -->
-    <section class="redesign-section rs-offers" aria-labelledby="rs-offers-title">
-      <p class="studio-eyebrow">Les formules</p>
-      <h2 class="studio-section-heading" id="rs-offers-title">Une production adaptée à vos besoins.</h2>
-      <div class="flip-card-grid flip-card-grid--aligned">
-        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
-          <div class="flip-card-face"><span class="flip-hint">01 · Essentiel</span><h3>La séance</h3><p>Une production ponctuelle pour renouveler vos contenus.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻︎</span></div>
-          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Brief préparatoire</li><li>Session photo et/ou vidéo</li><li>Sélection et retouche</li><li>Création de formats courts selon le devis</li></ul></div>
-        </div></article>
-        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
-          <div class="flip-card-face"><span class="flip-hint">02 · Signature</span><h3>La collection</h3><p>Une production complète pour constituer une réserve de contenus.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻︎</span></div>
-          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Direction visuelle</li><li>Session photo et vidéo</li><li>Plusieurs formats de contenus</li><li>Montage et déclinaisons</li><li>Banque de contenus organisée</li></ul></div>
-        </div></article>
-        <article class="flip-card" tabindex="0"><div class="flip-card-inner">
-          <div class="flip-card-face"><span class="flip-hint">03 · Sur mesure</span><h3>L’accompagnement</h3><p>Une collaboration régulière pour faire évoluer votre communication.</p><p class="flip-price">Sur devis</p><span class="flip-hint">Survolez pour voir le contenu ↻︎</span></div>
-          <div class="flip-card-face flip-card-face--back"><h3>Ce qui est compris</h3><ul class="flip-list"><li>Planification des productions</li><li>Sessions récurrentes</li><li>Création de contenus variés</li><li>Déclinaisons selon les besoins</li><li>Accompagnement éditorial selon le projet</li></ul></div>
-        </div></article>
+    <!-- 06 · FORMULAIRE (même bloc que la page Photo & vidéo) -->
+    <section class="redesign-section rs-form" id="demande-contenus" aria-labelledby="rs-contact-title">
+      <div class="redesign-panel redesign-contact-layout">
+        <p class="studio-eyebrow">Un projet de contenus ?</p>
+        <h2 id="rs-contact-title">Imaginons vos contenus ensemble.</h2>
+        <p>Parlez-nous de votre activité et de vos réseaux : nous vous proposons une production adaptée à vos besoins.</p>
+        <button class="contact-submit contact-reveal" type="button" data-contact-reveal aria-expanded="false" aria-controls="contact-collapse"><span>Remplir le formulaire</span><span aria-hidden="true">↓︎</span></button>
+        <div class="contact-collapse is-closed" id="contact-collapse"><div class="contact-collapse-inner">
+        <form class="contact-form redesign-contact-form" id="contact-form" novalidate>
+          <input id="contact-service" name="service" type="hidden" value="Contenus réseaux">
+          <div class="contact-form-grid">
+            <div class="contact-field"><label for="contact-name">Nom et prénom</label><input id="contact-name" name="name" autocomplete="name" maxlength="100"></div>
+            <div class="contact-field"><label for="contact-email">Adresse e-mail <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" required aria-describedby="contact-form-status" autocomplete="email" maxlength="254"></div>
+            <div class="contact-field"><label for="contact-phone">Téléphone <span class="contact-optional">(facultatif)</span></label><input id="contact-phone" name="phone" type="tel" autocomplete="tel" maxlength="30"></div>
+            <div class="contact-field"><label for="contact-date">Date ou période <span class="contact-optional">(facultatif)</span></label><input id="contact-date" name="date" type="date"></div>
+            <div class="contact-field"><label for="pref-type">Formule envisagée</label><select id="pref-type" name="type"><option value="">À préciser ensemble</option><option value="La séance — production ponctuelle">La séance — production ponctuelle</option><option value="La collection — réserve de contenus">La collection — réserve de contenus</option><option value="L’accompagnement — collaboration régulière">L’accompagnement — collaboration régulière</option></select></div>
+            <div class="contact-field"><label for="pref-activite">Votre activité</label><select id="pref-activite" name="pref-activite" data-extra><option value="">À préciser</option><option value="Lieu ou établissement">Lieu ou établissement</option><option value="Marque ou savoir-faire">Marque ou savoir-faire</option><option value="Projet ou événement">Projet ou événement</option><option value="Autre">Autre</option></select></div>
+            <fieldset class="contact-chips contact-field--wide"><legend>Les formats qui vous intéressent</legend><label><input type="checkbox" name="pref-formats" value="Reels & vidéos courtes"><span>Reels &amp; vidéos courtes</span></label><label><input type="checkbox" name="pref-formats" value="Photographies"><span>Photographies</span></label><label><input type="checkbox" name="pref-formats" value="Stories"><span>Stories</span></label><label><input type="checkbox" name="pref-formats" value="Carrousels"><span>Carrousels</span></label></fieldset>
+            <div class="contact-field contact-field--wide"><label for="contact-message">Quelques mots sur votre projet</label><textarea id="contact-message" name="message" rows="5" maxlength="4000"></textarea></div>
+            <div class="contact-honeypot" aria-hidden="true"><label for="contact-website">Ne pas remplir ce champ</label><input id="contact-website" name="website" tabindex="-1" autocomplete="off"></div>
+            <div class="contact-consent contact-field--wide"><input id="contact-consent" name="consent" type="checkbox"><label for="contact-consent">J’accepte que mes informations soient utilisées pour répondre à cette demande. Consultez la <a href="politique-confidentialite.html">politique de confidentialité</a>.</label></div>
+          </div>
+          <p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p>
+          <button class="contact-submit" id="contact-submit" type="submit"><span>Envoyer ma demande</span><span aria-hidden="true">↗︎</span></button>
+        </form>
+        </div></div>
       </div>
-      <p class="studio-eyebrow studio-eyebrow--note">Chaque formule est ajustée en fonction du volume de contenus, du temps de production et des livrables souhaités.</p>
     </section>
 
-    <!-- 06 · LA LIVRAISON -->
+    <!-- 07 · LA LIVRAISON -->
     <section class="rs-section rs-delivery" aria-labelledby="rs-delivery-title">
       <div class="rs-intro" data-rs-reveal>
         <p class="studio-eyebrow">La livraison</p>
@@ -279,49 +312,70 @@
       </div>
     </section>
 
-    <!-- 07 · MINI-PORTFOLIO DYNAMIQUE (toujours la dernière section) -->
-    <section class="rs-section rs-showcase" id="rs-contact" aria-labelledby="rs-showcase-title">
-      <div class="rs-intro" data-rs-reveal>
-        <p class="studio-eyebrow">Mini-portfolio</p>
-        <h2 id="rs-showcase-title">Des univers, des histoires, des images.</h2>
-        <p>Une sélection de contenus imaginés et réalisés pour valoriser des lieux, des marques et des savoir-faire.</p>
-      </div>
-      <div class="rs-collage">
-        <figure class="rs-collage-photo rs-collage-photo--a rs-zoom" data-rs-depth="0.14" data-rs-reveal data-temp="Alexandre en production (hôtel, restaurant…)"><img src="images/photo-alexandre.webp" alt="Alexandre en production" loading="lazy"><figcaption>En production</figcaption></figure>
-        <figure class="rs-collage-photo rs-collage-photo--b rs-zoom" data-rs-depth="0.24" data-rs-reveal data-temp="photo finale"><img src="images/Lieux-et-marques/letm-01-1200.webp" alt="Photographie finale" loading="lazy"></figure>
-        <figure class="rs-collage-photo rs-collage-photo--c rs-zoom" data-rs-depth="0.08" data-rs-reveal data-temp="photo finale"><img src="images/evenementiel/concert-11-800.webp" alt="Photographie finale" loading="lazy"></figure>
-        <div class="rs-phone rs-collage-phone rs-collage-phone--1" data-rs-depth="0.06" data-rs-reveal>
-          <div class="rs-phone-screen rs-profile">
-            <div class="rs-profile-head"><span class="rs-avatar"></span><div><strong>votre.marque</strong><small>Grille de publications</small></div></div>
-            <div class="rs-profile-grid" data-temp="grille de publications">
-              <img src="images/Lieux-et-marques/letm-01-300.webp" alt="" loading="lazy"><img src="images/portraits/personnel-22-400.webp" alt="" loading="lazy"><img src="images/evenementiel/concert-12-400.webp" alt="" loading="lazy">
-              <img src="images/portraits/personnel-03-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-01-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-23-400.webp" alt="" loading="lazy">
-              <img src="images/evenementiel/concert-02-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-11-400.webp" alt="" loading="lazy"><img src="images/evenementiel/cabaret-12-400.webp" alt="" loading="lazy">
-              <img src="images/portraits/personnel-01-400.webp" alt="" loading="lazy"><img src="images/evenementiel/sport-competition-01-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-12-400.webp" alt="" loading="lazy">
-              <img src="images/evenementiel/concert-31-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-21-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-02-400.webp" alt="" loading="lazy">
+    <!-- 08 · MINI-PORTFOLIO (toujours la dernière section) : même cadre que le portfolio de la page Photo & vidéo -->
+    <section class="redesign-section rs-showcase" id="rs-portfolio" aria-labelledby="rs-showcase-title">
+      <p class="studio-eyebrow">Mini-portfolio</p>
+      <h2 class="studio-section-heading" id="rs-showcase-title">Des univers, des histoires, des images.</h2>
+      <p class="rs-showcase-intro">Une sélection de contenus imaginés et réalisés pour valoriser des lieux, des marques et des savoir-faire.</p>
+      <div class="portfolio-carousel rs-mock-carousel" data-rs-mockups aria-roledescription="carrousel" aria-label="Exemples de contenus">
+        <button class="portfolio-arrow portfolio-arrow--previous" type="button" data-rs-prev aria-label="Exemple précédent"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 4 7 12 15 20"/></svg></button>
+        <div class="rs-mock-stage" aria-live="polite">
+          <div class="rs-mock-slide is-active" data-kind="Instagram" data-title="Une grille cohérente" data-text="Des publications pensées ensemble pour construire un univers reconnaissable dès le premier regard.">
+            <div class="rs-phone">
+              <div class="rs-phone-screen rs-profile">
+                <div class="rs-profile-head"><span class="rs-avatar"></span><div><strong>votre.marque</strong><small>Grille de publications</small></div></div>
+                <div class="rs-profile-grid" data-temp="grille de publications">
+                  <img src="images/Lieux-et-marques/letm-01-300.webp" alt="" loading="lazy"><img src="images/portraits/personnel-22-400.webp" alt="" loading="lazy"><img src="images/evenementiel/concert-12-400.webp" alt="" loading="lazy">
+                  <img src="images/portraits/personnel-03-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-01-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-23-400.webp" alt="" loading="lazy">
+                  <img src="images/evenementiel/concert-02-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-11-400.webp" alt="" loading="lazy"><img src="images/evenementiel/cabaret-12-400.webp" alt="" loading="lazy">
+                  <img src="images/portraits/personnel-01-400.webp" alt="" loading="lazy"><img src="images/evenementiel/sport-competition-01-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-12-400.webp" alt="" loading="lazy">
+                  <img src="images/evenementiel/concert-31-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-21-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-02-400.webp" alt="" loading="lazy">
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="rs-phone rs-collage-phone rs-collage-phone--2" data-rs-depth="0.18" data-rs-reveal>
-          <div class="rs-phone-screen">
-            <video class="rs-reel" muted loop playsinline preload="none" poster="images/video/interview-affiche-800.webp" data-rs-video data-temp="Reel">
-              <source src="images/video/interview-720.webm" type="video/webm">
-              <source src="images/video/interview-720.mp4" type="video/mp4">
-            </video>
-            <div class="rs-reel-ui"><span class="rs-reel-tag">Reels</span><div class="rs-reel-side"><i></i><i></i><i></i></div></div>
+          <div class="rs-mock-slide" data-kind="Reels" data-title="Un savoir-faire en mouvement" data-text="Des vidéos verticales courtes, rythmées et pensées pour capter l’attention dès les premières secondes.">
+            <div class="rs-phone">
+              <div class="rs-phone-screen">
+                <video class="rs-reel" muted loop playsinline preload="none" poster="images/video/interview-affiche-800.webp" data-rs-slide-video data-temp="Reel">
+                  <source src="images/video/interview-720.webm" type="video/webm">
+                  <source src="images/video/interview-720.mp4" type="video/mp4">
+                </video>
+                <div class="rs-reel-ui"><span class="rs-reel-tag">Reels</span><div class="rs-reel-side"><i></i><i></i><i></i></div><p class="rs-reel-caption"><strong>@votre.marque</strong><br>Les coulisses, en 30 secondes.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="rs-mock-slide" data-kind="Stories" data-title="Les coulisses au quotidien" data-text="Des formats courts pour partager les actualités, les préparatifs et les temps forts avec votre communauté.">
+            <div class="rs-phone">
+              <div class="rs-phone-screen rs-story">
+                <img src="images/Lieux-et-marques/letm-05.webp" alt="" loading="lazy" data-temp="story">
+                <div class="rs-story-bars"><i class="is-done"></i><i class="is-live"></i><i></i></div>
+                <div class="rs-story-head"><span class="rs-avatar"></span><strong>votre.marque</strong><small>2 h</small></div>
+                <span class="rs-story-sticker">Ce soir en terrasse</span>
+              </div>
+            </div>
+          </div>
+          <div class="rs-mock-slide" data-kind="Carrousel" data-title="Une offre en quelques images" data-text="Des compositions qui se feuillettent pour présenter un produit, un lieu ou une démarche, étape par étape.">
+            <div class="rs-post" data-rs-carousel>
+              <div class="rs-post-head"><span class="rs-avatar"></span><strong>votre.marque</strong></div>
+              <div class="rs-post-slides" data-temp="carrousel">
+                <div class="rs-slide rs-slide--text"><span>Nouveau</span><strong>La maison<br>en 3 images</strong><small>Faites défiler →</small></div>
+                <img class="rs-slide" src="images/Lieux-et-marques/letm-01-1200.webp" alt="" loading="lazy">
+                <img class="rs-slide" src="images/Lieux-et-marques/letm-02-1200.webp" alt="" loading="lazy">
+              </div>
+              <div class="rs-post-dots"><i class="is-on"></i><i></i><i></i></div>
+            </div>
+          </div>
+          <div class="rs-mock-slide" data-kind="Coulisses" data-title="Sur place, avec vous" data-text="La production se fait dans votre lieu, au plus près de votre activité, pour des images fidèles à votre univers.">
+            <figure class="rs-mock-photo" data-temp="Alexandre en production"><img src="images/photo-alexandre.webp" alt="Alexandre en production" loading="lazy"><figcaption>En production</figcaption></figure>
           </div>
         </div>
-        <div class="rs-phone rs-collage-phone rs-collage-phone--3" data-rs-depth="0.30" data-rs-reveal>
-          <div class="rs-phone-screen rs-story">
-            <img src="images/Lieux-et-marques/letm-05.webp" alt="" loading="lazy" data-temp="story">
-            <div class="rs-story-bars"><i class="is-done"></i><i class="is-live"></i><i></i></div>
-            <div class="rs-story-head"><span class="rs-avatar"></span><strong>votre.marque</strong></div>
-          </div>
-        </div>
+        <div class="portfolio-description" data-rs-desc><span class="studio-eyebrow portfolio-kind">Instagram</span><h3>Une grille cohérente</h3><p>Des publications pensées ensemble pour construire un univers reconnaissable dès le premier regard.</p><div class="rs-mock-dots" aria-hidden="true"></div></div>
+        <button class="portfolio-arrow portfolio-arrow--next" type="button" data-rs-next aria-label="Exemple suivant"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 4 17 12 9 20"/></svg></button>
       </div>
       <div class="rs-cta" data-rs-reveal>
         <h3>Vous avez un projet de contenu ?</h3>
-        <a class="studio-button" href="#site-footer">Parlons de votre projet <span aria-hidden="true">↗︎</span></a>
+        <a class="studio-button" href="#demande-contenus">Parlons de votre projet <span aria-hidden="true">↗︎</span></a>
       </div>
     </section>
   </main>
