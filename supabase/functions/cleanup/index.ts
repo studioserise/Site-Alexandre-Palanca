@@ -105,6 +105,9 @@ Deno.serve(async (request) => {
         }
       }
       if (!orders.length) {
+        // Guide PDF des contenus réseaux (s'il y en a un)
+        const docs = await databaseRequest(`galleries?select=tutorial_path&id=eq.${encodeURIComponent(gallery.id)}`) as Array<{ tutorial_path: string | null }>;
+        if (docs[0]?.tutorial_path) await removeFiles("client-documents", [docs[0].tutorial_path]);
         await databaseRequest(`galleries?id=eq.${encodeURIComponent(gallery.id)}`, { method: "DELETE" });
       }
     } catch (error) {

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png?v=4">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Vos contenus prêts à publier sur les réseaux sociaux.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Alexandre Palanca">
+  <meta property="og:title" content="Galerie privée — Alexandre Palanca">
+  <meta property="og:description" content="Galerie photo privée accessible avec un code personnel.">
+  <meta property="og:image" content="https://alexandrepalanca.fr/images/photo-alexandre.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://alexandrepalanca.fr/images/photo-alexandre.jpg">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Vos contenus réseaux — Alexandre Palanca</title>
+  <link rel="stylesheet" href="galeries.css?v=espace">
+  <link rel="stylesheet" href="espace-client.css?v=1">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css?v=langue">
+  <link rel="stylesheet" href="cursor.css?v=7">
+  <script src="site-nav.js?v=langue" defer></script>
+  <script src="cursor.js?v=3" defer></script>
+  <script type="module" src="contenus-reseaux.js?v=1"></script>
+</head>
+<body>
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links"><span></span><span></span></button>
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="photo-video.html">Photo &amp; vidéo</a></li>
+          <li><a class="site-nav-link" href="sites-internet.html">Sites internet</a></li>
+          <li><a class="site-nav-link" href="reseaux.html">Contenus réseaux</a></li>
+          <li><a class="site-nav-link" href="galerie.html">Espace client</a></li>
+          <li><a class="site-nav-link" href="#site-footer">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="client-space" id="client-space">
+    <div class="client-space-head">
+      <a class="client-back" href="galerie.html?service=reseaux">←︎ Espace client</a>
+      <p class="gallery-eyebrow">Contenus réseaux</p>
+      <h1 id="social-title">Chargement…</h1>
+      <p class="client-space-intro">Téléchargez vos dossiers, puis suivez le guide pour publier vos contenus sur les réseaux sociaux.</p>
+    </div>
+    <p class="gallery-error" id="social-error" role="alert" hidden></p>
+    <div class="social-layout" id="social-layout" hidden>
+      <aside class="social-folders">
+        <h2>Vos dossiers</h2>
+        <div id="social-folders"></div>
+        <p class="site-note">Pensez à enregistrer vos fichiers : l’accès à cette page est limité dans le temps.</p>
+      </aside>
+      <section class="social-guide">
+        <div class="social-guide-head">
+          <h2>Guide d’utilisation</h2>
+          <a class="gallery-primary-button" id="social-guide-download" href="#" hidden>Télécharger le guide (PDF)</a>
+        </div>
+        <iframe class="social-guide-frame" id="social-guide-frame" title="Guide d’utilisation (PDF)" hidden></iframe>
+        <p class="site-note" id="social-guide-empty" hidden>Le guide sera bientôt disponible.</p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

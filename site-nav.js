@@ -27,7 +27,7 @@ const publicNavigation = [
   { label: "Photo & vidéo", href: "photo-video.html", files: ["photo-video.html"] },
   { label: "Sites internet", href: "sites-internet.html", files: ["sites-internet.html"] },
   { label: "Contenus réseaux", href: "reseaux.html", files: ["reseaux.html"] },
-  { label: "Galerie", href: "galerie.html", files: ["galerie.html"] },
+  { label: "Espace client", href: "galerie.html", files: ["galerie.html", "galerie-privee.html", "suivi-site.html", "contenus-reseaux.html"] },
   { label: "Contact", href: "#site-footer", files: [] }
 ];
 

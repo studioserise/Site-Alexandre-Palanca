@@ -14,8 +14,12 @@ type Gallery = {
   tariff: "tarif0" | "tarif2" | "tarif5";
   status: "open" | "closed";
   expires_at: string;
-  delivery: "photos" | "video";
+  delivery: "photos" | "video" | "web" | "social";
   video_links: Array<{ label: string; url: string; multiple?: boolean }>;
+  web_pages: Array<{ name: string; url: string }>;
+  feedback_rounds: number;
+  social_folders: Array<{ label: string; url: string; description: string }>;
+  tutorial_path: string | null;
 };
 
 Deno.serve(async (request) => {
@@ -30,7 +34,7 @@ Deno.serve(async (request) => {
     const galleryId = await readGallerySession(request);
     const queryId = encodeURIComponent(galleryId);
     const galleries = await databaseRequest(
-      `galleries?select=id,name,type,tariff,status,expires_at,delivery,video_links&id=eq.${queryId}&limit=1`
+      `galleries?select=id,name,type,tariff,status,expires_at,delivery,video_links,web_pages,feedback_rounds,social_folders,tutorial_path&id=eq.${queryId}&limit=1`
     ) as Gallery[];
     const gallery = galleries[0];
     if (
@@ -39,6 +43,47 @@ Deno.serve(async (request) => {
       Date.parse(gallery.expires_at) <= Date.now()
     ) {
       return jsonResponse(request, 410, { message: "Cette galerie est fermée." });
+    }
+
+    // Suivi de site web : pages à afficher dans un cadre et retours déjà envoyés
+    if (gallery.delivery === "web") {
+      const feedback = await databaseRequest(
+        `web_feedback?select=round,entries,final_comment,submitted_at&gallery_id=eq.${queryId}&order=round.asc`
+      ) as Array<Record<string, unknown>>;
+      return jsonResponse(request, 200, {
+        gallery: { id: gallery.id, name: gallery.name, delivery: "web", expiresAt: gallery.expires_at },
+        pages: gallery.web_pages ?? [],
+        roundsIncluded: gallery.feedback_rounds,
+        feedback
+      });
+    }
+
+    // Contenus réseaux : dossiers (liens) et guide PDF (lien signé valable 8 h)
+    if (gallery.delivery === "social") {
+      if (new URL(request.url).searchParams.get("compter") === "video") {
+        await databaseRequest("rpc/count_gallery_download", {
+          method: "POST", body: JSON.stringify({ p_gallery: gallery.id })
+        }).catch(() => {});
+        return jsonResponse(request, 200, { ok: true });
+      }
+      let tutorialUrl: string | null = null;
+      if (gallery.tutorial_path) {
+        const base = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/$/, "");
+        const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+        const path = gallery.tutorial_path.split("/").map(encodeURIComponent).join("/");
+        const signed = await fetch(`${base}/storage/v1/object/sign/client-documents/${path}`, {
+          method: "POST",
+          headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ expiresIn: 8 * 3600 })
+        });
+        const result = await signed.json().catch(() => ({}));
+        if (signed.ok && result.signedURL) tutorialUrl = `${base}/storage/v1${result.signedURL}`;
+      }
+      return jsonResponse(request, 200, {
+        gallery: { id: gallery.id, name: gallery.name, delivery: "social", expiresAt: gallery.expires_at },
+        folders: gallery.social_folders ?? [],
+        tutorialUrl
+      });
     }
 
     // Livraison vidéo : seulement les liens de téléchargement (aucun fichier stocké ici).

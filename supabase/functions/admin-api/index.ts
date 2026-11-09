@@ -118,6 +118,37 @@ async function createSignedUpload(bucket: string, path: string) {
 }
 
 
+// Pages du site en cours (suivi de site web) : 1 à 30 pages { nom, adresse https }
+function parseWebPages(value: unknown) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 30) {
+    throw new Error("Pages invalides : ajoutez 1 à 30 pages.");
+  }
+  return value.map((entry, index) => {
+    const raw = typeof entry?.url === "string" ? entry.url.trim() : "";
+    let url: URL;
+    try { url = new URL(raw); } catch { throw new Error(`Page ${index + 1} invalide : collez l'adresse complète (https://…).`); }
+    if (url.protocol !== "https:" || raw.length > 2000) throw new Error(`Page ${index + 1} invalide : l'adresse doit commencer par https://.`);
+    const name = typeof entry?.name === "string" && entry.name.trim() ? entry.name.trim().slice(0, 80) : `Page ${index + 1}`;
+    return { name, url: url.toString() };
+  });
+}
+
+// Dossiers des contenus réseaux : 1 à 30 liens { nom, lien https, description }
+function parseSocialFolders(value: unknown) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 30) {
+    throw new Error("Dossiers invalides : ajoutez 1 à 30 dossiers.");
+  }
+  return value.map((entry, index) => {
+    const raw = typeof entry?.url === "string" ? entry.url.trim() : "";
+    let url: URL;
+    try { url = new URL(raw); } catch { throw new Error(`Dossier ${index + 1} invalide : collez le lien complet (https://…).`); }
+    if (url.protocol !== "https:" || raw.length > 2000) throw new Error(`Dossier ${index + 1} invalide : le lien doit commencer par https://.`);
+    const label = typeof entry?.label === "string" && entry.label.trim() ? entry.label.trim().slice(0, 120) : `Dossier ${index + 1}`;
+    const description = typeof entry?.description === "string" ? entry.description.trim().slice(0, 300) : "";
+    return { label, url: url.toString(), description };
+  });
+}
+
 // Liens de vidéos (galerie « livraison vidéo ») : 1 à 10 liens https, avec un nom facultatif.
 function parseVideoLinks(value: unknown) {
   if (!Array.isArray(value) || value.length < 1 || value.length > 10) {
@@ -150,7 +181,7 @@ Deno.serve(async (request) => {
 
     if (request.method === "GET") {
       const [galleries, orders] = await Promise.all([
-        databaseRequest("galleries?select=id,name,type,tariff,status,expires_at,created_at,access_code_encrypted,delivery,video_links&order=created_at.desc"),
+        databaseRequest("galleries?select=id,name,type,tariff,status,expires_at,created_at,access_code_encrypted,delivery,video_links,web_pages,feedback_rounds,social_folders,tutorial_path&order=created_at.desc"),
         databaseRequest("gallery_orders?select=id,gallery_id,customer_email,status,currency,subtotal_cents,discount_bps,discount_cents,total_cents,created_at,paid_at,sent_at&order=created_at.desc")
       ]);
       const orderIds = (orders as Array<{ id: string }>).map((order) => order.id);
@@ -165,7 +196,12 @@ Deno.serve(async (request) => {
         const { access_code_encrypted, ...rest } = gallery;
         return { ...rest, accessCode: await decryptCode(access_code_encrypted as string | null) };
       }));
-      return jsonResponse(request, 200, { galleries: visibleGalleries, orders, orderPhotos });
+      // Retours des clients sur leurs sites (suivi de site web)
+      const webIds = (galleries as Array<{ id: string; delivery: string }>).filter((g) => g.delivery === "web").map((g) => g.id);
+      const feedback = webIds.length
+        ? await databaseRequest(`web_feedback?select=*&gallery_id=in.(${webIds.join(",")})&order=round.asc`)
+        : [];
+      return jsonResponse(request, 200, { galleries: visibleGalleries, orders, orderPhotos, feedback });
     }
 
     if (request.method !== "POST") {
@@ -179,10 +215,16 @@ Deno.serve(async (request) => {
       if (type !== "event" && type !== "individual") {
         return jsonResponse(request, 400, { message: "Type de galerie invalide." });
       }
-      const delivery = body.delivery === "video" ? "video" : "photos";
+      const delivery = ["video", "web", "social"].includes(String(body.delivery)) ? String(body.delivery) : "photos";
       const videoLinks = delivery === "video" ? parseVideoLinks(body.videoLinks) : [];
-      // Livraison vidéo : téléchargement libre, pas de tarif
-      const tariff = delivery === "video" ? "tarif0" : body.tariff;
+      const webPages = delivery === "web" ? parseWebPages(body.webPages) : [];
+      const socialFolders = delivery === "social" ? parseSocialFolders(body.socialFolders) : [];
+      const rounds = Number(body.feedbackRounds ?? 2);
+      if (!Number.isInteger(rounds) || rounds < 0 || rounds > 20) {
+        return jsonResponse(request, 400, { message: "Nombre de séries de modifications invalide (0 à 20)." });
+      }
+      // Vidéo, site, réseaux : pas de tarif (accès libre au contenu)
+      const tariff = delivery === "photos" ? body.tariff : "tarif0";
       if (!["tarif0", "tarif2", "tarif5"].includes(String(tariff))) {
         return jsonResponse(request, 400, { message: "Tarif de galerie invalide." });
       }
@@ -193,8 +235,10 @@ Deno.serve(async (request) => {
         });
       }
       const days = Number(body.daysOpen);
-      if (!Number.isInteger(days) || days < 1 || days > 15) {
-        return jsonResponse(request, 400, { message: "La durée d’accès doit être comprise entre 1 et 15 jours." });
+      // Suivi de site et contenus réseaux : jusqu'à 90 jours ; galeries : 15 jours
+      const maxDays = delivery === "web" || delivery === "social" ? 90 : 15;
+      if (!Number.isInteger(days) || days < 1 || days > maxDays) {
+        return jsonResponse(request, 400, { message: `La durée d’accès doit être comprise entre 1 et ${maxDays} jours.` });
       }
       const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
       // Séance liée (facultatif) : éteint le rappel « publier la galerie sous 72 h »
@@ -216,6 +260,9 @@ Deno.serve(async (request) => {
           expires_at: expiresAt,
           delivery,
           video_links: videoLinks,
+          web_pages: webPages,
+          social_folders: socialFolders,
+          feedback_rounds: rounds,
           ...link
         })
       }) as Array<{ id: string; name: string; type: string; status: string; expires_at: string }>;
@@ -238,6 +285,50 @@ Deno.serve(async (request) => {
     }
 
     // Modifier les liens d'une galerie « livraison vidéo »
+    // Suivi de site : pages et nombre de séries de modifications
+    if (body.action === "set-web-pages") {
+      const galleryId = requiredText(body.galleryId, "Galerie", 64);
+      const rounds = Number(body.feedbackRounds);
+      if (!Number.isInteger(rounds) || rounds < 0 || rounds > 20) {
+        return jsonResponse(request, 400, { message: "Nombre de séries de modifications invalide (0 à 20)." });
+      }
+      await databaseRequest(`galleries?id=eq.${encodeURIComponent(galleryId)}&delivery=eq.web`, {
+        method: "PATCH",
+        body: JSON.stringify({ web_pages: parseWebPages(body.webPages), feedback_rounds: rounds })
+      });
+      return jsonResponse(request, 200, { ok: true });
+    }
+
+    // Contenus réseaux : dossiers à télécharger
+    if (body.action === "set-social-folders") {
+      const galleryId = requiredText(body.galleryId, "Galerie", 64);
+      await databaseRequest(`galleries?id=eq.${encodeURIComponent(galleryId)}&delivery=eq.social`, {
+        method: "PATCH",
+        body: JSON.stringify({ social_folders: parseSocialFolders(body.socialFolders) })
+      });
+      return jsonResponse(request, 200, { ok: true });
+    }
+
+    // Contenus réseaux : guide PDF (dépôt direct dans le stockage privé, puis enregistrement)
+    if (body.action === "prepare-tutorial-upload") {
+      const galleryId = requiredText(body.galleryId, "Galerie", 64);
+      if (!/^[0-9a-f-]{36}$/i.test(galleryId)) return jsonResponse(request, 400, { message: "Galerie invalide." });
+      const path = `${galleryId}/guide-${Date.now()}.pdf`;
+      return jsonResponse(request, 200, { bucket: "client-documents", path, token: await createSignedUpload("client-documents", path) });
+    }
+    if (body.action === "set-tutorial") {
+      const galleryId = requiredText(body.galleryId, "Galerie", 64);
+      const path = requiredText(body.path, "Fichier", 200);
+      if (!path.startsWith(`${galleryId}/guide-`) || !path.endsWith(".pdf")) {
+        return jsonResponse(request, 400, { message: "Fichier invalide." });
+      }
+      await databaseRequest(`galleries?id=eq.${encodeURIComponent(galleryId)}&delivery=eq.social`, {
+        method: "PATCH",
+        body: JSON.stringify({ tutorial_path: path })
+      });
+      return jsonResponse(request, 200, { ok: true });
+    }
+
     if (body.action === "set-video-links") {
       const galleryId = requiredText(body.galleryId, "Galerie", 64);
       const videoLinks = parseVideoLinks(body.videoLinks);
@@ -282,8 +373,8 @@ Deno.serve(async (request) => {
       ) {
         return jsonResponse(request, 410, { message: "Cette galerie est fermée." });
       }
-      if (galleries[0].delivery === "video") {
-        return jsonResponse(request, 400, { message: "Galerie de livraison vidéo : pas de photos, seulement des liens." });
+      if (galleries[0].delivery !== "photos") {
+        return jsonResponse(request, 400, { message: "Cet accès ne contient pas de photos (vidéo, site ou contenus réseaux)." });
       }
       const photoId = crypto.randomUUID();
       const previewPath = `${galleryId}/${photoId}/preview.${previewExtension}`;
@@ -323,8 +414,8 @@ Deno.serve(async (request) => {
       ) {
         return jsonResponse(request, 410, { message: "Cette galerie est fermée." });
       }
-      if (galleries[0].delivery === "video") {
-        return jsonResponse(request, 400, { message: "Galerie de livraison vidéo : pas de photos, seulement des liens." });
+      if (galleries[0].delivery !== "photos") {
+        return jsonResponse(request, 400, { message: "Cet accès ne contient pas de photos (vidéo, site ou contenus réseaux)." });
       }
 
       const previewPath = requiredText(body.previewPath, "Chemin aperçu", 500);

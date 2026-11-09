@@ -16,6 +16,7 @@
     "Sites internet": "Websites",
     "Contenus réseaux": "Social media content",
     "Galerie": "Gallery",
+    "Espace client": "Client area",
     "Contact": "Contact",
     "Site internet": "Website",
     "Navigation principale": "Main navigation",

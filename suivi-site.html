@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png?v=4">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Suivi de votre site internet en cours de création.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Alexandre Palanca">
+  <meta property="og:title" content="Galerie privée — Alexandre Palanca">
+  <meta property="og:description" content="Galerie photo privée accessible avec un code personnel.">
+  <meta property="og:image" content="https://alexandrepalanca.fr/images/photo-alexandre.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://alexandrepalanca.fr/images/photo-alexandre.jpg">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Suivi de votre site — Alexandre Palanca</title>
+  <link rel="stylesheet" href="galeries.css?v=espace">
+  <link rel="stylesheet" href="espace-client.css?v=1">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="site-nav.css?v=langue">
+  <link rel="stylesheet" href="cursor.css?v=7">
+  <script src="site-nav.js?v=langue" defer></script>
+  <script src="cursor.js?v=3" defer></script>
+  <script type="module" src="suivi-site.js?v=1"></script>
+</head>
+<body>
+  <header class="site-nav is-visible" id="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-brand" href="index.html#accueil" aria-label="Retour à l'accueil">
+        <span class="site-nav-logo-frame" aria-hidden="true"><span class="site-nav-logo-canvas"><img src="images/logo-accueil.png" alt=""></span></span>
+      </a>
+      <button class="site-nav-toggle" id="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-links"><span></span><span></span></button>
+      <nav aria-label="Navigation principale">
+        <ul class="site-nav-links" id="site-nav-links">
+          <li><a class="site-nav-link" href="photo-video.html">Photo &amp; vidéo</a></li>
+          <li><a class="site-nav-link" href="sites-internet.html">Sites internet</a></li>
+          <li><a class="site-nav-link" href="reseaux.html">Contenus réseaux</a></li>
+          <li><a class="site-nav-link" href="galerie.html">Espace client</a></li>
+          <li><a class="site-nav-link" href="#site-footer">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="client-space" id="client-space">
+    <div class="client-space-head">
+      <a class="client-back" href="galerie.html?service=site">←︎ Espace client</a>
+      <p class="gallery-eyebrow">Suivi de site</p>
+      <h1 id="site-title">Chargement…</h1>
+      <p class="client-space-intro" id="site-intro"></p>
+      <p class="client-round" id="site-round" hidden></p>
+    </div>
+    <p class="gallery-error" id="site-error" role="alert" hidden></p>
+
+    <section id="site-review" hidden>
+      <nav class="site-pages" id="site-pages" aria-label="Pages du site"></nav>
+      <div class="site-toolbar">
+        <div class="site-device" role="group" aria-label="Taille d'écran">
+          <button type="button" data-device="desktop" aria-pressed="true">Ordinateur</button>
+          <button type="button" data-device="mobile" aria-pressed="false">Téléphone</button>
+        </div>
+        <a class="site-open" id="site-open" href="#" target="_blank" rel="noopener noreferrer">Ouvrir dans un nouvel onglet ↗︎</a>
+      </div>
+      <div class="site-frame-wrap" id="site-frame-wrap">
+        <iframe class="site-frame" id="site-frame" title="Aperçu du site" referrerpolicy="no-referrer" loading="lazy"></iframe>
+      </div>
+      <div class="site-page-feedback" id="site-feedback">
+        <label class="site-comment"><span id="site-comment-label">Votre commentaire sur cette page</span>
+          <textarea id="site-comment" rows="4" maxlength="4000" placeholder="Ce que vous souhaitez changer, ajouter ou garder…"></textarea></label>
+        <label class="site-approve"><input type="checkbox" id="site-approve"> Ça me convient</label>
+        <button class="gallery-quiet-button" id="site-next" type="button">Page suivante →︎</button>
+      </div>
+
+      <div class="site-submit">
+        <p class="site-progress" id="site-progress"></p>
+        <label class="site-comment"><span>Une dernière chose ? <small>(facultatif)</small></span>
+          <textarea id="site-final" rows="3" maxlength="4000" placeholder="Une remarque générale, une idée, une question…"></textarea></label>
+        <button class="gallery-primary-button" id="site-send" type="button" disabled>Envoyer mes retours</button>
+        <p class="gallery-form-message" id="site-message" role="status"></p>
+        <p class="site-note">Chaque envoi compte comme une série de modifications prévue au contrat.</p>
+      </div>
+    </section>
+
+    <section class="site-history" id="site-history" hidden>
+      <h2>Retours déjà envoyés</h2>
+      <div id="site-history-list"></div>
+    </section>
+  </main>
+</body>
+</html>

@@ -7,13 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <title>Administration des galeries — Alexandre Palanca</title>
-  <link rel="stylesheet" href="galeries.css?v=video2">
+  <link rel="stylesheet" href="galeries.css?v=espace">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=langue">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script src="site-nav.js?v=langue" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="admin-galeries.js?v=video2"></script>
+  <script type="module" src="admin-galeries.js?v=espace"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -27,7 +27,7 @@
           <li><a class="site-nav-link" href="photo-video.html">Photo &amp; vidéo</a></li>
           <li><a class="site-nav-link" href="sites-internet.html">Sites internet</a></li>
           <li><a class="site-nav-link" href="reseaux.html">Contenus réseaux</a></li>
-          <li><a class="site-nav-link" href="galerie.html">Galerie</a></li>
+          <li><a class="site-nav-link" href="galerie.html">Espace client</a></li>
           <li><a class="site-nav-link" href="#site-footer">Contact</a></li>
         </ul>
       </nav>
@@ -79,8 +79,28 @@
               <select class="gallery-admin-select" id="admin-gallery-delivery">
                 <option value="photos">Photos</option>
                 <option value="video">Livraison vidéo (lien de téléchargement)</option>
+                <option value="web">Suivi de site internet (retours du client)</option>
+                <option value="social">Contenus réseaux (dossiers + guide PDF)</option>
               </select>
             </label>
+            <div class="admin-video-links" id="admin-web-fields" hidden>
+              <p class="gallery-admin-note">Collez l’adresse de chaque page du site en cours (ex. version de test en ligne). Le client voit chaque page dans un cadre et laisse un commentaire ou coche « Ça me convient ». Le site doit accepter d’être affiché dans un cadre.</p>
+              <div id="admin-web-rows"></div>
+              <button class="gallery-quiet-button" id="admin-web-add" type="button">+ Ajouter une page</button>
+              <label class="gallery-admin-label" for="admin-web-rounds">
+                Séries de modifications prévues au contrat
+                <input class="gallery-admin-input" id="admin-web-rounds" type="number" min="0" max="20" value="2">
+              </label>
+            </div>
+            <div class="admin-video-links" id="admin-social-fields" hidden>
+              <p class="gallery-admin-note">Un lien par dossier (Google Drive, WeTransfer…), avec une courte description. Le guide PDF s’affiche à côté des dossiers.</p>
+              <div id="admin-social-rows"></div>
+              <button class="gallery-quiet-button" id="admin-social-add" type="button">+ Ajouter un dossier</button>
+              <label class="gallery-admin-label" for="admin-social-pdf">
+                Guide PDF (facultatif, 20 Mo maximum)
+                <input class="gallery-admin-input" id="admin-social-pdf" type="file" accept="application/pdf">
+              </label>
+            </div>
             <div class="admin-video-links" id="admin-video-links" hidden>
               <p class="gallery-admin-note">Déposez la vidéo sur Google Drive, WeTransfer, SwissTransfer, Dropbox… puis collez ici le lien de téléchargement. Le client verra seulement un bouton « Télécharger » (rien n’est stocké sur le site).</p>
               <div id="admin-video-rows"></div>
@@ -103,7 +123,7 @@
                 </select>
               </label>
               <label class="gallery-admin-label" for="admin-gallery-days">
-                Accès (jours, maximum 15)
+                <span id="admin-gallery-days-label">Accès (jours, maximum 15)</span>
                 <input class="gallery-admin-input" id="admin-gallery-days" type="number" min="1" max="15" value="15" required>
               </label>
             </div>

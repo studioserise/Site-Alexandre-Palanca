@@ -10,6 +10,36 @@ const demoNote = document.getElementById("gallery-demo-note");
 
 demoNote.hidden = !config.demoMode;
 
+// Espace client : trois services, galeries par défaut. Le code ouvre toujours le bon contenu.
+const SPACES = {
+  galerie: {
+    intro: "Retrouvez les photographies de votre événement ou de votre séance grâce au code d’accès transmis par Alexandre.",
+    button: "Accéder à la galerie"
+  },
+  site: {
+    intro: "Suivez l’avancement de votre site internet : parcourez chaque page et donnez vos retours, grâce au code transmis par Elisa.",
+    button: "Voir mon site en cours"
+  },
+  reseaux: {
+    intro: "Téléchargez vos contenus prêts à publier sur les réseaux sociaux, avec le guide d’utilisation, grâce à votre code d’accès.",
+    button: "Accéder à mes contenus"
+  }
+};
+let space = "galerie";
+function showSpace(key) {
+  space = SPACES[key] ? key : "galerie";
+  document.querySelectorAll("[data-space]").forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.space === space)));
+  document.getElementById("client-intro").textContent = SPACES[space].intro;
+  submitButton.textContent = SPACES[space].button;
+  message.textContent = "";
+}
+document.querySelectorAll("[data-space]").forEach((tab) => tab.addEventListener("click", () => {
+  showSpace(tab.dataset.space);
+  history.replaceState(null, "", space === "galerie" ? "galerie.html" : `galerie.html?service=${space}`);
+  input.focus();
+}));
+showSpace(new URLSearchParams(window.location.search).get("service") || "galerie");
+
 // Livraison vidéo : fenêtre avec un bouton « Télécharger » par vidéo (liens externes), sans ouvrir de galerie.
 const dialog = document.getElementById("video-dialog");
 async function showVideoDialog(accessToken) {
@@ -86,11 +116,15 @@ form.addEventListener("submit", async (event) => {
       return;
     }
     window.sessionStorage.setItem("gallery-session-token", result.accessToken);
-    window.location.assign("galerie-privee.html");
+    window.location.assign(
+      result.delivery === "web" ? "suivi-site.html"
+        : result.delivery === "social" ? "contenus-reseaux.html"
+        : "galerie-privee.html"
+    );
   } catch (error) {
     message.textContent = error.message;
   } finally {
     submitButton.disabled = false;
-    submitButton.textContent = "Accéder à la galerie";
+    submitButton.textContent = SPACES[space].button;
   }
 });

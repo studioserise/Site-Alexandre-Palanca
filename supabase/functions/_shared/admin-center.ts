@@ -63,7 +63,7 @@ export async function notifications() {
   const today = todayParis();
   const now = Date.now();
   const site = (Deno.env.get("FRONTEND_ORIGIN") ?? "").replace(/\/$/, "");
-  const [quotes, invoices, requests, reminders, galleries, orders, events, dismissed] = await Promise.all([
+  const [quotes, invoices, requests, reminders, galleries, orders, events, dismissed, feedback] = await Promise.all([
     rows("quotes?select=id,number,issuer,status,client_id,client_snapshot,valid_until,validated_at,created_at,service_date,service_time,deposit_enabled,deposit_cents,total_ttc_cents,response_redo,responded_at,deposit_transfer_notified_at,balance_transfer_notified_at,partner_requested,partner_quote_id&order=created_at.desc&limit=1000"),
     rows("invoices?select=id,number,kind,status,quote_id,due_date,amount_due_cents,paid_cents,client_snapshot&status=neq.cancelled&limit=2000"),
     rows("contact_requests?select=*&status=eq.new&order=created_at.desc&limit=200"),
@@ -71,7 +71,8 @@ export async function notifications() {
     rows(`galleries?select=id,name,status,expires_at,created_at,view_count,download_count,quote_id,event_id,delivery&limit=500`),
     rows(`gallery_orders?select=id,gallery_id,total_cents,paid_at,status&status=in.(paid_to_prepare,sent)&paid_at=gte.${addDays(today, -30)}&limit=500`),
     rows(`planning_events?select=*&kind=eq.seance&event_date=gte.${addDays(today, -30)}&event_date=lte.${today}`),
-    rows("notification_dismissals?select=key&limit=5000")
+    rows("notification_dismissals?select=key&limit=5000"),
+    rows(`web_feedback?select=id,gallery_id,round,entries,final_comment,submitted_at&submitted_at=gte.${addDays(today, -45)}T00:00:00Z&order=submitted_at.desc&limit=100`)
   ]);
   const hidden = new Set(dismissed.map((entry) => entry.key));
   const list: Notification[] = [];
@@ -253,6 +254,21 @@ export async function notifications() {
 
   // 10. Galeries : ventes, fermeture proche, statistiques
   const galleryById = new Map(galleries.map((g) => [g.id, g]));
+
+  // Retours d'un client sur son site (suivi de site web) : à traiter puis supprimer à la main
+  for (const entry of feedback) {
+    const gallery = galleryById.get(entry.gallery_id);
+    const pages = (entry.entries ?? []) as Array<{ approved: boolean }>;
+    const toChange = pages.filter((page) => !page.approved).length;
+    push({
+      key: `retours-site:${entry.id}`, priority: 82, category: "demande",
+      title: `Retours du client sur le site — ${gallery?.name ?? "site"} (série ${entry.round})`,
+      detail: toChange
+        ? `${toChange} page${toChange > 1 ? "s" : ""} à modifier sur ${pages.length}${entry.final_comment ? ", plus un dernier commentaire" : ""}. Détail dans l'e-mail reçu et dans la gestion des galeries.`
+        : `Toutes les pages conviennent au client${entry.final_comment ? " (avec un dernier commentaire)" : ""}.`,
+      link: "admin-galeries.html"
+    });
+  }
   const photoCounts = new Map<string, number>();
   if (orders.length) {
     const lines = await rows(`gallery_order_photos?select=order_id&order_id=in.(${orders.map((o) => o.id).join(",")})`);
@@ -288,7 +304,11 @@ export async function notifications() {
     push({
       key: `stats:${gallery.id}:${gallery.view_count}:${gallery.download_count}:${sales.count}`, priority: 20, category: "galerie",
       title: `Galerie ${gallery.name}`,
-      detail: gallery.delivery === "video"
+      detail: gallery.delivery === "web"
+        ? `Suivi de site : ${gallery.view_count} ouverture${gallery.view_count > 1 ? "s" : ""} par le client.`
+        : gallery.delivery === "social"
+        ? `Contenus réseaux : ${gallery.view_count} ouverture${gallery.view_count > 1 ? "s" : ""} · ${gallery.download_count} téléchargement${gallery.download_count > 1 ? "s" : ""} de dossiers.`
+        : gallery.delivery === "video"
         ? `Livraison vidéo : ${gallery.view_count} ouverture${gallery.view_count > 1 ? "s" : ""} · ${gallery.download_count} clic${gallery.download_count > 1 ? "s" : ""} sur « Télécharger ».`
         : `${gallery.view_count} ouverture${gallery.view_count > 1 ? "s" : ""} · ${gallery.download_count} photo${gallery.download_count > 1 ? "s" : ""} téléchargée${gallery.download_count > 1 ? "s" : ""} · ${sales.count} vendue${sales.count > 1 ? "s" : ""} sur 30 jours${sales.cents ? ` (${formatMoney(sales.cents)})` : ""}.`,
       link: "admin-galeries.html"
