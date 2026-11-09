@@ -225,10 +225,26 @@ $("site-next").addEventListener("click", () => {
   openPage(Math.min(state.current + 1, state.pages.length - 1));
   $("site-pages").scrollIntoView({ behavior: "smooth", block: "start" });
 });
+// Écran réaliste : le site s'affiche à la taille réelle de l'appareil, puis est réduit pour tenir dans le cadre.
+// Ordinateur : 1440 × 900 (portable 16:10) ; téléphone : 390 × 693 (9:16).
+const DEVICES = { desktop: { width: 1440, height: 900 }, mobile: { width: 390, height: 693 } };
+let device = "desktop";
+function fitFrame() {
+  const wrap = $("site-frame-wrap");
+  const frame = $("site-frame");
+  const size = DEVICES[device];
+  const scale = wrap.clientWidth / size.width;
+  frame.style.width = `${size.width}px`;
+  frame.style.height = `${size.height}px`;
+  frame.style.transform = `scale(${scale})`;
+}
 document.querySelectorAll("[data-device]").forEach((button) => button.addEventListener("click", () => {
   document.querySelectorAll("[data-device]").forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
-  $("site-frame-wrap").classList.toggle("is-mobile", button.dataset.device === "mobile");
+  device = button.dataset.device === "mobile" ? "mobile" : "desktop";
+  $("site-frame-wrap").classList.toggle("is-mobile", device === "mobile");
+  fitFrame();
 }));
+new ResizeObserver(fitFrame).observe($("site-frame-wrap"));
 
 $("site-send").addEventListener("click", async () => {
   const button = $("site-send");

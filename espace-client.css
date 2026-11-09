@@ -32,17 +32,34 @@
 .site-open { color: #c5c1bb; font-size: 0.82rem; }
 
 .site-frame-wrap {
+  position: relative;
   overflow: hidden;
+  width: 100%;
+  margin: 0 auto;
+  aspect-ratio: 1440 / 900;
   border: 1px solid rgba(245, 243, 239, 0.18);
   border-radius: 12px;
   background: #fff;
-  transition: max-width 260ms ease;
-  max-width: 100%;
-  margin: 0 auto;
 }
-.site-frame-wrap.is-mobile { max-width: 400px; }
-.site-frame { display: block; width: 100%; height: min(78vh, 860px); border: 0; background: #fff; }
-
+/* Téléphone : écran 9:16 avec un contour d'appareil */
+.site-frame-wrap.is-mobile {
+  width: min(100%, 360px);
+  aspect-ratio: 390 / 693;
+  border: 10px solid #121211;
+  border-radius: 34px;
+  box-shadow: 0 0 0 1px rgba(245, 243, 239, 0.18), 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+.site-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 1440px;
+  height: 900px;
+  border: 0;
+  background: #fff;
+  transform-origin: 0 0;
+}
 .site-page-feedback, .site-submit {
   display: grid;
   gap: 12px;
@@ -105,7 +122,6 @@
 @media (max-width: 820px) {
   .social-layout { grid-template-columns: 1fr; }
   .social-guide-frame { height: 70vh; }
-  .site-frame { height: 70vh; }
 }
 
 /* Mode clair : mêmes boutons que le reste du site (contour foncé, actif en noir), textes foncés */
