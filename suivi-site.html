@@ -16,13 +16,13 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Suivi de votre site — Alexandre Palanca</title>
   <link rel="stylesheet" href="galeries.css?v=espace2">
-  <link rel="stylesheet" href="espace-client.css?v=cadre">
+  <link rel="stylesheet" href="espace-client.css?v=nav">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=langue">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script src="site-nav.js?v=espace" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="suivi-site.js?v=1"></script>
+  <script type="module" src="suivi-site.js?v=nav"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -64,6 +64,10 @@
       </div>
       <div class="site-frame-wrap" id="site-frame-wrap">
         <iframe class="site-frame" id="site-frame" title="Aperçu du site" referrerpolicy="no-referrer" loading="lazy"></iframe>
+        <div class="site-blocked" id="site-blocked" role="alert" hidden>
+          <p><strong>Cette page n’a pas encore été créée ou est en cours de création.</strong><br>Pour changer de page, utilisez les boutons au-dessus du cadre.</p>
+          <button type="button" id="site-blocked-close" aria-label="Fermer le message">×</button>
+        </div>
       </div>
       <p class="site-note site-frame-help">La page reste blanche ? Certains sites refusent d’être affichés dans un cadre : utilisez « Ouvrir dans un nouvel onglet » ci-dessus, puis revenez ici pour laisser votre commentaire.</p>
       <div class="site-page-feedback" id="site-feedback">

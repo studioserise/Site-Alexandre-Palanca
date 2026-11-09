@@ -4,7 +4,97 @@ import { callGalleryFunction } from "./galeries-api.js";
 // Sous chaque page : un commentaire, ou « Ça me convient ». L'envoi n'est possible que lorsque
 // toutes les pages sont commentées ou validées ; un dernier commentaire général est possible.
 const $ = (id) => document.getElementById(id);
-const state = { pages: [], answers: [], current: 0, galleryId: "", roundsLeft: 0 };
+const state = { pages: [], answers: [], current: 0, galleryId: "", roundsLeft: 0, expectingLoad: false, signalled: false };
+
+// ---- Navigation dans le cadre : seules les pages prévues (boutons au-dessus) sont accessibles.
+// Même site : les clics sont interceptés directement. Autre site : le site en cours peut inclure
+// https://alexandrepalanca.fr/apercu.js pour signaler ses clics ; sans ce script, toute navigation
+// dans le cadre est annulée.
+function samePage(a, b) {
+  const clean = (value) => {
+    try {
+      const url = new URL(value, window.location.href);
+      return `${url.origin}${url.pathname.replace(/\/index\.html$/, "/").replace(/\.html$/, "").replace(/\/$/, "")}`;
+    } catch { return String(value); }
+  };
+  return clean(a) === clean(b);
+}
+function pageIndexOf(url) {
+  return state.pages.findIndex((page) => samePage(page.url, url));
+}
+let blockTimer;
+function showBlocked() {
+  const box = $("site-blocked");
+  box.hidden = false;
+  clearTimeout(blockTimer);
+  blockTimer = setTimeout(() => { box.hidden = true; }, 4500);
+}
+function goTo(url) {
+  const index = pageIndexOf(url);
+  if (index === state.current) return;
+  if (index >= 0) {
+    openPage(index);
+  } else {
+    showBlocked();
+  }
+}
+function reloadCurrent() {
+  const frame = $("site-frame");
+  state.expectingLoad = true;
+  frame.src = state.pages[state.current].url;
+  frame.dataset.url = state.pages[state.current].url;
+}
+// Même site : interception des clics sur les liens, avant toute navigation
+function guardFrame(frame) {
+  let doc;
+  try { doc = frame.contentWindow.document; } catch { return false; }
+  if (!doc || doc.__apercuGuard) return true;
+  doc.__apercuGuard = true;
+  frame.contentWindow.addEventListener("click", (event) => {
+    const link = event.target.closest?.("a[href]");
+    if (!link) return;
+    const href = link.getAttribute("href") || "";
+    if (href.startsWith("#") || /^(mailto|tel):/i.test(href)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    goTo(link.href);
+  }, true);
+  return true;
+}
+function onFrameLoad() {
+  const frame = $("site-frame");
+  if (state.expectingLoad) {
+    state.expectingLoad = false;
+    state.signalled = false;
+    guardFrame(frame);
+    return;
+  }
+  // Navigation non prévue dans le cadre
+  let url = null;
+  try { url = frame.contentWindow.location.href; } catch { /* autre site : adresse illisible */ }
+  if (url) {
+    const index = pageIndexOf(url);
+    if (index >= 0 && index !== state.current) {
+      state.current = index;
+      frame.dataset.url = state.pages[index].url;
+      openPage(index);
+      guardFrame(frame);
+      return;
+    }
+    if (index === state.current) { guardFrame(frame); return; }
+  }
+  if (state.signalled) { state.signalled = false; return; }
+  showBlocked();
+  reloadCurrent();
+}
+// Autre site équipé d'apercu.js : il demande la permission avant de changer de page
+window.addEventListener("message", (event) => {
+  const frame = $("site-frame");
+  if (event.source !== frame.contentWindow || event.data?.type !== "apercu-navigation") return;
+  state.signalled = true;
+  setTimeout(() => { state.signalled = false; }, 1500);
+  goTo(String(event.data.url || ""));
+});
 const draftKey = () => `suivi-site-${state.galleryId}`;
 
 function saveDraft() {
@@ -49,9 +139,11 @@ function openPage(index) {
   const page = state.pages[index];
   const frame = $("site-frame");
   if (frame.dataset.url !== page.url) {
+    state.expectingLoad = true;
     frame.src = page.url;
     frame.dataset.url = page.url;
   }
+  $("site-blocked").hidden = true;
   $("site-open").href = page.url;
   $("site-comment-label").textContent = `Votre commentaire sur la page « ${page.name} »`;
   $("site-comment").value = state.answers[index].comment;
@@ -114,6 +206,9 @@ async function start() {
   $("site-review").hidden = false;
   openPage(0);
 }
+
+$("site-frame").addEventListener("load", onFrameLoad);
+$("site-blocked-close").addEventListener("click", () => { $("site-blocked").hidden = true; });
 
 $("site-comment").addEventListener("input", (event) => {
   state.answers[state.current].comment = event.target.value;
