@@ -409,3 +409,24 @@ textarea {
 .lang-legal-note { max-width: 760px; margin: 0 auto 24px; padding: 12px 16px; border-radius: 8px; background: rgba(245, 243, 239, 0.08); font-size: 0.82rem; }
 html[data-theme="light"] .site-lang-toggle { color: #171715; }
 html[data-theme="light"] .lang-legal-note { background: rgba(23, 23, 21, 0.06); }
+
+/* Bas de page : coordonnées d'Alexandre et d'Elisa, avec le rôle de chacun.
+   Grand écran : deux colonnes dont les lignes sont alignées (nom, rôle, e-mail, téléphone, lieu).
+   Écran moyen ou téléphone : l'un sous l'autre. */
+.site-footer-people { display: grid; grid-template-rows: repeat(5, auto); grid-auto-flow: column; grid-auto-columns: max-content; column-gap: 30px; margin-top: 22px; }
+.site-footer-person { display: contents; }
+.site-footer-person .site-footer-email { margin-top: 10px; }
+.site-footer-person .site-footer-phone { margin-top: 6px; }
+.site-footer-person-name { margin: 0; color: #f5f3ef; font-size: 0.95rem; }
+.site-footer-person-name span { color: #aaa7a1; font-size: 0.82rem; }
+.site-footer-person-role { margin: 2px 0 0; color: #aaa7a1; font-size: 0.7rem; letter-spacing: 0.08em; line-height: 1.5; text-transform: uppercase; white-space: nowrap; }
+.site-footer-person-place { margin: 6px 0 0; color: #aaa7a1; font-size: 0.74rem; }
+.site-footer-contact > .site-footer-person-name { margin-top: 18px; }
+@media (max-width: 1180px) {
+  .site-footer-people { grid-template-rows: none; grid-auto-flow: row; grid-template-columns: 1fr; row-gap: 18px; }
+  .site-footer-person { display: grid; align-content: start; }
+}
+html[data-theme="light"] :is(.site-footer-person-name) { color: #171715; }
+html[data-theme="light"] :is(.site-footer-person-name span, .site-footer-person-role, .site-footer-person-place) { color: #55524c; }
+.site-footer .site-footer-contact > p.site-footer-person-name { color: #f5f3ef; font-size: 0.95rem; }
+html[data-theme="light"] .site-footer .site-footer-contact > p.site-footer-person-name { color: #171715; }

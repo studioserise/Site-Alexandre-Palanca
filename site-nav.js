@@ -159,6 +159,56 @@ if (siteNav && siteNavToggle && siteNavLinks) {
   });
 }
 
+// Coordonnées en bas de page selon la page : Photo & vidéo → Alexandre, Sites internet → Elisa,
+// accueil, contenus réseaux et autres pages → les deux, avec le rôle de chacun.
+const FOOTER_PEOPLE = {
+  alex: {
+    name: "Alexandre Palanca",
+    role: "Photographe & vidéaste",
+    email: "info@alexandrepalanca.fr",
+    phone: "+33 6 79 53 82 80",
+    tel: "+33679538280",
+    place: "Sarlat-la-Canéda · Dordogne &amp; Périgord"
+  },
+  elisa: {
+    name: "Elisa Martignac",
+    role: "Webdesign & création de sites internet",
+    roleLines: ["Webdesign &amp;", "création de sites internet"],
+    email: "mtgcelisa@gmail.com",
+    phone: "+33 6 65 47 73 51",
+    tel: "+33665477351",
+    place: ""
+  }
+};
+const footerPage = (window.location.pathname.split("/").pop() || "index").replace(/\.html$/, "") || "index";
+const footerWho = footerPage === "photo-video" ? ["alex"] : footerPage === "sites-internet" ? ["elisa"] : ["alex", "elisa"];
+const footerSocials = `<nav class="site-footer-socials" aria-label="Réseaux sociaux">
+          <a href="https://www.instagram.com/alexpalanca_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/></svg></a>
+          <a href="https://www.facebook.com/alexandre.palanca.7" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8.5h2.5V5H14a3.5 3.5 0 0 0-3.5 3.5V11H8v3.5h2.5V21H14v-6.5h2.5l.5-3.5h-3V8.8a.3.3 0 0 1 .3-.3z"/></svg></a>
+        </nav>`;
+function footerContacts() {
+  if (footerWho.length === 1) {
+    const person = FOOTER_PEOPLE[footerWho[0]];
+    // Une seule personne : même présentation qu'avant (e-mail en grand, téléphone, lieu)
+    return `<p class="site-footer-person-name">${person.name} — <span>${person.role}</span></p>
+        <a class="site-footer-email" href="mailto:${person.email}">${person.email}</a>
+        <a class="site-footer-phone" href="tel:${person.tel}">${person.phone}</a>
+        ${person.place ? `<p>${person.place}</p>` : ""}
+        ${footerWho[0] === "alex" ? footerSocials : ""}`;
+  }
+  return `<div class="site-footer-people">${footerWho.map((key) => {
+    const person = FOOTER_PEOPLE[key];
+    return `<div class="site-footer-person">
+          <p class="site-footer-person-name">${person.name}</p>
+          <p class="site-footer-person-role">${(person.roleLines ?? [person.role]).join("<br>")}</p>
+          <a class="site-footer-email" href="mailto:${person.email}">${person.email}</a>
+          <a class="site-footer-phone" href="tel:${person.tel}">${person.phone}</a>
+          ${person.place ? `<p class="site-footer-person-place">${person.place}</p>` : ""}
+        </div>`;
+  }).join("")}</div>
+        ${footerSocials}`;
+}
+
 if (!document.querySelector(".site-footer")) {
   const footer = document.createElement("footer");
   footer.className = "site-footer";
@@ -168,13 +218,7 @@ if (!document.querySelector(".site-footer")) {
       <div class="site-footer-contact">
         <p class="site-footer-eyebrow">Un projet à imaginer ?</p>
         <h2>Parlons de votre prochaine histoire.</h2>
-        <a class="site-footer-email" href="mailto:info@alexandrepalanca.fr">info@alexandrepalanca.fr</a>
-        <a class="site-footer-phone" href="tel:+33679538280">+33 6 79 53 82 80</a>
-        <p>Sarlat-la-Canéda · Dordogne &amp; Périgord</p>
-        <nav class="site-footer-socials" aria-label="Réseaux sociaux">
-          <a href="https://www.instagram.com/alexpalanca_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/></svg></a>
-          <a href="https://www.facebook.com/alexandre.palanca.7" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8.5h2.5V5H14a3.5 3.5 0 0 0-3.5 3.5V11H8v3.5h2.5V21H14v-6.5h2.5l.5-3.5h-3V8.8a.3.3 0 0 1 .3-.3z"/></svg></a>
-        </nav>
+        ${footerContacts()}
         <div class="site-footer-actions">
           <a href="photo-video.html#demande-devis">Photo &amp; vidéo <span aria-hidden="true">↗︎</span></a>
           <a href="sites-internet.html#demande-projet">Site internet <span aria-hidden="true">↗︎</span></a>
