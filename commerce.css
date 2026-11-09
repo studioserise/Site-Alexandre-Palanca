@@ -104,3 +104,5 @@
 
 .com-pair-note { margin: 14px 0 6px; padding: 10px 12px; border: 1px solid rgba(245, 243, 239, 0.18); border-radius: 8px; }
 .com-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.com-issuer.is-site { background: #b9d7e8; color: #0d2230; letter-spacing: 0.04em; }

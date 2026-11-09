@@ -24,47 +24,77 @@ const issuerTag = (key) => `<span class="com-issuer is-${key === "elisa" ? "elis
 let listIssuer = "all";
 const issuerFilter = (current) => `<div class="com-issuer-filter">${[["all", "Tous"], ...ISSUERS.map(([k, n]) => [k, n])].map(([k, n]) =>
   `<button type="button" class="gallery-quiet-button${current === k ? " is-active" : ""}" data-issuer-filter="${k}">${n}</button>`).join("")}</div>`;
-// Contenus réseaux : une prestation à deux, en deux devis associés.
-// Alex facture le shooting photo & vidéo (70 %), Elisa la création digitale (30 %).
-const SOCIAL_SHARE = { alexandre: 70, elisa: 30 };
-const SOCIAL_FORMULAS = [
-  ["La séance — production ponctuelle", 350, "forfait", "1 séance de création jusqu'à 2 heures, 10 photographies retouchées, 1 Reel monté (15 à 45 secondes)"],
-  ["La collection — réserve de contenus", 650, "forfait", "1 séance de création jusqu'à une demi-journée, 20 photographies retouchées, 3 Reels montés, 5 séquences courtes pour les stories"],
-  ["L'accompagnement — collaboration régulière", 850, "mois", "1 séance de création par mois, jusqu'à 10 photographies retouchées, 3 Reels montés, 5 séquences courtes pour les stories"]
-];
-const SOCIAL_LINE = {
-  alexandre: ["Shooting photo & vidéo — contenus réseaux", "Préparation et réalisation de la séance de création (prises de vues photo et vidéo), sélection et retouche des photographies."],
-  elisa: ["Création digitale — contenus réseaux", "Montage des Reels et séquences stories, déclinaison des contenus aux formats des réseaux sociaux, organisation de la livraison et PDF récapitulatif."]
-};
+// Prestations réalisées à deux, en deux devis associés : la part de chacun est calculée sur le prix total.
+//   reseaux : Contenus réseaux — Alex : shooting photo & vidéo (70 %), Elisa : création digitale (30 %)
+//   site    : Site internet    — Elisa : création du site (75 %), Alex : shooting photo pour le site (25 %)
 const SOCIAL_TERMS = {
   delivery: "Livraison des contenus dans un espace privé en ligne, dans un délai indicatif de 2 à 3 semaines après la séance. Une série d'ajustements incluse sur les montages ; au-delà, devis complémentaire.",
   usage: "Après paiement intégral, le client peut utiliser les contenus livrés pour sa communication (réseaux sociaux, site internet, supports numériques) sans limite de durée. Toute revente ou cession à un tiers est exclue. Les musiques intégrées aux montages restent soumises aux conditions des plateformes. Les contenus peuvent être présentés dans le portfolio des prestataires, sauf opposition écrite."
 };
+const BUNDLES = {
+  reseaux: {
+    label: "Contenus réseaux", tag: "Réseaux", first: "alexandre", share: { alexandre: 70, elisa: 30 },
+    roles: { alexandre: "shooting photo & vidéo", elisa: "création digitale" },
+    formulas: [
+  ["La séance — production ponctuelle", 350, "forfait", "1 séance de création jusqu'à 2 heures, 10 photographies retouchées, 1 Reel monté (15 à 45 secondes)"],
+  ["La collection — réserve de contenus", 650, "forfait", "1 séance de création jusqu'à une demi-journée, 20 photographies retouchées, 3 Reels montés, 5 séquences courtes pour les stories"],
+  ["L'accompagnement — collaboration régulière", 850, "mois", "1 séance de création par mois, jusqu'à 10 photographies retouchées, 3 Reels montés, 5 séquences courtes pour les stories"]
+],
+    line: {
+  alexandre: ["Shooting photo & vidéo — contenus réseaux", "Préparation et réalisation de la séance de création (prises de vues photo et vidéo), sélection et retouche des photographies."],
+  elisa: ["Création digitale — contenus réseaux", "Montage des Reels et séquences stories, déclinaison des contenus aux formats des réseaux sociaux, organisation de la livraison et PDF récapitulatif."]
+},
+    terms: { elisa: SOCIAL_TERMS }
+  },
+  site: {
+    label: "Site internet", tag: "Site", first: "elisa", share: { alexandre: 25, elisa: 75 },
+    roles: { alexandre: "shooting photo pour le site", elisa: "création du site" },
+    formulas: [
+      ["Site essentiel", 650, "forfait", "une page ou un site simple : échange de cadrage, direction artistique, design responsive, intégration des contenus fournis et formulaire de contact"],
+      ["Site vitrine", 1200, "forfait", "un site multipage : architecture éditoriale, direction artistique personnalisée, pages dédiées, galerie, mise en page responsive et accompagnement à la mise en ligne"],
+      ["Site sur mesure", 2000, "forfait", "atelier de conception, parcours et fonctionnalités sur mesure, univers graphique approfondi, production et suivi de projet dédiés"]
+    ],
+    line: {
+      alexandre: ["Shooting photo pour le site", "Séance photo pour illustrer le site : prises de vues, sélection et retouche des images, livrées aux formats du site."],
+      elisa: ["Création du site internet", "Conception, design et intégration du site, mise en page responsive et accompagnement à la mise en ligne."]
+    },
+    terms: {}
+  }
+};
 const otherIssuer = (key) => (key === "elisa" ? "alexandre" : "elisa");
-// Part d'un prestataire sur le prix total : la part d'Elisa est le reste, pour que 70 % + 30 % tombe juste
-const socialShare = (issuer, totalCents) => {
-  const alex = Math.round(totalCents * SOCIAL_SHARE.alexandre / 100);
+// Part d'un prestataire : celle d'Elisa est le reste, pour que les deux parts tombent juste sur le total
+const bundleShare = (key, issuer, totalCents) => {
+  const alex = Math.round(totalCents * BUNDLES[key].share.alexandre / 100);
   return issuer === "elisa" ? totalCents - alex : alex;
 };
-const socialItem = (issuer, formula, totalCents, quantity = "1", unit = "forfait") => {
-  const [title, description] = SOCIAL_LINE[issuer];
-  const desc = SOCIAL_FORMULAS.find(([n]) => n === formula);
+const bundleItem = (key, issuer, formula, totalCents, quantity = "1", unit = "forfait") => {
+  const b = BUNDLES[key];
+  const [title, description] = b.line[issuer];
+  const desc = b.formulas.find(([n]) => n === formula);
   return {
     serviceId: null, title, quantity, unit, vat: "0", saveToCatalog: false,
-    description: `${formula ? `Formule « ${formula} »${desc ? ` : ${desc[3]}` : ""}. ` : ""}${description} Part ${issuer === "elisa" ? "d'Elisa Martignac" : "d'Alexandre Palanca"} : ${SOCIAL_SHARE[issuer]} % de la formule.`,
-    price: toEuros(socialShare(issuer, totalCents))
+    description: `${formula ? `Formule « ${formula} »${desc ? ` : ${desc[3]}` : ""}. ` : ""}${description} Part ${issuer === "elisa" ? "d'Elisa Martignac" : "d'Alexandre Palanca"} : ${b.share[issuer]} % de la formule.`,
+    price: toEuros(bundleShare(key, issuer, totalCents))
   };
 };
-const socialProject = (formula) => `Contenus réseaux${formula ? ` — ${formula}` : ""}.\nPrestation réalisée à deux, en deux devis séparés : shooting photo & vidéo par Alexandre Palanca et création digitale par Elisa Martignac.`;
-const bundleTag = (q) => (q.bundle === "reseaux" ? ' <span class="com-issuer is-reseaux">Réseaux</span>' : "");
+const bundleProject = (key, formula) => {
+  const b = BUNDLES[key];
+  return `${b.label}${formula ? ` — ${formula}` : ""}.\nPrestation réalisée à deux, en deux devis séparés : ${b.roles.alexandre} par Alexandre Palanca et ${b.roles.elisa} par Elisa Martignac.`;
+};
+const bundleRole = (key, issuer) => `${BUNDLES[key].roles[issuer]} (${issuer === "elisa" ? "Elisa" : "Alex"}, ${BUNDLES[key].share[issuer]} %)`;
+const bundleSplit = (key, totalCents) => `Alex : ${money(bundleShare(key, "alexandre", totalCents))} · Elisa : ${money(bundleShare(key, "elisa", totalCents))}`;
+const bundleTag = (q) => (q.bundle && BUNDLES[q.bundle] ? ` <span class="com-issuer is-${q.bundle}">${BUNDLES[q.bundle].tag}</span>` : "");
+const isBundleLine = (it) => Object.values(BUNDLES).some((b) => Object.values(b.line).some(([t]) => it.title === t));
 
 // Boutons permanents sous les onglets : « Créer un devis — Alex » / « — Elisa » / « — Contenus réseaux »
 document.addEventListener("click", (event) => {
   const button = event.target.closest("[data-new-quote]");
   if (!button) return;
-  if (button.dataset.newQuote === "reseaux") {
-    // Étape 1 : le devis du shooting (Alex) ; le rappel du devis d'Elisa est créé automatiquement
-    quoteEditor(null, null, { issuer: "alexandre", bundle: "reseaux", partnerRequested: true, projectDescription: socialProject("") });
+  const key = button.dataset.newQuote;
+  if (BUNDLES[key]) {
+    // Prestation à deux : le premier devis (Alex pour les réseaux, Elisa pour un site) ;
+    // le rappel du second devis, déjà pré-rempli, est créé automatiquement
+    quoteEditor(null, null, { issuer: BUNDLES[key].first, bundle: key, partnerRequested: true, projectDescription: bundleProject(key, "") });
   } else {
     quoteEditor(null, null, { issuer: button.dataset.newQuote });
   }
@@ -405,9 +435,10 @@ async function quoteEditor(id, presetClient, preset = {}) {
     issuer
   };
   // Contenus réseaux : conditions adaptées sur le devis d'Elisa (sinon celles des sites internet)
-  if (draft.bundle === "reseaux" && !id && issuer === "elisa") {
-    draft.deliveryTerms = SOCIAL_TERMS.delivery;
-    draft.usageTerms = SOCIAL_TERMS.usage;
+  const bundleTerms = draft.bundle && BUNDLES[draft.bundle]?.terms?.[issuer];
+  if (bundleTerms && !id) {
+    if (bundleTerms.delivery) draft.deliveryTerms = bundleTerms.delivery;
+    if (bundleTerms.usage) draft.usageTerms = bundleTerms.usage;
   }
   if (id) {
     const data = existing;
@@ -448,7 +479,7 @@ function previewHtml() {
 
 function renderEditor() {
   const stepsHtml = `<div class="com-steps">${STEPS.map((l, i) => `<div class="com-step ${i + 1 < step ? "is-done" : ""} ${i + 1 === step ? "is-current" : ""}">${i + 1}. ${l}</div>`).join("")}</div>`;
-  view.innerHTML = `<div class="com-top"><h2>${issuerTag(draft.issuer)} ${draft.id ? "Modifier le brouillon" : "Nouveau devis"} — ${esc(issuerLabel(draft.issuer))}${draft.bundle === "reseaux" ? ` · contenus réseaux (${draft.issuer === "elisa" ? "création digitale, 30 %" : "shooting, 70 %"})` : ""}</h2>
+  view.innerHTML = `<div class="com-top"><h2>${issuerTag(draft.issuer)} ${draft.id ? "Modifier le brouillon" : "Nouveau devis"} — ${esc(issuerLabel(draft.issuer))}${draft.bundle && BUNDLES[draft.bundle] ? ` · ${BUNDLES[draft.bundle].label.toLowerCase()} (${bundleRole(draft.bundle, draft.issuer)})` : ""}</h2>
     <button class="gallery-quiet-button com-preview-toggle" id="pv-toggle" type="button">Aperçu</button></div>
     <div class="com-layout"><div class="com-panel">${stepsHtml}<div class="com-form" id="step-body"></div>
     <div class="com-actions"><button class="gallery-quiet-button" id="prev" type="button" ${step === 1 ? "disabled" : ""}>←︎ Précédent</button>
@@ -461,8 +492,8 @@ function renderEditor() {
   const next = document.getElementById("next");
   if (next) next.onclick = () => {
     if (step === 1 && !draft.client.name.trim()) return say("Choisissez ou saisissez un client.");
-    if (step === 2 && !draft.items.length) return say(draft.bundle === "reseaux" ? "Choisissez la formule et cliquez sur « Ajouter la ligne »." : "Ajoutez au moins une prestation.");
-    if (step === 2 && draft.bundle === "reseaux" && !toCents(draft.bundleTotal)) return say("Indiquez le prix total de la formule contenus réseaux.");
+    if (step === 2 && !draft.items.length) return say(draft.bundle ? "Choisissez la formule et cliquez sur « Ajouter la ligne »." : "Ajoutez au moins une prestation.");
+    if (step === 2 && draft.bundle && !toCents(draft.bundleTotal)) return say("Indiquez le prix total de la formule.");
     if (step === 2 && draft.items.some((i) => !i.title.trim())) return say("Chaque prestation doit avoir un titre.");
     say("");
     step += 1;
@@ -494,7 +525,7 @@ function stepClient(body, refresh) {
 function stepItems(body, refresh) {
   const options = catalog.map((s) => `<option value="${s.id}">${esc(s.name)} — ${money(s.unit_price_cents)}</option>`).join("");
   const draw = () => {
-    body.innerHTML = `${draft.bundle === "reseaux" ? socialBox() : ""}<div class="com-row">${field("Ajouter depuis le catalogue", `<select class="gallery-admin-input" id="cat"><option value="">Choisir…</option>${options}</select>`)}
+    body.innerHTML = `${draft.bundle && BUNDLES[draft.bundle] ? bundleBox() : ""}<div class="com-row">${field("Ajouter depuis le catalogue", `<select class="gallery-admin-input" id="cat"><option value="">Choisir…</option>${options}</select>`)}
       <div class="com-actions"><button class="gallery-quiet-button" id="custom" type="button">+ Prestation personnalisée</button></div></div>
       <div id="items">${draft.items.map((it, n) => `<div class="com-item" data-n="${n}">
         ${field("Titre", input("title", it.title))}${field("Description", textarea("description", it.description))}
@@ -513,35 +544,39 @@ function stepItems(body, refresh) {
       if (svc) { draft.items.push(newItem(svc)); draw(); refresh(); }
     };
     document.getElementById("custom").onclick = () => { draft.items.push(newItem()); draw(); refresh(); };
-    if (draft.bundle === "reseaux") bindSocialBox(draw, refresh);
+    if (draft.bundle && BUNDLES[draft.bundle]) bindBundleBox(draw, refresh);
   };
   draw();
 }
 
-// Contenus réseaux : formule + prix total → ligne du devis à la part du prestataire (70 % / 30 %)
-function socialBox() {
+// Prestation à deux : formule + prix total → ligne du devis à la part du prestataire
+function bundleBox() {
+  const key = draft.bundle;
+  const b = BUNDLES[key];
   const total = toCents(draft.bundleTotal);
-  const known = SOCIAL_FORMULAS.some(([n]) => n === draft.bundleFormula);
-  return `<div class="com-partner com-social"><h3>Contenus réseaux — ${draft.issuer === "elisa" ? "création digitale (Elisa, 30 %)" : "shooting photo & vidéo (Alex, 70 %)"}</h3>
-    <div class="com-row">${field("Formule", `<select class="gallery-admin-input" id="soc-formula"><option value="">Choisir…</option>${SOCIAL_FORMULAS.map(([n, p, u]) => `<option value="${esc(n)}" ${draft.bundleFormula === n ? "selected" : ""}>${esc(n)} — dès ${p} €${u === "mois" ? " / mois" : ""}</option>`).join("")}<option value="__autre" ${draft.bundleFormula && !known ? "selected" : ""}>Autre / sur mesure</option></select>`)}
+  const known = b.formulas.some(([n]) => n === draft.bundleFormula);
+  const intro = `Le prix total est réparti à ${b.share.alexandre} % pour Alex et ${b.share.elisa} % pour Elisa.`;
+  return `<div class="com-partner com-social"><h3>${esc(b.label)} — ${esc(bundleRole(key, draft.issuer))}</h3>
+    <div class="com-row">${field("Formule", `<select class="gallery-admin-input" id="soc-formula"><option value="">Choisir…</option>${b.formulas.map(([n, p, u]) => `<option value="${esc(n)}" ${draft.bundleFormula === n ? "selected" : ""}>${esc(n)} — dès ${p} €${u === "mois" ? " / mois" : ""}</option>`).join("")}<option value="__autre" ${draft.bundleFormula && !known ? "selected" : ""}>Autre / sur mesure</option></select>`)}
     ${field("Prix total de la formule (€)", `<input class="gallery-admin-input" id="soc-total" inputmode="decimal" value="${esc(draft.bundleTotal)}">`)}</div>
     ${draft.bundleFormula && !known ? field("Nom de la formule", `<input class="gallery-admin-input" id="soc-name" value="${esc(draft.bundleFormula)}">`) : ""}
-    <p class="com-hint" id="soc-split">${total ? `Alex : ${money(socialShare("alexandre", total))} · Elisa : ${money(socialShare("elisa", total))}` : "Le prix total est réparti à 70 % pour Alex et 30 % pour Elisa."}</p>
-    <div class="com-actions"><button class="gallery-primary-button" id="soc-apply" type="button">${draft.items.some(isSocialLine) ? "Mettre à jour la ligne" : "Ajouter la ligne"} (${SOCIAL_SHARE[draft.issuer]} %)</button></div></div>`;
+    <p class="com-hint" id="soc-split">${total ? bundleSplit(key, total) : intro}</p>
+    <div class="com-actions"><button class="gallery-primary-button" id="soc-apply" type="button">${draft.items.some(isBundleLine) ? "Mettre à jour la ligne" : "Ajouter la ligne"} (${b.share[draft.issuer]} %)</button></div></div>`;
 }
-const isSocialLine = (it) => Object.values(SOCIAL_LINE).some(([t]) => it.title === t);
-function bindSocialBox(draw, refresh) {
+function bindBundleBox(draw, refresh) {
+  const key = draft.bundle;
+  const b = BUNDLES[key];
   const sel = document.getElementById("soc-formula");
   const tot = document.getElementById("soc-total");
   const name = document.getElementById("soc-name");
   const split = () => {
     const t = toCents(draft.bundleTotal);
     document.getElementById("soc-split").textContent = t
-      ? `Alex : ${money(socialShare("alexandre", t))} · Elisa : ${money(socialShare("elisa", t))}`
-      : "Le prix total est réparti à 70 % pour Alex et 30 % pour Elisa.";
+      ? bundleSplit(key, t)
+      : `Le prix total est réparti à ${b.share.alexandre} % pour Alex et ${b.share.elisa} % pour Elisa.`;
   };
   sel.onchange = () => {
-    const f = SOCIAL_FORMULAS.find(([n]) => n === sel.value);
+    const f = b.formulas.find(([n]) => n === sel.value);
     if (f) { draft.bundleFormula = f[0]; draft.bundleTotal = toEuros(f[1] * 100); }
     else if (sel.value === "__autre") draft.bundleFormula = "Sur mesure";
     else draft.bundleFormula = "";
@@ -553,12 +588,12 @@ function bindSocialBox(draw, refresh) {
     const total = toCents(draft.bundleTotal);
     if (!total) return say("Indiquez le prix total de la formule.");
     say("");
-    const f = SOCIAL_FORMULAS.find(([n]) => n === draft.bundleFormula);
-    const at = draft.items.findIndex(isSocialLine);
+    const f = b.formulas.find(([n]) => n === draft.bundleFormula);
+    const at = draft.items.findIndex(isBundleLine);
     const qty = at >= 0 ? draft.items[at].quantity : "1";
-    const line = socialItem(draft.issuer, draft.bundleFormula, total, qty, f ? f[2] : "forfait");
+    const line = bundleItem(key, draft.issuer, draft.bundleFormula, total, qty, f ? f[2] : "forfait");
     if (at >= 0) draft.items[at] = line; else draft.items.unshift(line);
-    if (!draft.projectDescription || draft.projectDescription.startsWith("Contenus réseaux")) draft.projectDescription = socialProject(draft.bundleFormula);
+    if (!draft.projectDescription || draft.projectDescription.startsWith(b.label)) draft.projectDescription = bundleProject(key, draft.bundleFormula);
     draw();
     refresh();
   };
@@ -568,7 +603,7 @@ function stepTerms(body, refresh) {
   const partnerLabel = draft.issuer === "elisa"
     ? "Prestation photo & vidéo comprise (rappel pour créer le devis d'Alex, déjà pré-rempli)"
     : "Création de site internet comprise (rappel pour créer le devis d'Elisa, déjà pré-rempli)";
-  body.innerHTML = `${draft.partnerQuoteId ? '<p class="com-hint">Devis associé à celui de l\'autre prestataire (même client, même projet).</p>' : draft.bundle === "reseaux" ? `<p class="com-hint com-partner">Contenus réseaux : le rappel pour créer le devis ${draft.issuer === "elisa" ? "du shooting (Alex, 70 %)" : "de la création digitale (Elisa, 30 %)"}, déjà pré-rempli, apparaîtra dans le centre de notifications.</p>` : `<label class="com-check com-partner"><input type="checkbox" id="partner-on" ${draft.partnerRequested ? "checked" : ""}> ${partnerLabel}</label>`}
+  body.innerHTML = `${draft.partnerQuoteId ? '<p class="com-hint">Devis associé à celui de l\'autre prestataire (même client, même projet).</p>' : draft.bundle && BUNDLES[draft.bundle] ? `<p class="com-hint com-partner">${esc(BUNDLES[draft.bundle].label)} : le rappel pour créer le devis ${esc(bundleRole(draft.bundle, otherIssuer(draft.issuer)))}, déjà pré-rempli, apparaîtra dans le centre de notifications.</p>` : `<label class="com-check com-partner"><input type="checkbox" id="partner-on" ${draft.partnerRequested ? "checked" : ""}> ${partnerLabel}</label>`}
     <div class="com-row">${field("Date de la prestation", input("serviceDate", draft.serviceDate, 'type="date"'))}${field("Heure du rendez-vous", input("serviceTime", draft.serviceTime, 'type="time"'))}</div>
     ${field("Lieu du rendez-vous", input("serviceLocation", draft.serviceLocation, 'placeholder="Adresse ou lieu précis"'))}
     <p class="com-hint">La date, l'heure et le lieu servent aux rappels envoyés au client 72 h et 24 h avant (après ta validation), et à l'échéance de l'acompte (72 h avant).</p>
@@ -603,11 +638,11 @@ function stepReview(body) {
       depositBps: Math.round((parseFloat(String(draft.depositPct).replace(",", ".")) || 0) * 100),
       contactRequestId: draft.contactRequestId || undefined,
       issuer: draft.issuer,
-      partnerRequested: draft.bundle === "reseaux" && !draft.partnerQuoteId ? true : draft.partnerRequested === true,
+      partnerRequested: draft.bundle && !draft.partnerQuoteId ? true : draft.partnerRequested === true,
       partnerQuoteId: draft.partnerQuoteId || undefined,
       bundle: draft.bundle || undefined,
       bundleFormula: draft.bundleFormula || "",
-      bundleTotalCents: draft.bundle === "reseaux" ? toCents(draft.bundleTotal) : undefined
+      bundleTotalCents: draft.bundle ? toCents(draft.bundleTotal) : undefined
     }));
     if (data) draft.id = data.quote.id;
     return data;
@@ -667,7 +702,7 @@ async function quoteDetail(id) {
   view.innerHTML = `<div class="com-panel com-detail"><div class="com-top"><h2>${issuerTag(q.issuer)} Devis ${esc(q.number)}${bundleTag(q)} ${badge(QUOTE_STATUS, q.status)}</h2>
     <a class="gallery-quiet-button" href="#" id="back">←︎ Retour</a></div>
     <dl><dt>Client</dt><dd>${esc(c.name)}</dd><dt>Date</dt><dd>${dateFr(q.issue_date)}</dd>
-    ${q.bundle === "reseaux" ? `<dt>Contenus réseaux</dt><dd>${esc(q.bundle_formula || "Formule à préciser")}${q.bundle_total_cents != null ? ` — total ${money(q.bundle_total_cents)} (Alex ${money(socialShare("alexandre", q.bundle_total_cents))} · Elisa ${money(socialShare("elisa", q.bundle_total_cents))})` : ""}</dd>` : ""}
+    ${q.bundle && BUNDLES[q.bundle] ? `<dt>${esc(BUNDLES[q.bundle].label)}</dt><dd>${esc(q.bundle_formula || "Formule à préciser")}${q.bundle_total_cents != null ? ` — total ${money(q.bundle_total_cents)} (${bundleSplit(q.bundle, q.bundle_total_cents)})` : ""}</dd>` : ""}
     ${data.partner ? `<dt>Devis associé</dt><dd>${issuerTag(data.partner.issuer)} <a href="#devis=${data.partner.id}" data-partner="${data.partner.id}" data-num="${data.partner.number ? 1 : ""}">${esc(data.partner.number || "Brouillon")}</a> — ${esc(issuerLabel(data.partner.issuer))}</dd>` : q.partner_requested ? `<dt>Devis associé</dt><dd>À créer — <a href="#associe=${q.id}" data-associe="${q.id}">créer le devis de ${q.issuer === "elisa" ? "Alex" : "Elisa"}</a></dd>` : ""}
     ${q.service_date ? `<dt>Rendez-vous</dt><dd>${dateFr(q.service_date)}${q.service_time ? ` à ${esc(q.service_time)}` : ""}${q.service_location ? ` — ${esc(q.service_location)}` : ""}</dd>` : ""}
     ${q.online_balance_paid_cents ? `<dt>Payé par carte (à reporter)</dt><dd>${money(q.online_balance_paid_cents)} — reporté automatiquement sur la facture finale à son émission</dd>` : ""}
@@ -782,18 +817,18 @@ async function openFromHash() {
     const q = data.quote;
     const c = q.client_snapshot || {};
     const issuer = otherIssuer(q.issuer);
-    const social = q.bundle === "reseaux";
+    const shared = q.bundle && BUNDLES[q.bundle] ? q.bundle : null;
     const total = q.bundle_total_cents || 0;
-    const source = q.items?.find(isSocialLine);
+    const source = q.items?.find(isBundleLine);
     return quoteEditor(null, clientFromRow({ id: q.client_id, ...c }), {
       issuer,
       partnerQuoteId: q.id,
       projectDescription: q.project_description || "",
       serviceDate: q.service_date || "", serviceTime: q.service_time || "", serviceLocation: q.service_location || "",
-      // Contenus réseaux : même formule, part de l'autre prestataire déjà calculée
-      ...(social ? {
-        bundle: "reseaux", bundleFormula: q.bundle_formula || "", bundleTotal: total ? toEuros(total) : "",
-        items: total ? [socialItem(issuer, q.bundle_formula || "", total, source ? String(source.quantity) : "1", source?.unit || "forfait")] : []
+      // Prestation à deux : même formule, part de l'autre prestataire déjà calculée
+      ...(shared ? {
+        bundle: shared, bundleFormula: q.bundle_formula || "", bundleTotal: total ? toEuros(total) : "",
+        items: total ? [bundleItem(shared, issuer, q.bundle_formula || "", total, source ? String(source.quantity) : "1", source?.unit || "forfait")] : []
       } : {})
     });
   }
@@ -806,15 +841,20 @@ async function openFromHash() {
       ? clientFromRow(data.client)
       : { name: r.name, email: r.email, phone: r.phone };
     const project = [r.service, r.type].filter(Boolean).join(" — ");
-    if (/r[ée]seaux/i.test(r.service || "")) {
-      const f = SOCIAL_FORMULAS.find(([n]) => n.split(" — ")[0] === String(r.type || "").split(" — ")[0]);
+    // Demandes « Contenus réseaux » et « Sites internet » : devis à deux, formule reconnue d'après le type
+    const shared = /r[ée]seaux/i.test(r.service || "") ? "reseaux" : /site/i.test(r.service || "") ? "site" : null;
+    if (shared) {
+      const type = String(r.type || "");
+      const f = shared === "reseaux"
+        ? BUNDLES.reseaux.formulas.find(([n]) => n.split(" — ")[0] === type.split(" — ")[0])
+        : BUNDLES.site.formulas.find(([n]) => (/une page/i.test(type) && n === "Site essentiel") || (/vitrine/i.test(type) && n === "Site vitrine") || (/sur mesure/i.test(type) && n === "Site sur mesure"));
       return quoteEditor(null, client, {
-        issuer: "alexandre", bundle: "reseaux", partnerRequested: true,
+        issuer: BUNDLES[shared].first, bundle: shared, partnerRequested: true,
         bundleFormula: f ? f[0] : "", bundleTotal: f ? toEuros(f[1] * 100) : "",
         contactRequestId: r.id,
         serviceDate: r.wanted_date || "",
         servicePeriod: r.wanted_date ? "" : (r.date_text || ""),
-        projectDescription: [socialProject(f ? f[0] : ""), r.message].filter(Boolean).join("\n\n")
+        projectDescription: [bundleProject(shared, f ? f[0] : ""), r.message].filter(Boolean).join("\n\n")
       });
     }
     return quoteEditor(null, client, {

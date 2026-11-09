@@ -179,16 +179,21 @@ export async function notifications() {
   const partnered = new Set(quotes.map((q) => q.partner_quote_id).filter(Boolean));
   for (const quote of quotes.filter((q) => q.partner_requested && q.status !== "refused" && !partnered.has(q.id))) {
     const forAlex = quote.issuer === "elisa";
-    const social = quote.bundle === "reseaux";
-    const what = social
-      ? (forAlex ? "le shooting photo & vidéo" : "la création digitale")
+    // Prestations à deux : contenus réseaux (Alex 70 % / Elisa 30 %), site internet (Elisa 75 % / Alex 25 %)
+    const bundles: Record<string, { label: string; alex: string; elisa: string }> = {
+      reseaux: { label: "contenus réseaux", alex: "shooting photo & vidéo (Alex, 70 %)", elisa: "création digitale (Elisa, 30 %)" },
+      site: { label: "site internet", alex: "shooting photo pour le site (Alex, 25 %)", elisa: "création du site (Elisa, 75 %)" }
+    };
+    const shared = bundles[quote.bundle ?? ""];
+    const what = shared
+      ? (forAlex ? `le ${shared.alex}` : `la ${shared.elisa}`)
       : (forAlex ? "une prestation photo & vidéo" : "un site internet");
     push({
       key: `associe:${quote.id}`, priority: 74, category: "devis",
-      title: social
-        ? `Créer le devis ${forAlex ? "shooting photo & vidéo (Alex, 70 %)" : "création digitale (Elisa, 30 %)"} — contenus réseaux — ${clientName(quote)}`
+      title: shared
+        ? `Créer le devis ${forAlex ? shared.alex : shared.elisa} — ${shared.label} — ${clientName(quote)}`
         : forAlex ? `Créer le devis photo & vidéo (Alex) — ${clientName(quote)}` : `Créer le devis site internet (Elisa) — ${clientName(quote)}`,
-      detail: `${forAlex ? "Le devis d'Elisa" : "Le devis d'Alexandre"}${quote.number ? ` ${quote.number}` : " (brouillon)"}${social ? ` (contenus réseaux${quote.bundle_formula ? ` · ${quote.bundle_formula}` : ""})` : ""} prévoit aussi ${what}. Le devis est déjà pré-rempli avec le client, le projet${social ? " et sa part du prix" : ""}.`,
+      detail: `${forAlex ? "Le devis d'Elisa" : "Le devis d'Alexandre"}${quote.number ? ` ${quote.number}` : " (brouillon)"}${shared ? ` (${shared.label}${quote.bundle_formula ? ` · ${quote.bundle_formula}` : ""})` : ""} prévoit aussi ${what}. Le devis est déjà pré-rempli avec le client, le projet${shared ? " et sa part du prix" : ""}.`,
       link: `gestion-commerciale.html#associe=${quote.id}`
     });
   }

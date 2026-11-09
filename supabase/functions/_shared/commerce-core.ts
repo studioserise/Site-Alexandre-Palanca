@@ -360,9 +360,10 @@ export async function saveQuote(body: Row) {
     partner_requested: body.partnerRequested === true,
     ...(typeof body.partnerQuoteId === "string" && UUID.test(body.partnerQuoteId) ? { partner_quote_id: body.partnerQuoteId } : {}),
     // Contenus réseaux : deux devis associés (shooting 70 % Alexandre, création digitale 30 % Elisa)
-    bundle: body.bundle === "reseaux" ? "reseaux" : null,
-    bundle_formula: body.bundle === "reseaux" ? str(body.bundleFormula, "Formule", 200) : "",
-    bundle_total_cents: body.bundle === "reseaux" && body.bundleTotalCents != null
+    // Prestation à deux : contenus réseaux (70 % / 30 %) ou site internet (Elisa 75 % / Alexandre 25 %)
+    bundle: ["reseaux", "site"].includes(String(body.bundle)) ? String(body.bundle) : null,
+    bundle_formula: ["reseaux", "site"].includes(String(body.bundle)) ? str(body.bundleFormula, "Formule", 200) : "",
+    bundle_total_cents: ["reseaux", "site"].includes(String(body.bundle)) && body.bundleTotalCents != null
       ? integer(body.bundleTotalCents, "Prix total de la formule", 0, 100000000) : null,
     client_id: client.id,
     client_snapshot: clientSnapshot(client),
@@ -679,12 +680,13 @@ export async function pairOf(quote: Row) {
 
 function pairServiceLabel(quote: Row) {
   if (quote.bundle === "reseaux") return quote.issuer === "elisa" ? "Création digitale" : "Shooting photo & vidéo";
+  if (quote.bundle === "site") return quote.issuer === "elisa" ? "Création du site internet" : "Shooting photo pour le site";
   return quote.issuer === "elisa" ? "Webdesign & création de site internet" : "Photographie & vidéo";
 }
 
 export function combinedFileName(pair: { alex: Row; elisa: Row }) {
   const client = String(pair.alex.client_snapshot?.name ?? pair.elisa.client_snapshot?.name ?? "").trim();
-  const kind = pair.alex.bundle === "reseaux" ? "Contenus réseaux" : "Photo & vidéo + Site internet";
+  const kind = pair.alex.bundle === "reseaux" ? "Contenus réseaux" : pair.alex.bundle === "site" ? "Site internet" : "Photo & vidéo + Site internet";
   return `${["Proposition", kind, client, `${pair.alex.number} + ${pair.elisa.number}`].filter(Boolean).join(" ")
     .replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim()}.pdf`;
 }
@@ -710,6 +712,8 @@ export async function ensureCombined(quote: Row): Promise<string | null> {
     validUntil: validity,
     projectTitle: pair.alex.bundle === "reseaux"
       ? `Contenus réseaux sociaux${pair.alex.bundle_formula ? ` — ${pair.alex.bundle_formula}` : ""}`
+      : pair.alex.bundle === "site"
+      ? `Site internet${pair.alex.bundle_formula ? ` — ${pair.alex.bundle_formula}` : ""}`
       : `Projet ${client.name ?? ""}`.trim(),
     description: description || "Une proposition réunissant la création des images et la réalisation digitale de votre projet.",
     client: { name: client.name ?? "", lines: partyLines(client) },
