@@ -107,3 +107,31 @@
   .social-guide-frame { height: 70vh; }
   .site-frame { height: 70vh; }
 }
+
+/* Mode clair : mêmes boutons que le reste du site (contour foncé, actif en noir), textes foncés */
+html[data-theme="light"] .client-space { color: #171715; }
+html[data-theme="light"] :is(.client-space-intro, .client-back, .site-open, .site-comment, .social-folder p, .site-note, .site-history-round p) { color: #494740; }
+html[data-theme="light"] .client-space .gallery-eyebrow { color: #69665e; }
+html[data-theme="light"] .client-back:hover { color: #171715; }
+html[data-theme="light"] .client-round { border-color: rgba(23, 23, 21, 0.35); color: #171715; }
+html[data-theme="light"] .site-page-pill { border-color: rgba(23, 23, 21, 0.35); color: #171715; }
+html[data-theme="light"] .site-page-pill:hover { border-color: #171715; background: #fff; }
+html[data-theme="light"] .site-page-pill[aria-current="true"] { border-color: #171715; background: #171715; color: #f1eee8; }
+html[data-theme="light"] .site-page-pill[data-done]::after { color: #2e7d32; }
+html[data-theme="light"] .site-page-pill[data-done="comment"]::after { color: #9a6b12; }
+html[data-theme="light"] .site-page-pill[aria-current="true"][data-done]::after { color: #9fd29a; }
+html[data-theme="light"] .site-device { border-color: rgba(23, 23, 21, 0.35); }
+html[data-theme="light"] .site-device button { color: #494740; }
+html[data-theme="light"] .site-device button[aria-pressed="true"] { background: #171715; color: #f1eee8; }
+html[data-theme="light"] :is(.site-frame-wrap, .social-guide-frame) { border-color: rgba(23, 23, 21, 0.2); }
+html[data-theme="light"] :is(.site-page-feedback, .site-submit, .social-folder, .site-history-round) { border-color: rgba(23, 23, 21, 0.18); background: rgba(255, 255, 255, 0.55); }
+html[data-theme="light"] .site-comment textarea { border-color: rgba(23, 23, 21, 0.3); background: rgba(255, 255, 255, 0.8); color: #171715; }
+html[data-theme="light"] .site-comment textarea::placeholder { color: #69665e; }
+html[data-theme="light"] .site-approve input { accent-color: #2e7d32; }
+html[data-theme="light"] .client-space :is(.gallery-quiet-button) { border: 1px solid rgba(23, 23, 21, 0.35); border-radius: 9px; padding: 9px 14px; background: transparent; color: #171715; }
+html[data-theme="light"] .client-space .gallery-quiet-button:hover { border-color: #171715; background: #fff; }
+html[data-theme="light"] .client-space .gallery-primary-button { border: 1px solid #171715; background: #171715; color: #f1eee8; }
+html[data-theme="light"] .client-space .gallery-primary-button:hover { background: #fff; color: #171715; }
+html[data-theme="light"] .client-space .gallery-primary-button:disabled { border-color: rgba(23, 23, 21, 0.25); background: transparent; color: rgba(23, 23, 21, 0.4); }
+html[data-theme="light"] .client-space .gallery-form-message { color: #a33b2b; }
+html[data-theme="light"] .client-space .gallery-form-message[data-kind="success"] { color: #2e7d32; }

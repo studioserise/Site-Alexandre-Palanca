@@ -1084,3 +1084,8 @@ button {
 .admin-feedback summary { cursor: pointer; }
 .admin-feedback p { margin: 8px 0 0; white-space: pre-wrap; color: #c5c1bb; }
 @media (max-width: 700px) { .admin-link-row, #admin-social-rows .admin-link-row, .admin-video-links form .admin-link-row:has([data-field="description"]) { grid-template-columns: 1fr; } }
+
+/* Espace client en mode clair : mêmes boutons que les autres pastilles du site (contour foncé, actif en noir) */
+html[data-theme="light"] .client-tab { border-color: rgba(23, 23, 21, 0.35); background: transparent; color: #171715; }
+html[data-theme="light"] .client-tab:hover { border-color: #171715; background: #fff; }
+html[data-theme="light"] .client-tab[aria-selected="true"] { border-color: #171715; background: #171715; color: #f1eee8; }
