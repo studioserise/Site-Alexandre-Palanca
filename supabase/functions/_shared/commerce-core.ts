@@ -357,6 +357,11 @@ export async function saveQuote(body: Row) {
     // Prestation de l'autre prestataire comprise → rappel de créer son devis (centre de notifications)
     partner_requested: body.partnerRequested === true,
     ...(typeof body.partnerQuoteId === "string" && UUID.test(body.partnerQuoteId) ? { partner_quote_id: body.partnerQuoteId } : {}),
+    // Contenus réseaux : deux devis associés (shooting 70 % Alexandre, création digitale 30 % Elisa)
+    bundle: body.bundle === "reseaux" ? "reseaux" : null,
+    bundle_formula: body.bundle === "reseaux" ? str(body.bundleFormula, "Formule", 200) : "",
+    bundle_total_cents: body.bundle === "reseaux" && body.bundleTotalCents != null
+      ? integer(body.bundleTotalCents, "Prix total de la formule", 0, 100000000) : null,
     client_id: client.id,
     client_snapshot: clientSnapshot(client),
     valid_until: date(body.validUntil, "Date de validité"),
@@ -506,7 +511,7 @@ export async function quotePdf(quote: Row, settings: Row) {
       { heading: "Modalités de paiement", text: quote.payment_terms, small: true },
       { heading: settings.cancellation_heading || "Conditions d'annulation", text: quote.cancellation_terms, small: true },
       { heading: settings.delivery_heading || "Conditions de livraison", text: quote.delivery_terms, small: true },
-      { heading: settings.usage_heading || "Utilisation des photographies et vidéos", text: quote.usage_terms, small: true }
+      { heading: quote.bundle === "reseaux" ? "Utilisation des contenus" : settings.usage_heading || "Utilisation des photographies et vidéos", text: quote.usage_terms, small: true }
     ],
     signatures: {
       client: "Date et signature, précédées de la mention manuscrite « Bon pour accord »",
@@ -1212,7 +1217,7 @@ export async function handle(body: Row) {
 
     case "list-quotes": {
       const list = await rows(
-        "quotes?select=id,number,issuer,status,issue_date,valid_until,total_ttc_cents,client_snapshot,pdf_path&order=created_at.desc&limit=500"
+        "quotes?select=id,number,issuer,bundle,status,issue_date,valid_until,total_ttc_cents,client_snapshot,pdf_path&order=created_at.desc&limit=500"
       );
       return {
         quotes: list.map((q) => ({
@@ -1231,8 +1236,8 @@ export async function handle(body: Row) {
       // Devis associé de l'autre prestataire (dans un sens ou dans l'autre)
       const partner = (await rows(
         quote.partner_quote_id
-          ? `quotes?select=id,number,issuer,status&id=${eq(quote.partner_quote_id)}`
-          : `quotes?select=id,number,issuer,status&partner_quote_id=${eq(quote.id)}&limit=1`
+          ? `quotes?select=id,number,issuer,status,bundle&id=${eq(quote.partner_quote_id)}`
+          : `quotes?select=id,number,issuer,status,bundle&partner_quote_id=${eq(quote.id)}&limit=1`
       ))[0] ?? null;
       return {
         quote: { ...quote, status: displayQuoteStatus(quote) },

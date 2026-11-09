@@ -64,7 +64,7 @@ export async function notifications() {
   const now = Date.now();
   const site = (Deno.env.get("FRONTEND_ORIGIN") ?? "").replace(/\/$/, "");
   const [quotes, invoices, requests, reminders, galleries, orders, events, dismissed, feedback] = await Promise.all([
-    rows("quotes?select=id,number,issuer,status,client_id,client_snapshot,valid_until,validated_at,created_at,service_date,service_time,deposit_enabled,deposit_cents,total_ttc_cents,response_redo,responded_at,deposit_transfer_notified_at,balance_transfer_notified_at,partner_requested,partner_quote_id&order=created_at.desc&limit=1000"),
+    rows("quotes?select=id,number,issuer,status,client_id,client_snapshot,valid_until,validated_at,created_at,service_date,service_time,deposit_enabled,deposit_cents,total_ttc_cents,response_redo,responded_at,deposit_transfer_notified_at,balance_transfer_notified_at,partner_requested,partner_quote_id,bundle,bundle_formula&order=created_at.desc&limit=1000"),
     rows("invoices?select=id,number,kind,status,quote_id,due_date,amount_due_cents,paid_cents,client_snapshot&status=neq.cancelled&limit=2000"),
     rows("contact_requests?select=*&status=eq.new&order=created_at.desc&limit=200"),
     rows("quote_reminders?select=quote_id,kind,token,prepared_at&sent_at=is.null&limit=200"),
@@ -146,10 +146,16 @@ export async function notifications() {
   const partnered = new Set(quotes.map((q) => q.partner_quote_id).filter(Boolean));
   for (const quote of quotes.filter((q) => q.partner_requested && q.status !== "refused" && !partnered.has(q.id))) {
     const forAlex = quote.issuer === "elisa";
+    const social = quote.bundle === "reseaux";
+    const what = social
+      ? (forAlex ? "le shooting photo & vidéo" : "la création digitale")
+      : (forAlex ? "une prestation photo & vidéo" : "un site internet");
     push({
       key: `associe:${quote.id}`, priority: 74, category: "devis",
-      title: forAlex ? `Créer le devis photo & vidéo (Alex) — ${clientName(quote)}` : `Créer le devis site internet (Elisa) — ${clientName(quote)}`,
-      detail: `${forAlex ? "Le devis d'Elisa" : "Le devis d'Alexandre"}${quote.number ? ` ${quote.number}` : " (brouillon)"} prévoit aussi ${forAlex ? "une prestation photo & vidéo" : "un site internet"}. Le devis est déjà pré-rempli avec le client et le projet.`,
+      title: social
+        ? `Créer le devis ${forAlex ? "shooting photo & vidéo (Alex, 70 %)" : "création digitale (Elisa, 30 %)"} — contenus réseaux — ${clientName(quote)}`
+        : forAlex ? `Créer le devis photo & vidéo (Alex) — ${clientName(quote)}` : `Créer le devis site internet (Elisa) — ${clientName(quote)}`,
+      detail: `${forAlex ? "Le devis d'Elisa" : "Le devis d'Alexandre"}${quote.number ? ` ${quote.number}` : " (brouillon)"}${social ? ` (contenus réseaux${quote.bundle_formula ? ` · ${quote.bundle_formula}` : ""})` : ""} prévoit aussi ${what}. Le devis est déjà pré-rempli avec le client, le projet${social ? " et sa part du prix" : ""}.`,
       link: `gestion-commerciale.html#associe=${quote.id}`
     });
   }
