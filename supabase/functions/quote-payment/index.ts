@@ -1,4 +1,4 @@
-import { quoteDues, Row, todayParis } from "../_shared/commerce-core.ts";
+import { getSettings, issuerFrom, issuerReplyTo, quoteDues, Row, todayParis } from "../_shared/commerce-core.ts";
 import { formatMoney } from "../_shared/commerce-pdf.ts";
 import { databaseRequest, sha256 } from "../_shared/http.ts";
 
@@ -73,7 +73,8 @@ async function transfer(quote: Row, part: string) {
 }
 
 async function view(quote: Row, part: string) {
-  const settings = (await databaseRequest("commerce_settings?select=legal_name,iban,bic&id=eq.1") as Row[])[0] ?? {};
+  // Coordonnées du prestataire de CE devis : l'argent va toujours au bon entrepreneur
+  const settings = await getSettings(quote.issuer);
   const { dues, amount, reference } = await transfer(quote, part);
   return {
     number: quote.number,
@@ -87,6 +88,7 @@ async function view(quote: Row, part: string) {
     iban: settings.iban ?? "",
     bic: settings.bic ?? "",
     reference,
+    cardAvailable: settings.card_payments === true,
     notifiedAt: part === "acompte" ? quote.deposit_transfer_notified_at : quote.balance_transfer_notified_at,
     today: todayParis()
   };
@@ -101,7 +103,7 @@ async function consumeRateLimit(request: Request) {
   if (attempts > 5) throw new UserError("Trop de tentatives. Réessayez dans quelques minutes.", 429);
 }
 
-// « J'ai effectué le virement » : e-mail à Alex pour qu'il vérifie et enregistre le règlement.
+// « J'ai effectué le virement » : e-mail au prestataire concerné pour qu'il vérifie et enregistre le règlement.
 async function notify(quote: Row, part: string) {
   const { amount, reference } = await transfer(quote, part);
   await databaseRequest(`quotes?id=eq.${encodeURIComponent(quote.id)}`, {
@@ -110,12 +112,13 @@ async function notify(quote: Row, part: string) {
   });
   const name = quote.client_snapshot?.name ?? "Le client";
   const text = `${name} indique avoir effectué un virement de ${formatMoney(amount)} (${part === "acompte" ? "acompte" : "solde"}) pour le devis ${quote.number}, avec la référence « ${reference} ».\n\nÀ vérifier sur ton compte bancaire, puis à enregistrer comme règlement sur la facture dans la gestion commerciale.`;
+  const issuerSettings = await getSettings(quote.issuer);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: requiredEnv("ORDER_EMAIL_FROM"),
-      to: [requiredEnv("CONTACT_EMAIL_TO")],
+      from: issuerFrom(issuerSettings),
+      to: [issuerReplyTo(issuerSettings)],
       subject: `🏦 Virement signalé : ${formatMoney(amount)} — devis ${quote.number} — ${name}`,
       text,
       html: `<p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6">${text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>")}</p>`
@@ -127,6 +130,10 @@ async function notify(quote: Row, part: string) {
 
 // Paiement par carte : session Stripe Checkout du montant restant.
 async function checkout(quote: Row, part: string, token: string) {
+  // Carte uniquement pour un prestataire équipé (compte Stripe d'Alexandre) ; sinon virement.
+  if ((await getSettings(quote.issuer)).card_payments !== true) {
+    throw new UserError("Le paiement par carte n'est pas proposé pour cette prestation : réglez par virement.", 409);
+  }
   const { dues, amount } = await transfer(quote, part);
   if (amount <= 0) throw new UserError(part === "acompte" ? "L'acompte est déjà réglé. Merci !" : "Tout est déjà réglé. Merci !", 409);
   if (amount < 50) throw new UserError("Montant trop faible pour un paiement par carte.");

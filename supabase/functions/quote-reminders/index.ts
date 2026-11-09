@@ -1,6 +1,6 @@
 import { databaseRequest } from "../_shared/http.ts";
 import { formatMoney } from "../_shared/commerce-pdf.ts";
-import { quoteDues, Row, serviceWhen, todayParis, addDays } from "../_shared/commerce-core.ts";
+import { addDays, getSettings, issuerFrom, issuerName, issuerReplyTo, quoteDues, Row, serviceWhen, todayParis } from "../_shared/commerce-core.ts";
 
 // Rappels au client avant la prestation (devis acceptés avec une date de prestation) :
 // - 72 h avant : rendez-vous (date, heure, lieu) + acompte à régler s'il ne l'est pas ;
@@ -84,7 +84,7 @@ async function sendEmail(payload: Row) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: requiredEnv("ORDER_EMAIL_FROM"), ...payload })
+    body: JSON.stringify({ from: requiredEnv("ORDER_EMAIL_FROM"), ...payload }) // « from » du prestataire si fourni
   });
   if (!response.ok) throw new Error(`Resend HTTP ${response.status}`);
 }
@@ -116,7 +116,7 @@ async function defaultMessage(kind: string, quote: Row, client: Row) {
         : "Votre acompte a bien été reçu, merci.",
       "",
       "N'hésitez pas à me contacter si vous avez la moindre question.", "",
-      "Bien cordialement,", "Alexandre Palanca"
+      "Bien cordialement,", quote.issuer === "elisa" ? "Elisa Martignac" : "Alexandre Palanca"
     ].join("\n");
   }
   const today = todayParis();
@@ -135,7 +135,7 @@ async function defaultMessage(kind: string, quote: Row, client: Row) {
       : ["Tout est déjà réglé, merci !"]),
     "",
     day === "demain" ? "À demain !" : "À très vite !", "",
-    "Bien cordialement,", "Alexandre Palanca"
+    "Bien cordialement,", quote.issuer === "elisa" ? "Elisa Martignac" : "Alexandre Palanca"
   ].join("\n");
 }
 
@@ -186,7 +186,8 @@ async function prepare() {
     const link = `${site()}/rappel.html?t=${token}`;
     const intro = `Le rappel ${KIND_LABEL[kind]} pour ${client.name} (devis ${quote.number}, rendez-vous le ${where(quote)}) est prêt. Il ne partira chez le client qu'après ta validation.`;
     await sendEmail({
-      to: [requiredEnv("CONTACT_EMAIL_TO")],
+      from: issuerFrom(await getSettings(quote.issuer)),
+      to: [issuerReplyTo(await getSettings(quote.issuer))],
       subject: `À valider : rappel ${kind === "j3" ? "J-3" : "J-1"} pour ${client.name} — ${serviceWhen(quote)}`,
       text: `${intro}\n\nRelire, modifier et envoyer : ${link}\n\n----- Aperçu -----\n\n${message}`,
       html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
@@ -243,10 +244,11 @@ async function send(body: Row) {
   try {
     await sendEmail({
       to: [client.email],
-      reply_to: requiredEnv("CONTACT_EMAIL_TO"),
+      from: issuerFrom(await getSettings(quote.issuer)),
+      reply_to: issuerReplyTo(await getSettings(quote.issuer)),
       subject: reminder.kind === "j3"
-        ? `Rappel : votre rendez-vous du ${serviceWhen(quote)} — Alexandre Palanca`
-        : `Votre rendez-vous approche — infos pratiques et règlement du solde — Alexandre Palanca`,
+        ? `Rappel : votre rendez-vous du ${serviceWhen(quote)} — ${issuerName(await getSettings(quote.issuer))}`
+        : `Votre rendez-vous approche — infos pratiques et règlement du solde — ${issuerName(await getSettings(quote.issuer))}`,
       text: message + (pay ? `\n\n${pay.label} : ${pay.url}` : ""),
       html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
         <p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>${pay ? button(pay.url, pay.label) : ""}</div>`

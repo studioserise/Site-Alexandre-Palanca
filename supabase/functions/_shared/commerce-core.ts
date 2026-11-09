@@ -102,8 +102,28 @@ export async function patchOne(table: string, id: string, body: Row) {
   return updated[0];
 }
 
-export async function getSettings() {
-  return (await rows("commerce_settings?select=*&id=eq.1"))[0];
+// Deux prestataires indépendants : chaque document suit les réglages de son prestataire.
+export const ISSUERS = ["alexandre", "elisa"] as const;
+export type Issuer = typeof ISSUERS[number];
+export function issuerOf(value: unknown): Issuer {
+  return value === "elisa" ? "elisa" : "alexandre";
+}
+export async function getSettings(issuer: unknown = "alexandre") {
+  const settings = (await rows(`commerce_settings?select=*&issuer=eq.${issuerOf(issuer)}`))[0];
+  if (!settings) throw new UserError("Fiche prestataire introuvable.", 500);
+  return settings;
+}
+// Expéditeur et adresse de réponse des e-mails du prestataire (même adresse d'envoi, nom propre)
+export function issuerName(settings: Row) {
+  return String(settings.legal_name || "Alexandre Palanca");
+}
+export function issuerFrom(settings: Row) {
+  const configured = requiredEnv("ORDER_EMAIL_FROM");
+  const address = /<([^>]+)>/.exec(configured)?.[1] ?? configured.trim();
+  return `${issuerName(settings).replace(/[<>"]/g, "")} <${address}>`;
+}
+export function issuerReplyTo(settings: Row) {
+  return settings.notify_email || Deno.env.get("CONTACT_EMAIL_TO") || settings.email;
 }
 
 // ---------------------------------------------------------------- clients
@@ -319,7 +339,12 @@ export function depositDueDate(quote: Row, settings: Row) {
 }
 
 export async function saveQuote(body: Row) {
-  const settings = await getSettings();
+  let issuer = issuerOf(body.issuer);
+  if (body.quoteId) {
+    const current = (await rows(`quotes?select=issuer&id=${eq(uuid(body.quoteId, "Devis"))}`))[0];
+    if (current && body.issuer === undefined) issuer = issuerOf(current.issuer);
+  }
+  const settings = await getSettings(issuer);
   const client = await upsertClient(body.client ?? {});
   const items = parseItems(body.items);
   const depositEnabled = body.depositEnabled !== false;
@@ -328,6 +353,7 @@ export async function saveQuote(body: Row) {
   const deposit = depositCents(totals.totalTtcCents, depositEnabled, depositBps);
 
   const fields = {
+    issuer,
     client_id: client.id,
     client_snapshot: clientSnapshot(client),
     valid_until: date(body.validUntil, "Date de validité"),
@@ -475,9 +501,9 @@ export async function quotePdf(quote: Row, settings: Row) {
       { heading: "Description du projet", text: quote.project_description },
       { heading: "Conditions particulières", text: quote.special_conditions },
       { heading: "Modalités de paiement", text: quote.payment_terms, small: true },
-      { heading: "Conditions d'annulation", text: quote.cancellation_terms, small: true },
-      { heading: "Conditions de livraison", text: quote.delivery_terms, small: true },
-      { heading: "Utilisation des photographies et vidéos", text: quote.usage_terms, small: true }
+      { heading: settings.cancellation_heading || "Conditions d'annulation", text: quote.cancellation_terms, small: true },
+      { heading: settings.delivery_heading || "Conditions de livraison", text: quote.delivery_terms, small: true },
+      { heading: settings.usage_heading || "Utilisation des photographies et vidéos", text: quote.usage_terms, small: true }
     ],
     signatures: {
       client: "Date et signature, précédées de la mention manuscrite « Bon pour accord »",
@@ -587,14 +613,14 @@ export async function validateQuote(id: string) {
   if (!quote.valid_until) throw new UserError("Date de validité invalide : à renseigner avant validation.");
 
   // La génération est testée avant d'attribuer un numéro, pour ne pas en perdre.
-  const settings = await getSettings();
+  const settings = await getSettings(quote.issuer);
   const issueDate = todayParis();
   const snapshot = clientSnapshot(client);
-  await renderOrFail(() => quotePdf({ ...quote, number: "D-0000-0000", client_snapshot: snapshot }, settings));
+  await renderOrFail(() => quotePdf({ ...quote, number: "XX-D-0000-0000", client_snapshot: snapshot }, settings));
 
   const number = await databaseRequest("rpc/next_document_number", {
     method: "POST",
-    body: JSON.stringify({ p_kind: "quote" })
+    body: JSON.stringify({ p_kind: "quote", p_issuer: issuerOf(quote.issuer) })
   }) as string;
   const bytes = await renderOrFail(() =>
     quotePdf({ ...quote, number, issue_date: issueDate, client_snapshot: snapshot }, settings)
@@ -656,12 +682,18 @@ export function invoiceTotals(items: ItemInput[], deductedCents: number) {
 }
 
 export async function writeInvoice(body: Row) {
-  const settings = await getSettings();
+  let issuer = issuerOf(body.issuer);
+  if (body.invoiceId) {
+    const current = (await rows(`invoices?select=issuer&id=${eq(uuid(body.invoiceId, "Facture"))}`))[0];
+    if (current && body.issuer === undefined) issuer = issuerOf(current.issuer);
+  }
+  const settings = await getSettings(issuer);
   const client = await upsertClient(body.client ?? {});
   const items = parseItems(body.items);
   const { totals, fields } = invoiceTotals(items, 0);
   const base = {
     kind: "invoice",
+    issuer,
     client_id: client.id,
     client_snapshot: clientSnapshot(client),
     due_date: date(body.dueDate, "Échéance") ?? addDays(todayParis(), settings.invoice_payment_days),
@@ -697,7 +729,7 @@ export async function invoiceFromQuote(quoteId: string, mode: string) {
   if (quote.status !== "accepted") {
     throw new UserError("Requête invalide : seul un devis accepté peut être facturé.", 409);
   }
-  const settings = await getSettings();
+  const settings = await getSettings(quote.issuer);
   const siblings = await rows(
     `invoices?select=id,kind,status,total_ttc_cents&quote_id=${eq(quoteId)}&status=neq.cancelled`
   );
@@ -750,6 +782,7 @@ export async function invoiceFromQuote(quoteId: string, mode: string) {
     : null;
   const invoice = await insertOne("invoices", {
     kind,
+    issuer: issuerOf(quote.issuer),
     quote_id: quote.id,
     client_id: quote.client_id,
     // Coordonnées à jour (le client a pu compléter son adresse en acceptant le devis)
@@ -793,14 +826,14 @@ export async function issueInvoice(id: string) {
     invoice.amount_due_cents = Math.max(0, invoice.total_ttc_cents - deducted);
   }
 
-  const settings = await getSettings();
+  const settings = await getSettings(invoice.issuer);
   const issueDate = todayParis();
   const snapshot = clientSnapshot(client);
-  await renderOrFail(() => invoicePdf({ ...invoice, number: "F-0000-0000", client_snapshot: snapshot }, settings));
+  await renderOrFail(() => invoicePdf({ ...invoice, number: "XX-F-0000-0000", client_snapshot: snapshot }, settings));
 
   const number = await databaseRequest("rpc/next_document_number", {
     method: "POST",
-    body: JSON.stringify({ p_kind: invoice.kind === "deposit" ? "deposit" : "invoice" })
+    body: JSON.stringify({ p_kind: invoice.kind === "deposit" ? "deposit" : "invoice", p_issuer: issuerOf(invoice.issuer) })
   }) as string;
   const bytes = await renderOrFail(() =>
     invoicePdf({ ...invoice, number, issue_date: issueDate, client_snapshot: snapshot }, settings)
@@ -953,7 +986,9 @@ export async function documentFileName(kind: string, record: Row) {
   }
   const photo = items.some((item) => /photo/i.test(item.category) || /photo|portrait|séance|reportage/i.test(item.title));
   const video = items.some((item) => /vid[ée]o/i.test(item.category) || /vid[ée]o|film|captation|tournage|clip|montage|production/i.test(item.title));
-  const media = photo && video ? "Photo & vidéo" : photo ? "Photo" : video ? "Vidéo" : "";
+  const media = record.issuer === "elisa"
+    ? "Site internet"
+    : photo && video ? "Photo & vidéo" : photo ? "Photo" : video ? "Vidéo" : "";
   const label = kind === "quote" ? "Devis" : record.kind === "deposit" ? "Facture d'acompte" : "Facture";
   const client = String(record.client_snapshot?.name ?? "").trim();
   const name = [label, media, client, record.number].filter(Boolean).join(" ")
@@ -990,6 +1025,8 @@ export async function sendDocument(body: Row) {
   if (!download.ok) throw new UserError("Le PDF archivé est introuvable.", 500);
   const bytes = new Uint8Array(await download.arrayBuffer());
   const fileName = await documentFileName(String(body.kind), record);
+  const settings = await getSettings(record.issuer);
+  const signature = issuerName(settings);
   const isQuote = body.kind === "quote";
   const label = isQuote ? "Devis" : "Facture";
   const snapshot = record.client_snapshot ?? {};
@@ -1024,12 +1061,13 @@ export async function sendDocument(body: Row) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      from: requiredEnv("ORDER_EMAIL_FROM"),
+      from: issuerFrom(settings),
       to: [to],
-      subject: `Votre ${label.toLowerCase()} ${record.number} — Alexandre Palanca`,
-      text: `${text}\n\nAlexandre Palanca${responseUrl ? `\n\nRépondre à la proposition : ${responseUrl}` : ""}`,
+      reply_to: issuerReplyTo(settings),
+      subject: `Votre ${label.toLowerCase()} ${record.number} — ${signature}`,
+      text: `${text}\n\n${signature}${responseUrl ? `\n\nRépondre à la proposition : ${responseUrl}` : ""}`,
       html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
-        <p>${escapeHtml(text).replace(/\n/g, "<br>")}</p><p>Alexandre Palanca</p>${button}</div>`,
+        <p>${escapeHtml(text).replace(/\n/g, "<br>")}</p><p>${escapeHtml(signature)}</p>${button}</div>`,
       attachments: [{ filename: fileName, content: toBase64(bytes) }]
     })
   });
@@ -1042,11 +1080,13 @@ export async function sendDocument(body: Row) {
 
 // ---------------------------------------------------------------- listes
 
-export async function dashboard() {
+// Chiffres séparés par prestataire (jamais additionnés entre Alexandre et Elisa)
+export async function dashboard(issuer: unknown = "alexandre") {
+  const who = issuerOf(issuer);
   const [quotes, invoices, drafts] = await Promise.all([
-    rows("quotes?select=status,valid_until&number=not.is.null"),
-    rows("invoices?select=status,total_ttc_cents,amount_due_cents,paid_cents&number=not.is.null"),
-    rows("quotes?select=id&number=is.null")
+    rows(`quotes?select=status,valid_until&number=not.is.null&issuer=eq.${who}`),
+    rows(`invoices?select=status,total_ttc_cents,amount_due_cents,paid_cents&number=not.is.null&issuer=eq.${who}`),
+    rows(`quotes?select=id&number=is.null&issuer=eq.${who}`)
   ]);
   const live = invoices.filter((invoice) => invoice.status !== "cancelled");
   return {
@@ -1107,13 +1147,15 @@ export function settingsFields(s: Row) {
 export async function handle(body: Row) {
   switch (body.action) {
     case "dashboard":
-      return await dashboard();
+      return { alexandre: await dashboard("alexandre"), elisa: await dashboard("elisa") };
 
     case "get-settings":
-      return { settings: await getSettings() };
+      return { settings: await getSettings(body.issuer) };
+    case "list-issuers":
+      return { issuers: await rows("commerce_settings?select=issuer,legal_name,trade_name,prefix,card_payments&order=id.asc") };
     case "save-settings":
       return {
-        settings: (await rows("commerce_settings?id=eq.1&select=*", {
+        settings: (await rows(`commerce_settings?issuer=eq.${issuerOf(body.issuer)}&select=*`, {
           method: "PATCH",
           headers: { Prefer: "return=representation" },
           body: JSON.stringify({ ...settingsFields(body.settings ?? {}), updated_at: new Date().toISOString() })
@@ -1133,7 +1175,8 @@ export async function handle(body: Row) {
       return { client: await upsertClient(body.client ?? {}) };
 
     case "list-services": {
-      const filter = body.includeInactive ? "" : "&active=is.true";
+      const filter = (body.includeInactive ? "" : "&active=is.true") +
+        (body.issuer ? `&issuer=eq.${issuerOf(body.issuer)}` : "");
       return { services: await rows(`services?select=*&order=name.asc${filter}`) };
     }
     case "save-service": {
@@ -1145,7 +1188,8 @@ export async function handle(body: Row) {
         unit: str(s.unit, "Unité", 30) || "unité",
         vat_rate_bps: integer(s.vatRateBps, "Taux de TVA", 0, 10000),
         category: str(s.category, "Catégorie", 100),
-        active: s.active !== false
+        active: s.active !== false,
+        ...(s.id && s.issuer === undefined ? {} : { issuer: issuerOf(s.issuer) })
       };
       return {
         service: s.id
@@ -1165,7 +1209,7 @@ export async function handle(body: Row) {
 
     case "list-quotes": {
       const list = await rows(
-        "quotes?select=id,number,status,issue_date,valid_until,total_ttc_cents,client_snapshot,pdf_path&order=created_at.desc&limit=500"
+        "quotes?select=id,number,issuer,status,issue_date,valid_until,total_ttc_cents,client_snapshot,pdf_path&order=created_at.desc&limit=500"
       );
       return {
         quotes: list.map((q) => ({
@@ -1220,7 +1264,7 @@ export async function handle(body: Row) {
 
     case "list-invoices": {
       const list = await rows(
-        "invoices?select=id,number,kind,status,issue_date,due_date,total_ttc_cents,amount_due_cents,paid_cents,client_snapshot,pdf_path&order=created_at.desc&limit=500"
+        "invoices?select=id,number,issuer,kind,status,issue_date,due_date,total_ttc_cents,amount_due_cents,paid_cents,client_snapshot,pdf_path&order=created_at.desc&limit=500"
       );
       return {
         invoices: list.map((i) => ({

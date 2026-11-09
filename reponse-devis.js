@@ -65,7 +65,7 @@ async function start() {
     return;
   }
   const q = data.quote;
-  $("q-eyebrow").textContent = `Devis ${q.number}`;
+  $("q-eyebrow").textContent = `Devis ${q.number}${data.issuerName ? ` · ${data.issuerName}` : ""}`;
   document.title = `Devis ${q.number} — Alexandre Palanca`;
   if (data.state !== "open") {
     finish(...STATES[data.state]);

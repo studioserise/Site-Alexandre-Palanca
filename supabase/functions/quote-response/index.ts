@@ -1,6 +1,6 @@
 import { databaseRequest, sha256 } from "../_shared/http.ts";
 import { signQuotePdf } from "../_shared/commerce-pdf.ts";
-import { invoiceFromQuote, issueInvoice, longDateFr, serviceSummary } from "../_shared/commerce-core.ts";
+import { getSettings, invoiceFromQuote, issueInvoice, issuerFrom, issuerName, issuerReplyTo, longDateFr, serviceSummary } from "../_shared/commerce-core.ts";
 
 const BUCKET = "commerce-documents";
 
@@ -128,7 +128,9 @@ type Section = { title: string; lines: Array<[string, string]> | string[] };
 // E-mail de notification envoyé à Alex à chaque réponse (accepté / refusé), avec toutes les infos.
 async function notifyAlex(
   subject: string, headline: string, sections: Section[], replyTo: string,
-  attachments: Array<{ filename: string; content: string }> = []
+  attachments: Array<{ filename: string; content: string }> = [],
+  // deno-lint-ignore no-explicit-any
+  issuerSettings: Record<string, any>
 ) {
   const textBody = [headline, ...sections.flatMap((section) => [
     "", section.title.toUpperCase(),
@@ -147,8 +149,8 @@ async function notifyAlex(
     method: "POST",
     headers: { Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: requiredEnv("ORDER_EMAIL_FROM"),
-      to: [requiredEnv("CONTACT_EMAIL_TO")],
+      from: issuerFrom(issuerSettings),
+      to: [issuerReplyTo(issuerSettings)],
       ...(isEmail(replyTo) ? { reply_to: replyTo } : {}),
       subject,
       text: textBody,
@@ -196,6 +198,7 @@ function publicView(quote: Row, client: Row | null) {
   const source = client ?? snapshot;
   return {
     state: stateOf(quote),
+    issuerName: quote.issuer === "elisa" ? "Elisa Martignac" : "Alexandre Palanca",
     quote: {
       number: quote.number,
       issueDate: quote.issue_date,
@@ -233,7 +236,8 @@ async function load(token: unknown) {
 // E-mail au client après sa signature : copie du devis signé, facture d'acompte, bouton de paiement.
 async function sendClientConfirmation(
   data: Row, quote: Row, deposit: Row | null, payUrl: string,
-  attachments: Array<{ filename: string; content: string }>
+  attachments: Array<{ filename: string; content: string }>,
+  issuerSettings: Row
 ) {
   const firstName = data.type === "professionnel" ? "" : String(data.name).split(/\s+/)[0];
   const lines = [
@@ -252,7 +256,7 @@ async function sendClientConfirmation(
     "Je reviendrai vers vous quelques jours avant le rendez-vous pour vous en rappeler les détails.",
     "",
     "Bien cordialement,",
-    "Alexandre Palanca"
+    issuerName(issuerSettings)
   ];
   const button = payUrl
     ? `<p style="margin:28px 0"><a href="${escapeHtml(payUrl)}" style="display:inline-block;padding:15px 30px;background:#111111;color:#ffffff;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">Régler l'acompte (${escapeHtml(money(deposit!.amount_due_cents))})</a></p>
@@ -262,12 +266,12 @@ async function sendClientConfirmation(
     method: "POST",
     headers: { Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: requiredEnv("ORDER_EMAIL_FROM"),
+      from: issuerFrom(issuerSettings),
       to: [data.email],
-      reply_to: requiredEnv("CONTACT_EMAIL_TO"),
+      reply_to: issuerReplyTo(issuerSettings),
       subject: deposit
-        ? `Votre devis ${quote.number} signé et votre facture d'acompte — Alexandre Palanca`
-        : `Votre devis ${quote.number} signé — Alexandre Palanca`,
+        ? `Votre devis ${quote.number} signé et votre facture d'acompte — ${issuerName(issuerSettings)}`
+        : `Votre devis ${quote.number} signé — ${issuerName(issuerSettings)}`,
       text: lines.join("\n") + (payUrl ? `\n\nRégler l'acompte (carte ou virement) : ${payUrl}` : ""),
       html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
         <p>${lines.map(escapeHtml).join("<br>")}</p>${button}</div>`,
@@ -392,7 +396,8 @@ async function accept(body: Row, request: Request) {
     : null;
 
   // Copie au client : devis signé, facture d'acompte et lien de paiement.
-  await sendClientConfirmation(data, quote, deposit, payUrl, [signedAttachment, ...(depositAttachment ? [depositAttachment] : [])]);
+  const issuerSettings = await getSettings(quote.issuer);
+  await sendClientConfirmation(data, quote, deposit, payUrl, [signedAttachment, ...(depositAttachment ? [depositAttachment] : [])], issuerSettings);
 
   const before = client ?? {};
   const labels: Record<string, string> = {
@@ -429,7 +434,7 @@ async function accept(body: Row, request: Request) {
         ? `Elle n'a pas pu être émise automatiquement (${depositError}) : créez-la depuis la fiche du devis.`
         : "Pas d'acompte prévu sur ce devis."]
     }
-  ], data.email, [signedAttachment, ...(depositAttachment ? [depositAttachment] : [])]);
+  ], data.email, [signedAttachment, ...(depositAttachment ? [depositAttachment] : [])], issuerSettings);
   return { state: "accepted", payUrl, depositCents: deposit?.amount_due_cents ?? 0 };
 }
 
@@ -462,7 +467,7 @@ async function refuse(body: Row) {
       ]
     },
     ...(await quoteSection(quote))
-  ], who.email || "");
+  ], who.email || "", [], await getSettings(quote.issuer));
   return { state: "refused" };
 }
 

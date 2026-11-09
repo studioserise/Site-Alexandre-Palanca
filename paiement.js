@@ -70,7 +70,7 @@ async function start() {
   } catch (error) {
     return say("Fiche indisponible", error.message);
   }
-  $("p-eyebrow").textContent = `Devis ${data.number}`;
+  $("p-eyebrow").textContent = `Devis ${data.number}${data.holder ? ` · ${data.holder}` : ""}`;
   if (data.amountCents <= 0) {
     return say(part === "acompte" ? "Acompte réglé" : "Tout est réglé", part === "acompte"
       ? "L'acompte de ce devis est déjà réglé. Merci !"
@@ -80,6 +80,11 @@ async function start() {
     ? `L'acompte confirme la réservation de votre date.${data.dueDate ? ` Merci de le régler au plus tard le ${dateFr(data.dueDate)}.` : ""}`
     : "Le solde peut être réglé dès maintenant par carte ou par virement, ou sur place le jour même (espèces ou virement).");
   $("p-card").textContent = `Payer ${money(data.amountCents)} par carte`;
+  // Carte proposée seulement si le prestataire l'accepte ; sinon, virement uniquement
+  if (!data.cardAvailable) {
+    document.querySelector(".pay-card").hidden = true;
+    document.querySelector(".pay-or").hidden = true;
+  }
   const facts = [
     ["Client", data.clientName],
     ...(data.invoiceNumber ? [[part === "acompte" ? "Facture d'acompte" : "Facture", data.invoiceNumber]] : []),

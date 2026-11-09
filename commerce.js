@@ -17,6 +17,19 @@ const TABS = [
   ["settings", "Réglages"]
 ];
 
+// Deux prestataires indépendants : chaque devis, facture et prestation appartient à l'un d'eux.
+const ISSUERS = [["alexandre", "Alexandre Palanca", "Photo & vidéo"], ["elisa", "Elisa Martignac", "Sites internet"]];
+const issuerLabel = (key) => (ISSUERS.find(([k]) => k === key) || ISSUERS[0])[1];
+const issuerTag = (key) => `<span class="com-issuer is-${key === "elisa" ? "elisa" : "alexandre"}">${key === "elisa" ? "EM" : "AP"}</span>`;
+let listIssuer = "all";
+const issuerFilter = (current) => `<div class="com-issuer-filter">${[["all", "Tous"], ...ISSUERS.map(([k, n]) => [k, n])].map(([k, n]) =>
+  `<button type="button" class="gallery-quiet-button${current === k ? " is-active" : ""}" data-issuer-filter="${k}">${n}</button>`).join("")}</div>`;
+const newQuoteButtons = () => ISSUERS.map(([k, n, what]) =>
+  `<button class="gallery-primary-button" type="button" data-new-quote="${k}">Nouveau devis — ${what} (${n.split(" ")[0]})</button>`).join("");
+function bindNewQuote() {
+  view.querySelectorAll("[data-new-quote]").forEach((b) => b.onclick = () => quoteEditor(null, null, { issuer: b.dataset.newQuote }));
+}
+
 const QUOTE_STATUS = {
   draft: ["Brouillon", ""], sent: ["Envoyé", "warn"], accepted: ["Accepté", "ok"],
   refused: ["Refusé", "bad"], expired: ["Expiré", "bad"]
@@ -99,16 +112,21 @@ function go(tab, ...args) {
 
 async function dashboard() {
   view.innerHTML = "<p>Chargement…</p>";
-  const data = await run(() => api("dashboard"));
-  if (!data) return;
-  const cards = [
-    ["Devis en attente", data.quotesPending], ["Devis acceptés", data.quotesAccepted],
-    ["Factures impayées", data.invoicesUnpaid], ["Factures payées", data.invoicesPaid],
-    ["Total facturé", money(data.totalInvoicedCents)], ["Reste à encaisser", money(data.remainingCents)]
-  ];
-  view.innerHTML = `<div class="com-cards">${cards.map(([l, v]) => `<div class="com-card"><span>${l}</span><strong>${v}</strong></div>`).join("")}</div>
-    <div class="com-actions"><button class="gallery-primary-button" id="new-quote" type="button">Nouveau devis</button></div>`;
-  document.getElementById("new-quote").onclick = () => quoteEditor();
+  const all = await run(() => api("dashboard"));
+  if (!all) return;
+  // Chiffres séparés par prestataire : jamais additionnés
+  const block = ([key, name, what]) => {
+    const data = all[key];
+    const cards = [
+      ["Devis en attente", data.quotesPending], ["Devis acceptés", data.quotesAccepted],
+      ["Factures impayées", data.invoicesUnpaid], ["Factures payées", data.invoicesPaid],
+      ["Total facturé", money(data.totalInvoicedCents)], ["Reste à encaisser", money(data.remainingCents)]
+    ];
+    return `<h2 class="com-issuer-title">${issuerTag(key)} ${esc(name)} <small>${esc(what)}</small></h2>
+      <div class="com-cards">${cards.map(([l, v]) => `<div class="com-card"><span>${l}</span><strong>${v}</strong></div>`).join("")}</div>`;
+  };
+  view.innerHTML = `${ISSUERS.map(block).join("")}<div class="com-actions">${newQuoteButtons()}</div>`;
+  bindNewQuote();
 }
 
 // ------------------------------------------------------------ listes
@@ -117,11 +135,13 @@ async function quotes() {
   view.innerHTML = "<p>Chargement…</p>";
   const data = await run(() => api("list-quotes"));
   if (!data) return;
-  view.innerHTML = `<div class="com-actions"><button class="gallery-primary-button" id="new-quote" type="button">Nouveau devis</button></div>
+  const shown = data.quotes.filter((q) => listIssuer === "all" || q.issuer === listIssuer);
+  view.innerHTML = `<div class="com-actions">${newQuoteButtons()}</div>${issuerFilter(listIssuer)}
     <div class="com-table-wrap"><table class="com-table"><thead><tr><th>Numéro</th><th>Client</th><th>Date</th><th>Validité</th><th class="com-num">Total TTC</th><th>Statut</th></tr></thead><tbody>
-    ${data.quotes.map((q) => `<tr class="is-click" data-id="${q.id}" data-num="${q.number ? 1 : ""}"><td>${esc(q.number || "Brouillon")}</td><td>${esc(q.client_name)}</td><td>${dateFr(q.issue_date)}</td><td>${dateFr(q.valid_until)}</td><td class="com-num">${money(q.total_ttc_cents)}</td><td>${badge(QUOTE_STATUS, q.status)}</td></tr>`).join("") || '<tr><td colspan="6">Aucun devis.</td></tr>'}
+    ${shown.map((q) => `<tr class="is-click" data-id="${q.id}" data-num="${q.number ? 1 : ""}"><td>${issuerTag(q.issuer)} ${esc(q.number || "Brouillon")}</td><td>${esc(q.client_name)}</td><td>${dateFr(q.issue_date)}</td><td>${dateFr(q.valid_until)}</td><td class="com-num">${money(q.total_ttc_cents)}</td><td>${badge(QUOTE_STATUS, q.status)}</td></tr>`).join("") || '<tr><td colspan="6">Aucun devis.</td></tr>'}
     </tbody></table></div>`;
-  document.getElementById("new-quote").onclick = () => quoteEditor();
+  bindNewQuote();
+  view.querySelectorAll("[data-issuer-filter]").forEach((b) => b.onclick = () => { listIssuer = b.dataset.issuerFilter; quotes(); });
   view.querySelectorAll("tr[data-id]").forEach((row) => {
     row.onclick = () => (row.dataset.num ? quoteDetail(row.dataset.id) : quoteEditor(row.dataset.id));
   });
@@ -131,9 +151,11 @@ async function invoices() {
   view.innerHTML = "<p>Chargement…</p>";
   const data = await run(() => api("list-invoices"));
   if (!data) return;
-  view.innerHTML = `<div class="com-table-wrap"><table class="com-table"><thead><tr><th>Numéro</th><th>Type</th><th>Client</th><th>Date</th><th>Échéance</th><th class="com-num">Total TTC</th><th class="com-num">Reste dû</th><th>Statut</th></tr></thead><tbody>
-    ${data.invoices.map((i) => `<tr class="is-click" data-id="${i.id}"><td>${esc(i.number || "Brouillon")}</td><td>${i.kind === "deposit" ? "Acompte" : "Facture"}</td><td>${esc(i.client_name)}</td><td>${dateFr(i.issue_date)}</td><td>${dateFr(i.due_date)}</td><td class="com-num">${money(i.total_ttc_cents)}</td><td class="com-num">${money(i.remaining_cents)}</td><td>${badge(INVOICE_STATUS, i.status)}</td></tr>`).join("") || '<tr><td colspan="8">Aucune facture. Elles se créent depuis un devis accepté.</td></tr>'}
+  const shown = data.invoices.filter((i) => listIssuer === "all" || i.issuer === listIssuer);
+  view.innerHTML = `${issuerFilter(listIssuer)}<div class="com-table-wrap"><table class="com-table"><thead><tr><th>Numéro</th><th>Type</th><th>Client</th><th>Date</th><th>Échéance</th><th class="com-num">Total TTC</th><th class="com-num">Reste dû</th><th>Statut</th></tr></thead><tbody>
+    ${shown.map((i) => `<tr class="is-click" data-id="${i.id}"><td>${issuerTag(i.issuer)} ${esc(i.number || "Brouillon")}</td><td>${i.kind === "deposit" ? "Acompte" : "Facture"}</td><td>${esc(i.client_name)}</td><td>${dateFr(i.issue_date)}</td><td>${dateFr(i.due_date)}</td><td class="com-num">${money(i.total_ttc_cents)}</td><td class="com-num">${money(i.remaining_cents)}</td><td>${badge(INVOICE_STATUS, i.status)}</td></tr>`).join("") || '<tr><td colspan="8">Aucune facture. Elles se créent depuis un devis accepté.</td></tr>'}
     </tbody></table></div>`;
+  view.querySelectorAll("[data-issuer-filter]").forEach((b) => b.onclick = () => { listIssuer = b.dataset.issuerFilter; invoices(); });
   view.querySelectorAll("tr[data-id]").forEach((row) => { row.onclick = () => invoiceDetail(row.dataset.id); });
 }
 
@@ -213,11 +235,13 @@ async function showClient(id) {
 
 // ------------------------------------------------------------ prestations
 
+let serviceIssuer = "alexandre";
 async function services() {
   view.innerHTML = "<p>Chargement…</p>";
-  const data = await run(() => api("list-services", { includeInactive: true }));
+  const data = await run(() => api("list-services", { includeInactive: true, issuer: serviceIssuer }));
   if (!data) return;
-  view.innerHTML = `<div class="com-layout"><div class="com-panel"><h2>Catalogue</h2><div class="com-table-wrap"><table class="com-table"><thead><tr><th>Prestation</th><th class="com-num">Prix HT</th><th>Unité</th><th>TVA</th></tr></thead><tbody>
+  view.innerHTML = `<div class="com-issuer-filter">${ISSUERS.map(([k, n]) => `<button type="button" class="gallery-quiet-button${serviceIssuer === k ? " is-active" : ""}" data-svc-issuer="${k}">${n}</button>`).join("")}</div>
+    <div class="com-layout"><div class="com-panel"><h2>Catalogue — ${esc(issuerLabel(serviceIssuer))}</h2><div class="com-table-wrap"><table class="com-table"><thead><tr><th>Prestation</th><th class="com-num">Prix HT</th><th>Unité</th><th>TVA</th></tr></thead><tbody>
     ${data.services.map((s) => `<tr class="is-click" data-id="${s.id}"><td>${esc(s.name)}${s.active ? "" : " <small>(désactivée)</small>"}</td><td class="com-num">${money(s.unit_price_cents)}</td><td>${esc(s.unit)}</td><td>${s.vat_rate_bps / 100} %</td></tr>`).join("") || '<tr><td colspan="4">Catalogue vide.</td></tr>'}
     </tbody></table></div><p><button class="gallery-quiet-button" id="svc-new" type="button">+ Nouvelle prestation</button></p></div>
     <div class="com-panel" id="svc-form"><p>Sélectionnez une prestation ou créez-en une.</p></div></div>`;
@@ -233,7 +257,7 @@ async function services() {
     bindFields(box, model);
     document.getElementById("svc-active").onchange = (e) => { model.active = e.target.checked; };
     document.getElementById("svc-save").onclick = async () => {
-      const ok = await run(() => api("save-service", { service: { id: model.id, name: model.name, description: model.description, unit: model.unit, category: model.category, active: model.active, unitPriceCents: toCents(model.price), vatRateBps: Math.round((parseFloat(String(model.vat).replace(",", ".")) || 0) * 100) } }));
+      const ok = await run(() => api("save-service", { service: { id: model.id, issuer: serviceIssuer, name: model.name, description: model.description, unit: model.unit, category: model.category, active: model.active, unitPriceCents: toCents(model.price), vatRateBps: Math.round((parseFloat(String(model.vat).replace(",", ".")) || 0) * 100) } }));
       if (ok) { say("Prestation enregistrée.", true); services(); }
     };
     const del = document.getElementById("svc-del");
@@ -243,36 +267,41 @@ async function services() {
     };
   };
   document.getElementById("svc-new").onclick = () => edit({});
+  view.querySelectorAll("[data-svc-issuer]").forEach((b) => b.onclick = () => { serviceIssuer = b.dataset.svcIssuer; services(); });
   view.querySelectorAll("tr[data-id]").forEach((row) => { row.onclick = () => edit(data.services.find((s) => s.id === row.dataset.id)); });
 }
 
 // ------------------------------------------------------------ réglages
 
+let settingsIssuer = "alexandre";
 async function settings() {
   view.innerHTML = "<p>Chargement…</p>";
-  const data = await run(() => api("get-settings"));
+  const data = await run(() => api("get-settings", { issuer: settingsIssuer }));
   if (!data) return;
   const s = { ...data.settings };
   const text = (k, label) => field(label, input(k, s[k] ?? ""));
   const area = (k, label) => field(label, textarea(k, s[k] ?? ""));
-  view.innerHTML = `<div class="com-panel"><h2>Informations de l'émetteur</h2><div class="com-form">
+  view.innerHTML = `<div class="com-issuer-filter">${ISSUERS.map(([k, n]) => `<button type="button" class="gallery-quiet-button${settingsIssuer === k ? " is-active" : ""}" data-set-issuer="${k}">${n}</button>`).join("")}</div>
+    <div class="com-panel"><h2>Fiche prestataire — ${esc(issuerLabel(settingsIssuer))} <small>(numéros ${esc(s.prefix || "")}-…)</small></h2><div class="com-form">
     <div class="com-row">${text("legal_name", "Nom légal")}${text("trade_name", "Nom commercial")}</div>
     <div class="com-row">${text("siren", "SIREN / SIRET")}${text("iban", "IBAN")}</div>
     <div class="com-row">${text("bic", "BIC")}<p class="com-hint">L'IBAN et le BIC sont affichés au client sur la fiche de virement (acompte et solde).</p></div>
     ${text("address", "Adresse")}
     <div class="com-row">${text("postal_code", "Code postal")}${text("city", "Ville")}</div>
     <div class="com-row">${text("email", "E-mail")}${text("phone", "Téléphone")}</div>
+    ${text("notify_email", "E-mail qui reçoit les réponses des clients et les notifications")}
     ${area("vat_mention", "Mention TVA")}${area("legal_footer", "Mentions légales (pied de page)")}
     <h3>Valeurs par défaut</h3>
     <div class="com-row3 com-row">${text("default_validity_days", "Validité des devis (jours)")}${text("default_deposit_bps", "Acompte (en 1/100 %, 3000 = 30 %)")}${text("invoice_payment_days", "Délai de paiement (jours)")}</div>
-    ${area("default_payment_terms", "Modalités de paiement")}${area("default_cancellation_terms", "Conditions d'annulation")}
-    ${area("default_delivery_terms", "Conditions de livraison")}${area("default_usage_terms", "Conditions d'utilisation des images")}
+    ${area("default_payment_terms", "Modalités de paiement")}${area("default_cancellation_terms", s.cancellation_heading || "Conditions d'annulation")}
+    ${area("default_delivery_terms", s.delivery_heading || "Conditions de livraison")}${area("default_usage_terms", s.usage_heading || "Conditions d'utilisation")}
     <div class="com-actions"><button class="gallery-primary-button" id="set-save" type="button">Enregistrer</button></div></div></div>`;
   bindFields(view, s);
   document.getElementById("set-save").onclick = async () => {
-    const out = await run(() => api("save-settings", { settings: s }));
+    const out = await run(() => api("save-settings", { issuer: settingsIssuer, settings: s }));
     if (out) say("Réglages enregistrés.", true);
   };
+  view.querySelectorAll("[data-set-issuer]").forEach((b) => b.onclick = () => { settingsIssuer = b.dataset.setIssuer; settings(); });
 }
 
 // ------------------------------------------------------------ éditeur de devis
@@ -310,7 +339,15 @@ async function quoteEditor(id, presetClient, preset = {}) {
   view.innerHTML = "<p>Chargement…</p>";
   currentTab = "quotes";
   renderTabs();
-  const [cat, set] = await Promise.all([run(() => api("list-services")), run(() => api("get-settings"))]);
+  // Prestataire : celui du brouillon existant, sinon celui choisi (Alexandre par défaut)
+  let issuer = preset.issuer === "elisa" ? "elisa" : "alexandre";
+  let existing = null;
+  if (id) {
+    existing = await run(() => api("get-quote", { id }));
+    if (!existing) return;
+    issuer = existing.quote.issuer === "elisa" ? "elisa" : "alexandre";
+  }
+  const [cat, set] = await Promise.all([run(() => api("list-services", { issuer })), run(() => api("get-settings", { issuer }))]);
   if (!cat || !set) return;
   catalog = cat.services;
   appSettings = set.settings;
@@ -323,11 +360,11 @@ async function quoteEditor(id, presetClient, preset = {}) {
     deliveryTerms: s.default_delivery_terms || "", usageTerms: s.default_usage_terms || "",
     depositEnabled: true, depositPct: String((s.default_deposit_bps ?? 3000) / 100),
     contactRequestId: null,
-    ...preset
+    ...preset,
+    issuer
   };
   if (id) {
-    const data = await run(() => api("get-quote", { id }));
-    if (!data) return;
+    const data = existing;
     const q = data.quote;
     Object.assign(draft, {
       id: q.id, client: clientFromRow({ id: q.client_id, ...q.client_snapshot, postal_code: q.client_snapshot?.postalCode ?? q.client_snapshot?.postal_code, vat_number: q.client_snapshot?.vatNumber ?? q.client_snapshot?.vat_number }),
@@ -363,7 +400,7 @@ function previewHtml() {
 
 function renderEditor() {
   const stepsHtml = `<div class="com-steps">${STEPS.map((l, i) => `<div class="com-step ${i + 1 < step ? "is-done" : ""} ${i + 1 === step ? "is-current" : ""}">${i + 1}. ${l}</div>`).join("")}</div>`;
-  view.innerHTML = `<div class="com-top"><h2>${draft.id ? "Modifier le brouillon" : "Nouveau devis"}</h2>
+  view.innerHTML = `<div class="com-top"><h2>${issuerTag(draft.issuer)} ${draft.id ? "Modifier le brouillon" : "Nouveau devis"} — ${esc(issuerLabel(draft.issuer))}</h2>
     <button class="gallery-quiet-button com-preview-toggle" id="pv-toggle" type="button">Aperçu</button></div>
     <div class="com-layout"><div class="com-panel">${stepsHtml}<div class="com-form" id="step-body"></div>
     <div class="com-actions"><button class="gallery-quiet-button" id="prev" type="button" ${step === 1 ? "disabled" : ""}>←︎ Précédent</button>
@@ -439,8 +476,8 @@ function stepTerms(body, refresh) {
     ${field("Description du projet", textarea("projectDescription", draft.projectDescription))}
     ${field("Conditions particulières", textarea("specialConditions", draft.specialConditions))}
     <div class="com-row"><label class="com-check"><input type="checkbox" id="dep-on" ${draft.depositEnabled ? "checked" : ""}> Demander un acompte</label>${field("Acompte (%)", input("depositPct", draft.depositPct, 'inputmode="decimal"'))}</div>
-    ${field("Modalités de paiement", textarea("paymentTerms", draft.paymentTerms))}${field("Conditions d'annulation", textarea("cancellationTerms", draft.cancellationTerms))}
-    ${field("Livraison", textarea("deliveryTerms", draft.deliveryTerms))}${field("Utilisation des images", textarea("usageTerms", draft.usageTerms))}`;
+    ${field("Modalités de paiement", textarea("paymentTerms", draft.paymentTerms))}${field(appSettings.cancellation_heading || "Conditions d'annulation", textarea("cancellationTerms", draft.cancellationTerms))}
+    ${field(appSettings.delivery_heading || "Livraison", textarea("deliveryTerms", draft.deliveryTerms))}${field(appSettings.usage_heading || "Utilisation des images", textarea("usageTerms", draft.usageTerms))}`;
   bindFields(body, draft, refresh);
   document.getElementById("dep-on").onchange = (e) => { draft.depositEnabled = e.target.checked; refresh(); };
 }
@@ -462,7 +499,8 @@ function stepReview(body) {
       specialConditions: draft.specialConditions, paymentTerms: draft.paymentTerms, cancellationTerms: draft.cancellationTerms,
       deliveryTerms: draft.deliveryTerms, usageTerms: draft.usageTerms, depositEnabled: draft.depositEnabled,
       depositBps: Math.round((parseFloat(String(draft.depositPct).replace(",", ".")) || 0) * 100),
-      contactRequestId: draft.contactRequestId || undefined
+      contactRequestId: draft.contactRequestId || undefined,
+      issuer: draft.issuer
     }));
     if (data) draft.id = data.quote.id;
     return data;
@@ -519,7 +557,7 @@ async function quoteDetail(id) {
   const q = data.quote;
   const c = q.client_snapshot || {};
   const actions = await documentActions("quote", id, c.email);
-  view.innerHTML = `<div class="com-panel com-detail"><div class="com-top"><h2>Devis ${esc(q.number)} ${badge(QUOTE_STATUS, q.status)}</h2>
+  view.innerHTML = `<div class="com-panel com-detail"><div class="com-top"><h2>${issuerTag(q.issuer)} Devis ${esc(q.number)} ${badge(QUOTE_STATUS, q.status)}</h2>
     <a class="gallery-quiet-button" href="#" id="back">←︎ Retour</a></div>
     <dl><dt>Client</dt><dd>${esc(c.name)}</dd><dt>Date</dt><dd>${dateFr(q.issue_date)}</dd>
     ${q.service_date ? `<dt>Rendez-vous</dt><dd>${dateFr(q.service_date)}${q.service_time ? ` à ${esc(q.service_time)}` : ""}${q.service_location ? ` — ${esc(q.service_location)}` : ""}</dd>` : ""}
@@ -566,7 +604,7 @@ async function invoiceDetail(id) {
   const issued = Boolean(i.number);
   const remaining = i.amount_due_cents - i.paid_cents;
   const actions = issued ? await documentActions("invoice", id, c.email) : null;
-  view.innerHTML = `<div class="com-panel com-detail"><div class="com-top"><h2>${i.kind === "deposit" ? "Facture d'acompte" : "Facture"} ${esc(i.number || "(brouillon)")} ${badge(INVOICE_STATUS, i.status)}</h2>
+  view.innerHTML = `<div class="com-panel com-detail"><div class="com-top"><h2>${issuerTag(i.issuer)} ${i.kind === "deposit" ? "Facture d'acompte" : "Facture"} ${esc(i.number || "(brouillon)")} ${badge(INVOICE_STATUS, i.status)}</h2>
     <a class="gallery-quiet-button" href="#" id="back">←︎ Retour</a></div>
     <dl><dt>Client</dt><dd>${esc(c.name || "—")}</dd><dt>Devis</dt><dd>${esc(i.quote_number || "—")}</dd><dt>Échéance</dt><dd>${dateFr(i.due_date)}</dd>
     <dt>Total TTC</dt><dd>${money(i.total_ttc_cents)}</dd><dt>Reste à payer</dt><dd>${money(issued ? remaining : i.amount_due_cents)}</dd></dl>
@@ -623,6 +661,8 @@ async function openFromHash() {
       : { name: r.name, email: r.email, phone: r.phone };
     const project = [r.service, r.type].filter(Boolean).join(" — ");
     return quoteEditor(null, client, {
+      // Demande « Sites internet » → devis d'Elisa ; sinon devis d'Alexandre
+      issuer: /site/i.test(r.service || "") ? "elisa" : "alexandre",
       contactRequestId: r.id,
       serviceDate: r.wanted_date || "",
       servicePeriod: r.wanted_date ? "" : (r.date_text || ""),
