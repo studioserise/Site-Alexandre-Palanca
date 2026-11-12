@@ -295,3 +295,33 @@ html[data-theme="light"] .iv-palette--free img { filter: drop-shadow(0 8px 18px 
   .iv-palette--free { width: 22vw; }
   .iv-logo-free img { width: 100%; }
 }
+
+/* Section 2 : une seule mention « projet conceptuel », sous l'introduction */
+.rs-intro > .iv-formats-chip { margin-top: 26px; color: var(--studio-muted); font-size: 0.62rem; line-height: 1.4; }
+/* 03 · téléphone agrandi de 30 % */
+.iv-event-phone { width: clamp(182px, 19.5vw, 273px); }
+@media (max-width: 640px) { .iv-event-phone { width: 49.4vw; margin-left: -26vw; } }
+
+/* 04 · t-shirts détourés, sans fond, avec ombre portée */
+.iv-tee-free { display: grid; place-items: center; width: 100%; }
+.iv-tee-free img { width: min(92%, 560px); filter: drop-shadow(0 26px 40px rgba(0, 0, 0, 0.55)); transform: rotate(-3deg); }
+html[data-theme="light"] .iv-tee-free img { filter: drop-shadow(0 22px 32px rgba(23, 23, 21, 0.22)); }
+.rs-intro > p.iv-formats-chip { display: inline-block; margin: 26px 0 0; padding: 6px 12px; color: var(--studio-muted); font-size: 0.62rem; letter-spacing: 0.14em; line-height: 1.4; }
+/* 03 · téléphone : 30 % plus grand qu'à l'origine (environ 115 px affichés -> 150 px) */
+.iv-event-phone { width: clamp(124px, 10.4vw, 160px); }
+.iv-event-phone img { width: 100%; }
+@media (max-width: 640px) { .iv-event-phone { width: 34vw; margin-left: -18vw; } }
+/* Palette réduite de 30 % */
+.iv-palette--free { width: clamp(77px, 8.4vw, 119px); }
+@media (max-width: 640px) { .iv-palette--free { width: 15.4vw; } }
+
+/* Portfolio : t-shirts agrandis de 30 % */
+@media (min-width: 641px) {
+  .iv-compo--2.has-cutout .is-cutout { left: 24%; bottom: -9%; width: 85.8%; height: 83.2%; }
+}
+.iv-compo--0.has-cutout .is-cutout:nth-child(2) { right: -8%; bottom: -10%; width: 83.2%; height: 96.2%; }
+@media (max-width: 640px) {
+  .iv-compo--2.has-cutout .is-cutout { right: -6%; bottom: -2%; width: 75.4%; height: 80.6vw; }
+  .iv-compo--0.has-cutout .is-cutout:nth-child(2) { right: -6%; bottom: -8%; width: 83.2%; height: 88.4%; }
+}
+@media (min-width: 641px) { .iv-compo--0.has-cutout .is-cutout:nth-child(2) { right: 3%; } }
