@@ -61,7 +61,6 @@
         project.prestations.forEach(function (item) { list.append(el("li", "", item)); });
         parts.push(list);
       }
-      if (projects.length > 1) parts.push(el("p", "iv-count", (index + 1) + " / " + projects.length));
       desc.replaceChildren.apply(desc, parts);
     };
 
