@@ -400,3 +400,29 @@ html[data-theme="light"] .iv-fv--event .iv-fv-poster { box-shadow: 0 16px 34px r
 .iv-page .iv-formats { padding-bottom: clamp(24px, 3.5vw, 52px); }
 .iv-page .rs-offers { padding-top: clamp(24px, 3.5vw, 52px); padding-bottom: clamp(20px, 3vw, 44px); }
 .iv-page .rs-method { padding-top: clamp(28px, 4vw, 60px); }
+
+/* ---------------------------------------------------------------- flottement doux des visuels (sections 1 et 2)
+   Propriétés « translate » et « rotate » séparées : elles s'ajoutent aux inclinaisons, positions et parallaxe existantes. */
+@keyframes iv-float {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  50% { translate: 0 -12px; rotate: 0.8deg; }
+}
+@keyframes iv-float-alt {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  50% { translate: 4px -9px; rotate: -0.7deg; }
+}
+.iv-hero-visual figure > img { animation: iv-float 7s ease-in-out infinite; will-change: translate; }
+.iv-hero-poster > img { animation-name: iv-float-alt; animation-duration: 8.5s; animation-delay: -2s; }
+.iv-hero-phone > img { animation-duration: 6s; animation-delay: -4s; }
+.iv-hero-tee > img { animation-duration: 9s; animation-delay: -1s; }
+
+.iv-fv-logo { animation: iv-float 8s ease-in-out infinite; }
+.iv-fv-palette { animation: iv-float-alt 6.5s ease-in-out infinite -3s; }
+.iv-fv--photo { animation: iv-float-alt 9s ease-in-out infinite -1.5s; }
+.iv-fv-poster { animation: iv-float-alt 8s ease-in-out infinite -5s; }
+.iv-fv-phone { animation: iv-float 6s ease-in-out infinite -2.5s; }
+.iv-fv--tee img { animation: iv-float 7.5s ease-in-out infinite -4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .iv-hero-visual figure > img, .iv-fv-logo, .iv-fv-palette, .iv-fv--photo, .iv-fv-poster, .iv-fv-phone, .iv-fv--tee img { animation: none; }
+}
