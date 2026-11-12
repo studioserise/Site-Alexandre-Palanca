@@ -549,3 +549,4 @@ html[data-theme="light"] .home-offer-copy > p { color: #494740; }
 .home-offer-card .redesign-hero-image::before { position: absolute; inset: auto 0 0; z-index: 1; height: 38%; background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent); content: ""; pointer-events: none; }
 /* Accueil : images des prestations en noir et blanc (recto et dos) */
 .home-offer-card .redesign-hero-image img, .home-offer-card .flip-card-face--back::before { filter: grayscale(1); }
+.home-offer-card .flip-card-face--back .studio-eyebrow { margin-bottom: 16px; }
