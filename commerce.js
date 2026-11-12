@@ -828,6 +828,8 @@ async function openFromHash() {
   if (key === "devis" && id) return quoteDetail(id);
   if (key === "brouillon" && id) return quoteEditor(id);
   if (key === "facture" && id) return invoiceDetail(id);
+  // Depuis l'application mobile : ouvre directement « Créer un devis » (Alex, Elisa, à deux…)
+  if (key === "nouveau" && id) return document.querySelector(`[data-new-quote="${CSS.escape(id)}"]`)?.click();
   if (key === "associe" && id) {
     // Devis de l'autre prestataire, pré-rempli à partir du devis d'origine (client, projet, rendez-vous)
     const data = await run(() => api("get-quote", { id }));

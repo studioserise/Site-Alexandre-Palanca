@@ -13,6 +13,18 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://rrytedgilrwsczoqeyzx.supabase.co; media-src 'self' blob: https://rrytedgilrwsczoqeyzx.supabase.co; font-src 'self'; connect-src 'self' https://rrytedgilrwsczoqeyzx.supabase.co https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src https:; frame-ancestors 'self'; upgrade-insecure-requests
 
+# Application mobile d'administration : jamais référencée ; le service worker et le manifeste
+# sont toujours relus (une nouvelle version de l'application est prise en compte tout de suite).
+/app/*
+  X-Robots-Tag: noindex, nofollow
+
+/app/sw.js
+  Cache-Control: no-cache
+
+/app/manifest.webmanifest
+  Cache-Control: no-cache
+  Content-Type: application/manifest+json
+
 # Outils à télécharger : jamais référencés par les moteurs de recherche
 /outils/*
   X-Robots-Tag: noindex, nofollow

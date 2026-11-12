@@ -1,0 +1,18 @@
+{
+  "id": "/app/",
+  "name": "Alex & Elisa — Administration",
+  "short_name": "Alex & Elisa",
+  "description": "Administration mobile : planning, à faire, espace client, devis, factures et clients.",
+  "lang": "fr",
+  "start_url": "/app/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "icons": [
+    { "src": "/app/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/app/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

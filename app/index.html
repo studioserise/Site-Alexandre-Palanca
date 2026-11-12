@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#080808">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Alex &amp; Elisa">
+  <title>Alex &amp; Elisa — Administration</title>
+  <link rel="manifest" href="/app/manifest.webmanifest">
+  <link rel="icon" type="image/png" href="/favicon.png?v=5">
+  <link rel="apple-touch-icon" href="/app/icons/apple-touch-icon.png">
+  <link rel="preload" href="/fonts/introrust.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/fonts.css?v=2">
+  <link rel="stylesheet" href="/admin-center.css?v=commune">
+  <link rel="stylesheet" href="/app/app.css?v=1">
+  <script type="module" src="/app/app.js?v=1"></script>
+</head>
+<body>
+  <!-- Connexion -->
+  <section class="app-login" id="login" hidden>
+    <img class="app-login-logo" src="/app/icons/icon-192.png" alt="" width="72" height="72">
+    <p class="app-eyebrow">Administration</p>
+    <h1>Alex &amp; Elisa</h1>
+    <form id="login-form" class="app-form" novalidate>
+      <label class="app-field"><span>Adresse e-mail</span><input id="login-email" type="email" autocomplete="username" required></label>
+      <label class="app-field"><span>Mot de passe</span><input id="login-password" type="password" autocomplete="current-password" required></label>
+      <button class="app-button" type="submit">Se connecter</button>
+      <p class="app-error" id="login-message" role="alert"></p>
+    </form>
+    <button class="app-link" type="button" id="install-help-login">Installer l'application sur l'iPhone</button>
+  </section>
+
+  <!-- Application -->
+  <div class="app-shell" id="shell" hidden>
+    <header class="app-top">
+      <div>
+        <p class="app-eyebrow" id="top-eyebrow"></p>
+        <h1 id="top-title">Accueil</h1>
+      </div>
+      <div class="app-top-actions">
+        <button class="app-icon-button" type="button" id="refresh" aria-label="Actualiser">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
+        </button>
+        <button class="app-icon-button" type="button" id="menu" aria-label="Menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>
+        </button>
+      </div>
+    </header>
+    <p class="app-status" id="status" role="status" hidden></p>
+    <main class="app-main" id="view" tabindex="-1"></main>
+
+    <button class="app-fab" type="button" id="fab" aria-label="Créer" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+
+    <nav class="app-tabs" aria-label="Navigation">
+      <a href="#accueil" data-tab="accueil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg><span>Accueil</span></a>
+      <a href="#planning" data-tab="planning"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>Planning</span></a>
+      <a href="#afaire" data-tab="afaire"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span>À faire</span><b class="app-badge" id="badge" hidden></b></a>
+      <a href="#espace" data-tab="espace"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg><span>Espace client</span></a>
+      <a href="#gestion" data-tab="gestion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Gestion</span></a>
+    </nav>
+  </div>
+
+  <!-- Feuille (détails, formulaires) -->
+  <dialog class="app-sheet" id="sheet">
+    <div class="app-sheet-inner">
+      <div class="app-sheet-handle" aria-hidden="true"></div>
+      <button class="app-sheet-close" type="button" id="sheet-close" aria-label="Fermer">×</button>
+      <div id="sheet-body"></div>
+    </div>
+  </dialog>
+  <p class="app-toast" id="toast" role="status" hidden></p>
+</body>
+</html>

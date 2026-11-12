@@ -25,4 +25,5 @@ export async function requireAdmin(request: Request) {
     `gallery_admins?select=user_id&user_id=eq.${encodeURIComponent(user.id)}&limit=1`
   ) as Array<{ user_id: string }>;
   if (!admins.length) throw new Error("Accès administrateur refusé.");
+  return { id: String(user.id), email: String(user.email ?? "") };
 }
