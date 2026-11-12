@@ -114,6 +114,14 @@
 
     // Formules photo
     "Les propositions photo": "Photo packages",
+    "Les formules photo": "Photo packages",
+    "Les formules vidéo": "Video packages",
+    "Les formules": "Packages",
+    "Parlons de votre projet.": "Let’s talk about your project.",
+    "Tarifs indicatifs, à préciser selon la durée du film et les livrables.": "Indicative prices, to be confirmed depending on the length of the film and the deliverables.",
+    "Un projet de contenus ?": "A content project?",
+    "Un projet d’identité ?": "A visual identity project?",
+    "Un projet web ?": "A web project?",
     "Des séances pensées selon votre projet.": "Sessions shaped around your project.",
     "01 · Essentiel": "01 · Essential",
     "02 · Signature": "02 · Signature",
