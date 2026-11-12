@@ -550,3 +550,13 @@ html[data-theme="light"] .home-offer-copy > p { color: #494740; }
 /* Accueil : images des prestations en noir et blanc (recto et dos) */
 .home-offer-card .redesign-hero-image img, .home-offer-card .flip-card-face--back::before { filter: grayscale(1); }
 .home-offer-card .flip-card-face--back .studio-eyebrow { margin-bottom: 16px; }
+
+/* Pied de page : un bouton par prestation (4) — sur deux lignes si la place manque, grille 2 × 2 sur téléphone */
+.site-footer-actions { flex-wrap: wrap; }
+@media (max-width: 800px) {
+  .site-footer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .site-footer-actions a { justify-content: space-between; }
+}
+/* Grille régulière 2 × 2 à toutes les tailles d'écran */
+.site-footer-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: min(100%, 440px); }
+.site-footer-actions a { justify-content: space-between; }

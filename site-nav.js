@@ -268,7 +268,9 @@ if (!document.querySelector(".site-footer")) {
         ${footerContacts()}
         <div class="site-footer-actions">
           <a href="photo-video.html#demande-devis">Photo &amp; vidéo <span aria-hidden="true">↗︎</span></a>
-          <a href="sites-internet.html#demande-projet">Site internet <span aria-hidden="true">↗︎</span></a>
+          <a href="sites-internet.html#demande-projet">Sites internet <span aria-hidden="true">↗︎</span></a>
+          <a href="identite-visuelle.html#demande-identite">Identité visuelle <span aria-hidden="true">↗︎</span></a>
+          <a href="reseaux.html#demande-contenus">Contenus réseaux <span aria-hidden="true">↗︎</span></a>
         </div>
       </div>
       <div class="site-footer-card-wrap">
