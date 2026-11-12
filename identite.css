@@ -438,3 +438,5 @@ html[data-theme="light"] .iv-fv--event .iv-fv-poster { box-shadow: 0 16px 34px r
   .iv-compo--0.has-cutout { height: min(108vw, 440px); }
 }
 .iv-project { align-content: center; }
+/* 04 · t-shirts remontés : ils ne passent jamais sur le texte (ombre et flottement compris) */
+.iv-fv--tee img { top: 40%; max-height: 84%; }
