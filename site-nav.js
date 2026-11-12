@@ -219,8 +219,8 @@ const FOOTER_PEOPLE = {
   },
   elisa: {
     name: "Elisa Martignac",
-    role: "Sites internet & identité visuelle",
-    roleLines: ["Sites internet &amp;", "identité visuelle"],
+    role: "Création digitale",
+    roleLines: ["Création digitale"],
     email: "mtgcelisa@gmail.com",
     phone: "+33 6 65 47 73 51",
     tel: "+33665477351",

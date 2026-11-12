@@ -14,6 +14,7 @@
     // Navigation, bas de page, éléments communs
     "Photo & vidéo": "Photo & video",
     "Prestations": "Services",
+    "Création digitale": "Digital creation",
     "Sites internet & identité visuelle": "Websites & visual identity",
     "Sites internet &amp;": "Websites &amp;",
     "identité visuelle": "visual identity",
