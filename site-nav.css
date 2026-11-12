@@ -535,3 +535,8 @@ html[data-theme="light"] .site-nav-group-toggle { color: #171715; }
   html[data-theme="light"] .site-nav-sub { background: rgba(241, 238, 232, 0.6); box-shadow: 0 0 28px rgba(23, 23, 21, 0.1); }
   html[data-theme="light"] .site-nav-sub::before { background: linear-gradient(135deg, rgba(23, 23, 21, 0) 0%, rgba(23, 23, 21, 0.55) 50%, rgba(23, 23, 21, 0) 100%); }
 }
+/* Menu Prestations : un peu plus transparent */
+@media (min-width: 801px) {
+  .site-nav-sub { background: rgba(8, 8, 8, 0.38); }
+  html[data-theme="light"] .site-nav-sub { background: rgba(241, 238, 232, 0.4); }
+}
