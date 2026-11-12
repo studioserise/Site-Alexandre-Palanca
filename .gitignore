@@ -15,3 +15,6 @@ node_modules/
 
 # Brouillons gardés en local, jamais mis en ligne
 _brouillons/
+
+# Rapport d’audit : gardé en local, jamais publié
+AUDIT_CONFORMITE.md

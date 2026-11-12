@@ -41,7 +41,16 @@ Deno.serve(async (request) => {
     const ipAttempts = ip
       ? await consumeRateLimit(await sha256(`ip:${ip}:${sessionSecret}`))
       : 0;
-    if (ipAttempts > 60) {
+    // Codes courts (3 caractères minimum) : limite par adresse IP (20 essais / 15 min)
+    // et limite globale, tous visiteurs confondus (300 essais / 15 min), contre les essais
+    // massifs depuis de nombreuses adresses.
+    if (ipAttempts > 20) {
+      return jsonResponse(request, 429, {
+        message: "Trop de tentatives. Veuillez réessayer dans 15 minutes."
+      });
+    }
+    const globalAttempts = await consumeRateLimit(await sha256(`global:${sessionSecret}`));
+    if (globalAttempts > 300) {
       return jsonResponse(request, 429, {
         message: "Trop de tentatives. Veuillez réessayer dans 15 minutes."
       });

@@ -1,0 +1,10 @@
+# Fichiers internes du projet : jamais servis aux visiteurs (code serveur, migrations, notes).
+# Les redirections Cloudflare Pages s'appliquent même si le fichier existe.
+/supabase/* / 301
+/GALERIES-SETUP.md / 301
+/AUDIT_CONFORMITE.md / 301
+/package.json / 301
+/package-lock.json / 301
+/.gitignore / 301
+/_headers / 301
+/_redirects / 301

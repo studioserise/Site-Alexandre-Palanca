@@ -431,10 +431,17 @@ export function partyLines(client: Row) {
   ].filter(Boolean);
 }
 
+// Mention « EI » obligatoire pour un entrepreneur individuel (art. L526-22 et R526-26 du Code de commerce),
+// ajoutée si elle ne figure pas déjà dans les mentions du prestataire.
+function hasEiMention(settings: Row) {
+  return /entrepreneur individuel|\bEI\b/i.test(`${settings.legal_name ?? ""} ${settings.legal_footer ?? ""}`);
+}
+
 export function issuerParty(settings: Row) {
   return {
     name: settings.trade_name || settings.legal_name,
     lines: [
+      hasEiMention(settings) ? "" : `${settings.legal_name} — Entrepreneur individuel (EI)`,
       settings.address,
       [settings.postal_code, settings.city].filter(Boolean).join(" "),
       settings.siren ? `SIREN : ${settings.siren}` : "",
@@ -446,7 +453,7 @@ export function issuerParty(settings: Row) {
 
 export function footerText(settings: Row) {
   return [
-    settings.legal_name,
+    hasEiMention(settings) ? settings.legal_name : `${settings.legal_name} EI`,
     settings.siren ? `SIREN ${settings.siren}` : "",
     settings.iban ? `IBAN : ${settings.iban}${settings.bic ? ` — BIC : ${settings.bic}` : ""}` : "",
     settings.vat_mention,
