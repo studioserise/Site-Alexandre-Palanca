@@ -284,3 +284,14 @@ html[data-theme="light"] .iv-compo-item.is-cutout { background: transparent; }
 /* Introduction : téléphone agrandi de 20 % (34 % -> 40,8 % ; mobile 38 % -> 45,6 %) */
 .iv-hero-phone { width: 40.8%; right: 4%; }
 @media (max-width: 640px) { .iv-hero-phone { width: 45.6%; right: 0; } }
+
+/* Section 2 · Identité & branding : logo et palette détourés (logo blanc en mode sombre, vert d'origine en mode clair) */
+.iv-logo-free { display: grid; place-items: center; width: 100%; padding: clamp(10px, 2vw, 24px) 0; }
+.iv-logo-free img { width: min(92%, 520px); }
+.iv-palette--free { width: clamp(110px, 12vw, 170px); padding: 0; border-radius: 0; background: transparent; }
+.iv-palette--free img { width: 100%; filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45)); }
+html[data-theme="light"] .iv-palette--free img { filter: drop-shadow(0 8px 18px rgba(23, 23, 21, 0.18)); }
+@media (max-width: 640px) {
+  .iv-palette--free { width: 22vw; }
+  .iv-logo-free img { width: 100%; }
+}
