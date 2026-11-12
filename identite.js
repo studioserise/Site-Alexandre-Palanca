@@ -23,6 +23,38 @@
       return node;
     };
 
+    var describe = function (project) {
+      var parts = [el("span", "studio-eyebrow portfolio-kind", project.type || ""), el("h3", "", project.titre || "")];
+      if (project.conceptuel === true) parts.push(el("span", "iv-chip", "Projet conceptuel"));
+      if (project.contexte) parts.push(el("p", "", project.contexte));
+      if (project.prestations && project.prestations.length) {
+        parts.push(el("h4", "", "Réalisations"));
+        var list = el("ul", "rs-list");
+        project.prestations.forEach(function (item) { list.append(el("li", "", item)); });
+        parts.push(list);
+      }
+      return parts;
+    };
+
+    // Même hauteur de cadre pour tous les projets : la description la plus longue fixe la hauteur réservée
+    var equalize = function () {
+      desc.style.minHeight = "";
+      var width = desc.getBoundingClientRect().width;
+      if (!width) return;
+      var probe = desc.cloneNode(false);
+      probe.removeAttribute("data-iv-desc");
+      probe.setAttribute("aria-hidden", "true");
+      probe.style.cssText = "position:absolute;left:-9999px;top:0;visibility:hidden;min-height:0;width:" + width + "px";
+      root.append(probe);
+      var tallest = 0;
+      projects.forEach(function (project) {
+        probe.replaceChildren.apply(probe, describe(project));
+        tallest = Math.max(tallest, probe.getBoundingClientRect().height);
+      });
+      probe.remove();
+      desc.style.minHeight = Math.ceil(tallest) + "px";
+    };
+
     // Visuels du projet : 1 à 3 images composées dans le cadre (la première en grand)
     var render = function () {
       var project = projects[index];
@@ -52,16 +84,7 @@
         return figure;
       }));
 
-      var parts = [el("span", "studio-eyebrow portfolio-kind", project.type || ""), el("h3", "", project.titre || "")];
-      if (project.conceptuel === true) parts.push(el("span", "iv-chip", "Projet conceptuel"));
-      if (project.contexte) parts.push(el("p", "", project.contexte));
-      if (project.prestations && project.prestations.length) {
-        parts.push(el("h4", "", "Réalisations"));
-        var list = el("ul", "rs-list");
-        project.prestations.forEach(function (item) { list.append(el("li", "", item)); });
-        parts.push(list);
-      }
-      desc.replaceChildren.apply(desc, parts);
+      desc.replaceChildren.apply(desc, describe(project));
     };
 
     var show = function (next) {
@@ -84,6 +107,10 @@
       startX = null;
     }, { passive: true });
     render();
+    equalize();
+    var resizeTimer;
+    window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(equalize, 150); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(equalize);
   } else if (root) {
     root.closest("section").hidden = true; // aucun projet : la section reste masquée
   }

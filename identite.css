@@ -426,3 +426,15 @@ html[data-theme="light"] .iv-fv--event .iv-fv-poster { box-shadow: 0 16px 34px r
 @media (prefers-reduced-motion: reduce) {
   .iv-hero-visual figure > img, .iv-fv-logo, .iv-fv-palette, .iv-fv--photo, .iv-fv-poster, .iv-fv-phone, .iv-fv--tee img { animation: none; }
 }
+
+/* Portfolio : zone d'images de hauteur fixe pour tous les projets (mobile compris), les visuels s'y adaptent */
+.iv-project { align-self: center; }
+@media (max-width: 640px) {
+  .iv-compo { height: min(108vw, 440px); }
+  .iv-compo--2.has-cutout { grid-template-rows: 1fr 1fr; padding-bottom: 0; }
+  .iv-compo--2.has-cutout .iv-compo-item:not(.is-cutout):first-child,
+  .iv-compo--2.has-cutout .iv-compo-item:not(.is-cutout):nth-child(2) { height: auto; }
+  .iv-compo--2.has-cutout .is-cutout { right: -4%; bottom: -4%; width: 70%; height: 62%; }
+  .iv-compo--0.has-cutout { height: min(108vw, 440px); }
+}
+.iv-project { align-content: center; }
