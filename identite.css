@@ -395,3 +395,8 @@ html[data-theme="light"] .iv-fv--event .iv-fv-poster { box-shadow: 0 16px 34px r
 /* 03 : tailles calées sur la hauteur du cadre (jamais de débordement sur le texte) */
 .iv-fv--event .iv-fv-poster { width: auto; height: 90%; max-width: 64%; object-fit: cover; }
 .iv-fv--event .iv-fv-phone { width: auto; height: 80%; max-width: 46%; object-fit: contain; }
+
+/* Espacements resserrés : formats -> formules -> méthode */
+.iv-page .iv-formats { padding-bottom: clamp(24px, 3.5vw, 52px); }
+.iv-page .rs-offers { padding-top: clamp(24px, 3.5vw, 52px); padding-bottom: clamp(20px, 3vw, 44px); }
+.iv-page .rs-method { padding-top: clamp(28px, 4vw, 60px); }
