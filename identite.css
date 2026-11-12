@@ -237,3 +237,40 @@ html[data-theme="light"] .iv-compo-item.is-cutout img { filter: drop-shadow(0 20
 @media (min-width: 641px) {
   .iv-compo--2.has-cutout .is-cutout { right: auto; left: 38%; bottom: -6%; width: 66%; height: 64%; transform: rotate(4deg); }
 }
+
+/* Visuel en deux versions : blanc en mode sombre, couleur d'origine en mode clair */
+.iv-only-light { display: none !important; }
+html[data-theme="light"] .iv-only-light { display: block !important; }
+html[data-theme="light"] .iv-only-dark { display: none !important; }
+
+/* Deux visuels détourés : le premier en grand (affiche), le second posé par-dessus en bas à droite */
+.iv-compo--0.has-cutout .is-cutout:first-child { width: 70%; height: 100%; }
+.iv-compo--0.has-cutout .is-cutout:first-child img { filter: none; }
+.iv-compo--0.has-cutout .is-cutout:nth-child(2) { position: absolute; right: -2%; bottom: -5%; width: 52%; height: 62%; transform: rotate(4deg); }
+@media (max-width: 640px) {
+  .iv-compo--0.has-cutout .is-cutout:first-child { width: 74%; }
+  .iv-compo--0.has-cutout .is-cutout:nth-child(2) { right: -3%; bottom: -4%; width: 54%; height: 58%; }
+}
+
+/* Mode clair : jamais de fond derrière un visuel détouré */
+html[data-theme="light"] .iv-compo-item.is-cutout { background: transparent; }
+.iv-compo--0.has-cutout .is-cutout:nth-child(2) { right: -8%; bottom: -6%; width: 50%; }
+
+/* ---------------------------------------------------------------- 01 · introduction, nouvel ordre :
+   t-shirts en haut à droite, en grand, derrière ; affiche au milieu ; téléphone agrandi devant, en bas à droite */
+.iv-hero-visual { min-height: 680px; }
+.iv-hero-tee { top: 0; right: -2%; bottom: auto; z-index: 0; width: 62%; transform: rotate(5deg); }
+.iv-hero-poster { top: 10%; left: 2%; z-index: 1; width: 50%; }
+.iv-hero-phone { top: auto; right: 8%; bottom: 4%; z-index: 2; width: 34%; transform: rotate(4deg); }
+.iv-hero-chip { z-index: 3; }
+@media (max-width: 900px) {
+  .iv-hero-visual { min-height: min(640px, 120vw); }
+}
+@media (max-width: 640px) {
+  .iv-hero-visual { display: block; position: relative; min-height: 132vw; }
+  .iv-hero-tee, .iv-hero-poster, .iv-hero-phone, .iv-hero-chip { position: absolute; }
+  .iv-hero-tee { top: 0; right: -4%; left: auto; width: 66%; transform: rotate(5deg); }
+  .iv-hero-poster { top: 12%; left: 0; width: 54%; transform: rotate(-3deg); }
+  .iv-hero-phone { top: auto; right: 4%; bottom: 7%; width: 38%; transform: rotate(4deg); }
+  .iv-hero-chip { bottom: 0; left: 0; }
+}

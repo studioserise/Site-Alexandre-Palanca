@@ -33,12 +33,22 @@
       compo.className = "iv-compo iv-compo--" + framed + (cutout ? " has-cutout" : "");
       compo.replaceChildren.apply(compo, images.map(function (image, i) {
         var figure = el("figure", "iv-compo-item" + (image.detoure ? " is-cutout" : image.fond === "clair" ? " is-light" : ""));
-        var img = el("img");
-        img.src = image.src;
-        img.alt = image.alt || "";
-        img.decoding = "async";
-        if (index > 0 || i > 0) img.loading = "lazy";
-        figure.append(img);
+        var lazy = index > 0 || i > 0;
+        var make = function (src, className, alt) {
+          var img = el("img", className);
+          img.src = src;
+          img.alt = alt;
+          img.decoding = "async";
+          if (lazy) img.loading = "lazy";
+          figure.append(img);
+        };
+        // Deux versions d'un même visuel : une pour le mode sombre, une pour le mode clair
+        if (image.srcClair) {
+          make(image.src, "iv-only-dark", image.alt || "");
+          make(image.srcClair, "iv-only-light", image.alt || "");
+        } else {
+          make(image.src, "", image.alt || "");
+        }
         return figure;
       }));
 

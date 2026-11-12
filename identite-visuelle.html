@@ -23,14 +23,14 @@
   <link rel="stylesheet" href="section-marker.css?v=bord">
   <link rel="stylesheet" href="contact.css?v=5">
   <link rel="stylesheet" href="reseaux.css?v=5">
-  <link rel="stylesheet" href="identite.css?v=6">
+  <link rel="stylesheet" href="identite.css?v=8">
   <script src="i18n.js?v=cgv1" defer></script>
   <script src="site-nav.js?v=cgv1" defer></script>
   <script src="redesign.js?v=29" defer></script>
   <script src="cursor.js?v=3" defer></script>
   <script src="section-marker.js?v=10" defer></script>
   <script src="reseaux.js?v=2" defer></script>
-  <script src="identite.js?v=3" defer></script>
+  <script src="identite.js?v=4" defer></script>
   <script type="module" src="contact.js?v=7"></script>
   <script src="contact-reveal.js?v=2" defer></script>
   <link rel="stylesheet" href="mobile.css?v=3" media="(max-width: 800px)">
@@ -64,14 +64,14 @@
         <a class="studio-button" href="#iv-portfolio">Découvrir nos réalisations <span aria-hidden="true">↓︎</span></a>
       </div>
       <div class="iv-hero-visual">
+        <figure class="iv-hero-tee" data-rs-depth="0.14" data-rs-reveal>
+          <img src="images/identite-visuelle/tee-shirts-700.webp" srcset="images/identite-visuelle/tee-shirts-700.webp 700w, images/identite-visuelle/tee-shirts-1400.webp 1400w" sizes="(max-width: 640px) 66vw, 30vw" alt="T-shirts de l’équipe aux couleurs de la saison" decoding="async">
+        </figure>
         <figure class="iv-hero-poster iv-shadow" data-rs-depth="0.08" data-rs-reveal>
           <img src="images/identite-visuelle/saison-culturelle-600.webp" srcset="images/identite-visuelle/saison-culturelle-600.webp 600w, images/identite-visuelle/saison-culturelle-1200.webp 1200w" sizes="(max-width: 640px) 46vw, 24vw" alt="Affiche de saison, branches de noyer illustrées en vert" width="600" height="900" decoding="async">
         </figure>
         <figure class="iv-hero-phone" data-rs-depth="0.2" data-rs-reveal>
-          <img src="images/identite-visuelle/telephone-700.webp" srcset="images/identite-visuelle/telephone-700.webp 700w, images/identite-visuelle/telephone-1400.webp 1400w" sizes="(max-width: 640px) 36vw, 14vw" alt="Publication pour les réseaux sociaux annonçant une pièce de théâtre" decoding="async">
-        </figure>
-        <figure class="iv-hero-tee" data-rs-depth="0.14" data-rs-reveal>
-          <img src="images/identite-visuelle/tee-shirts-700.webp" srcset="images/identite-visuelle/tee-shirts-700.webp 700w, images/identite-visuelle/tee-shirts-1400.webp 1400w" sizes="(max-width: 640px) 46vw, 20vw" alt="T-shirts de l’équipe aux couleurs de la saison" decoding="async">
+          <img src="images/identite-visuelle/telephone-700.webp" srcset="images/identite-visuelle/telephone-700.webp 700w, images/identite-visuelle/telephone-1400.webp 1400w" sizes="(max-width: 640px) 40vw, 18vw" alt="Publication pour les réseaux sociaux annonçant une pièce de théâtre" decoding="async">
         </figure>
         <p class="iv-chip iv-hero-chip" data-rs-reveal>Projet conceptuel · Saison culturelle</p>
       </div>
@@ -230,7 +230,8 @@
           titre, type (Identité visuelle · Projet culturel · Communication événementielle · Édition et print · Textile et merchandising),
           contexte (contexte et intention créative), prestations (liste), conceptuel (true = projet conceptuel, affiché comme tel),
           images : 1 à 3 visuels, composés ensemble dans le cadre (le premier en grand) :
-                   [{ "src": "chemin", "alt": "description", "detoure": true pour un PNG détouré (t-shirt, objet) posé par-dessus les autres }, …]
+                   [{ "src": "chemin", "alt": "description", "detoure": true pour un PNG détouré (t-shirt, objet) posé par-dessus les autres,
+                      "srcClair": "chemin" pour une autre version en mode clair (le src sert alors au mode sombre) }, …]
       -->
       <script type="application/json" id="iv-projects">
       [
@@ -250,9 +251,10 @@
           "titre": "Bodega Tour",
           "type": "Textile et merchandising",
           "conceptuel": null,
-          "contexte": "T-shirt imprimé en rouge sur blanc : au dos, une illustration de taureau, de DJ sur des tonneaux et de foule, encadrée comme une affiche, avec la phrase « Bordel ou pas bordel » ; sur le devant, le nom « Bodega Tour ».",
-          "prestations": ["Illustration", "T-shirt (dos et devant)"],
+          "contexte": "Affiche de tournée 2026 et t-shirt imprimé : une tête de taureau gravée, les dates de la tournée et la phrase « Bordel ou pas bordel », dans un cadre façon affiche ancienne.",
+          "prestations": ["Illustration", "Affiche de tournée", "T-shirt (dos et devant)"],
           "images": [
+            { "src": "images/identite-visuelle/bodega-design-blanc-1400.webp", "srcClair": "images/identite-visuelle/bodega-design-rouge-1400.webp", "alt": "Affiche de la tournée Bodega Tour 2026 : tête de taureau, liste des dates et « Bordel ou pas bordel »", "detoure": true },
             { "src": "images/identite-visuelle/bodega-tour-1400.webp", "alt": "T-shirt « Bodega Tour » : taureau, DJ sur des tonneaux et foule, imprimés en rouge", "detoure": true }
           ]
         }
