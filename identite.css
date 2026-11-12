@@ -328,3 +328,25 @@ html[data-theme="light"] .iv-tee-free img { filter: drop-shadow(0 22px 32px rgba
 /* 06 · L'approche : mise en page de l'« à propos » du site (studio-approach), échantillons de matières à côté */
 .iv-approach .iv-materials { width: 100%; max-width: 560px; justify-self: center; }
 @media (max-width: 1100px) { .iv-approach .iv-materials { margin-bottom: clamp(28px, 8vw, 48px); } }
+
+/* 01 · logo et palette réduits de 30 % */
+.iv-logo-free img { width: min(64.4%, 364px); }
+.iv-palette--free { width: clamp(54px, 5.9vw, 83px); }
+@media (max-width: 640px) {
+  .iv-logo-free img { width: 70%; }
+  .iv-palette--free { width: 10.8vw; }
+}
+/* 03 · téléphone encore agrandi et posé devant le bord de l'affiche */
+.iv-event-phone { width: clamp(160px, 13.5vw, 210px); margin-left: clamp(-120px, -7vw, -60px); }
+@media (max-width: 640px) { .iv-event-phone { width: 40vw; margin-left: -24vw; } }
+/* L'ordre d'empilement des visuels reste interne à la composition (le t-shirt « derrière » ne peut pas passer sous le fond de la section) */
+.iv-hero-visual { isolation: isolate; }
+
+/* 03 · affiche et téléphone côte à côte, le téléphone passe devant le bord de l'affiche */
+.iv-event-duo { display: flex; align-items: flex-end; width: 100%; }
+.iv-event-duo .iv-event-poster { flex: 0 0 auto; width: min(64%, 380px); }
+.iv-event-duo .iv-event-phone { flex: 0 0 auto; width: clamp(160px, 13.5vw, 210px); margin-left: clamp(-90px, -6vw, -48px); margin-bottom: -4%; }
+@media (max-width: 640px) {
+  .iv-event-duo .iv-event-poster { width: 62%; }
+  .iv-event-duo .iv-event-phone { width: 42vw; margin-left: -12vw; }
+}
