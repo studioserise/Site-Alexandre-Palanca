@@ -350,3 +350,17 @@ html[data-theme="light"] .iv-tee-free img { filter: drop-shadow(0 22px 32px rgba
   .iv-event-duo .iv-event-poster { width: 62%; }
   .iv-event-duo .iv-event-phone { width: 42vw; margin-left: -12vw; }
 }
+
+/* 06 · L'approche : portrait à droite du texte (comme l'« à propos » de la page Sites internet).
+   Taille limitée pour ne pas agrandir la photo au-delà de sa définition. */
+.iv-portrait { width: min(100%, 440px); min-height: 0; aspect-ratio: 3 / 4; justify-self: center; }
+.iv-portrait img { object-position: 40% 35%; }
+@media (max-width: 1100px) { .iv-portrait { width: min(100%, 380px); justify-self: start; } }
+
+/* 04 · La méthode : zoom doux au survol des illustrations, comme les photos des étapes de la page réseaux */
+.iv-step-visual > :not(.iv-step-number) { transition: transform 1100ms cubic-bezier(.22, .61, .36, 1); }
+@media (hover: hover) { .iv-step-visual:hover > :not(.iv-step-number) { transform: scale(1.06); } }
+.iv-step-visual .iv-moodboard { transform: rotate(-3deg); }
+@media (hover: hover) { .iv-step-visual:hover .iv-moodboard { transform: rotate(-3deg) scale(1.06); } }
+@media (prefers-reduced-motion: reduce) { .iv-step-visual > * { transition: none; } }
+@media (max-width: 800px) { .iv-page .iv-portrait { width: 100%; margin-top: 22px; } }
