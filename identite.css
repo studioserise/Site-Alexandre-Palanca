@@ -325,3 +325,7 @@ html[data-theme="light"] .iv-tee-free img { filter: drop-shadow(0 22px 32px rgba
   .iv-compo--0.has-cutout .is-cutout:nth-child(2) { right: -6%; bottom: -8%; width: 83.2%; height: 88.4%; }
 }
 @media (min-width: 641px) { .iv-compo--0.has-cutout .is-cutout:nth-child(2) { right: 3%; } }
+
+/* 06 · L'approche : mise en page de l'« à propos » du site (studio-approach), échantillons de matières à côté */
+.iv-approach .iv-materials { width: 100%; max-width: 560px; justify-self: center; }
+@media (max-width: 1100px) { .iv-approach .iv-materials { margin-bottom: clamp(28px, 8vw, 48px); } }

@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="section-marker.css?v=bord">
   <link rel="stylesheet" href="contact.css?v=5">
   <link rel="stylesheet" href="reseaux.css?v=5">
-  <link rel="stylesheet" href="identite.css?v=18">
+  <link rel="stylesheet" href="identite.css?v=20">
   <script src="i18n.js?v=cgv1" defer></script>
   <script src="site-nav.js?v=cgv1" defer></script>
   <script src="redesign.js?v=29" defer></script>
@@ -191,19 +191,47 @@
       </ol>
     </section>
 
-    <!-- 05 · PRÉSENTATION PERSONNELLE -->
-    <section class="rs-section iv-about" aria-labelledby="iv-about-title">
-      <div class="iv-about-copy" data-rs-reveal>
-        <p class="studio-eyebrow">L’approche</p>
-        <h2 id="iv-about-title">Une approche nourrie par la matière.</h2>
-        <p>Ma formation en DN MADE Matériaux, mention Textile, m’a apporté une approche particulière de la création visuelle.</p>
-        <p>Au-delà du graphisme, j’ai développé une sensibilité aux matières, aux textures, aux couleurs, aux procédés de fabrication et aux savoir-faire artisanaux.</p>
-        <p>Cette formation me permet d’aborder l’identité visuelle dans sa globalité : penser une image, mais aussi la manière dont elle prend forme et se matérialise sur différents supports.</p>
-        <p>Du papier au textile, de l’impression à l’objet, j’accorde une attention particulière aux détails, aux finitions et à la cohérence de chaque réalisation.</p>
-        <p class="iv-signature">Elisa Martignac</p>
+
+
+    <!-- 05 · FORMULAIRE (même formulaire et même envoi que les autres pages de prestation) -->
+    <section class="redesign-section rs-form" id="demande-identite" aria-labelledby="iv-contact-title">
+      <div class="redesign-panel redesign-contact-layout">
+        <p class="studio-eyebrow">Un projet d’identité ?</p>
+        <h2 id="iv-contact-title">Parlons de votre projet.</h2>
+        <p>Vous avez une marque à lancer, un lieu à valoriser ou un événement à habiller visuellement ? Présentez-nous votre projet et imaginons ensemble son identité.</p>
+        <button class="contact-submit contact-reveal" type="button" data-contact-reveal aria-expanded="false" aria-controls="contact-collapse"><span>Remplir le formulaire</span><span aria-hidden="true">↓︎</span></button>
+        <div class="contact-collapse is-closed" id="contact-collapse"><div class="contact-collapse-inner">
+        <form class="contact-form redesign-contact-form" id="contact-form" novalidate>
+          <input id="contact-service" name="service" type="hidden" value="Identité visuelle">
+          <div class="contact-form-grid">
+            <div class="contact-field"><label for="contact-name">Nom et prénom</label><input id="contact-name" name="name" autocomplete="name" maxlength="100"></div>
+            <div class="contact-field"><label for="contact-email">Adresse e-mail <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" required aria-describedby="contact-form-status" autocomplete="email" maxlength="254"></div>
+            <div class="contact-field contact-field--wide"><label for="pref-projet">Nom de la marque, du lieu ou du projet</label><input id="pref-projet" name="pref-projet" maxlength="160" data-extra autocomplete="organization"></div>
+            <div class="contact-field"><label for="pref-type">Type de besoin</label><select id="pref-type" name="type"><option value="">À préciser ensemble</option><option value="Identité visuelle">Identité visuelle</option><option value="Refonte">Refonte</option><option value="Événementiel">Événementiel</option><option value="Print">Print</option><option value="Textile">Textile</option><option value="Merchandising">Merchandising</option><option value="Autre">Autre</option></select></div>
+            <div class="contact-field"><label for="pref-budget">Budget envisagé</label><select id="pref-budget" name="pref-budget" data-extra><option value="">À préciser</option><option value="Moins de 500 €">Moins de 500 €</option><option value="500 à 1 000 €">500 à 1 000 €</option><option value="1 000 à 2 500 €">1 000 à 2 500 €</option><option value="Plus de 2 500 €">Plus de 2 500 €</option></select></div>
+            <div class="contact-field contact-field--wide"><label for="pref-formule">Formule envisagée</label><select id="pref-formule" name="pref-formule" data-extra><option value="">À préciser ensemble</option><option value="Essentiel">Essentiel — à partir de 350 €</option><option value="Signature">Signature — à partir de 750 €</option><option value="Sur mesure">Sur mesure — sur devis</option></select></div>
+            <div class="contact-field contact-field--wide"><label for="contact-message">Description du projet</label><textarea id="contact-message" name="message" rows="5" maxlength="4000"></textarea></div>
+            <div class="contact-honeypot" aria-hidden="true"><label for="contact-website">Ne pas remplir ce champ</label><input id="contact-website" name="website" tabindex="-1" autocomplete="off"></div>
+            <p class="contact-privacy-note contact-field--wide">Nos prestations sont réservées aux professionnels. Vos informations servent uniquement à répondre à votre demande et à préparer un devis ; elles sont supprimées au bout de 6 mois si aucun devis n’est établi. En savoir plus et exercer vos droits : <a href="politique-confidentialite.html">politique de confidentialité</a>.</p>
+          </div>
+          <p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p>
+          <button class="contact-submit" id="contact-submit" type="submit"><span>Envoyer ma demande</span><span aria-hidden="true">↗︎</span></button>
+        </form>
+        </div></div>
       </div>
-      <!-- PORTRAIT : ajouter ici une photo d'Elisa (portrait en situation de création), par exemple :
-           <figure class="iv-portrait rs-zoom"><img src="images/identite-visuelle/portrait-elisa-800.webp" alt="Elisa Martignac dans son atelier" loading="lazy"></figure> -->
+    </section>
+
+    <!-- 06 · L'APPROCHE (même forme que l'« à propos » de la page Sites internet) -->
+    <section class="studio-approach iv-approach" aria-labelledby="iv-about-title">
+      <div class="studio-approach-copy" data-rs-reveal>
+        <p class="studio-eyebrow">Elisa · Identité visuelle &amp; matière</p>
+        <h2 id="iv-about-title">Une approche nourrie par la matière.</h2>
+        <p>Formée en DN MADE Matériaux, mention Textile, Elisa aborde le graphisme avec un regard qui dépasse l’écran : une sensibilité aux matières, aux textures, aux couleurs, aux procédés de fabrication et aux savoir-faire artisanaux.</p>
+        <p>Pour elle, une identité ne s’arrête pas au logo. Elle se pense jusque dans la manière dont elle prend forme : le grain d’un papier, la tenue d’une encre sur un tissu, le relief d’une sérigraphie. Chaque support devient une façon de faire vivre l’image autrement.</p>
+        <p>Du premier croquis à l’objet fini, du papier au textile, elle veille à la cohérence de chaque détail et au soin des finitions.</p>
+      </div>
+      <!-- PORTRAIT : une photo d'Elisa pourra remplacer les échantillons, par exemple :
+           <figure class="studio-approach-photo"><img src="images/identite-visuelle/portrait-elisa-800.webp" alt="Elisa Martignac dans son atelier" loading="lazy"></figure> -->
       <div class="iv-materials" data-rs-reveal aria-hidden="true">
         <div class="iv-swatch iv-swatch--linen"><small>Lin</small></div>
         <div class="iv-swatch iv-swatch--herringbone"><small>Chevron</small></div>
@@ -214,7 +242,7 @@
       </div>
     </section>
 
-    <!-- 06 · PORTFOLIO : même cadre que les portfolios du site (visuels à gauche, projet à droite).
+    <!-- 07 · PORTFOLIO (toujours la dernière section) : même cadre que les portfolios du site (visuels à gauche, projet à droite).
          Les projets se trouvent dans le bloc JSON « iv-projects » plus bas : un objet par projet. -->
     <section class="redesign-section rs-showcase iv-showcase" id="iv-portfolio" aria-labelledby="iv-showcase-title">
       <p class="studio-eyebrow">Portfolio</p>
@@ -263,34 +291,6 @@
       <div class="rs-cta" data-rs-reveal>
         <h3>Une identité à imaginer ?</h3>
         <a class="studio-button" href="#demande-identite">Parlons de votre projet <span aria-hidden="true">↓︎</span></a>
-      </div>
-    </section>
-
-    <!-- 07 · FORMULAIRE (même formulaire et même envoi que les autres pages de prestation) -->
-    <section class="redesign-section rs-form" id="demande-identite" aria-labelledby="iv-contact-title">
-      <div class="redesign-panel redesign-contact-layout">
-        <p class="studio-eyebrow">Un projet d’identité ?</p>
-        <h2 id="iv-contact-title">Parlons de votre projet.</h2>
-        <p>Vous avez une marque à lancer, un lieu à valoriser ou un événement à habiller visuellement ? Présentez-nous votre projet et imaginons ensemble son identité.</p>
-        <button class="contact-submit contact-reveal" type="button" data-contact-reveal aria-expanded="false" aria-controls="contact-collapse"><span>Remplir le formulaire</span><span aria-hidden="true">↓︎</span></button>
-        <div class="contact-collapse is-closed" id="contact-collapse"><div class="contact-collapse-inner">
-        <form class="contact-form redesign-contact-form" id="contact-form" novalidate>
-          <input id="contact-service" name="service" type="hidden" value="Identité visuelle">
-          <div class="contact-form-grid">
-            <div class="contact-field"><label for="contact-name">Nom et prénom</label><input id="contact-name" name="name" autocomplete="name" maxlength="100"></div>
-            <div class="contact-field"><label for="contact-email">Adresse e-mail <span aria-hidden="true">*</span></label><input id="contact-email" name="email" type="email" required aria-describedby="contact-form-status" autocomplete="email" maxlength="254"></div>
-            <div class="contact-field contact-field--wide"><label for="pref-projet">Nom de la marque, du lieu ou du projet</label><input id="pref-projet" name="pref-projet" maxlength="160" data-extra autocomplete="organization"></div>
-            <div class="contact-field"><label for="pref-type">Type de besoin</label><select id="pref-type" name="type"><option value="">À préciser ensemble</option><option value="Identité visuelle">Identité visuelle</option><option value="Refonte">Refonte</option><option value="Événementiel">Événementiel</option><option value="Print">Print</option><option value="Textile">Textile</option><option value="Merchandising">Merchandising</option><option value="Autre">Autre</option></select></div>
-            <div class="contact-field"><label for="pref-budget">Budget envisagé</label><select id="pref-budget" name="pref-budget" data-extra><option value="">À préciser</option><option value="Moins de 500 €">Moins de 500 €</option><option value="500 à 1 000 €">500 à 1 000 €</option><option value="1 000 à 2 500 €">1 000 à 2 500 €</option><option value="Plus de 2 500 €">Plus de 2 500 €</option></select></div>
-            <div class="contact-field contact-field--wide"><label for="pref-formule">Formule envisagée</label><select id="pref-formule" name="pref-formule" data-extra><option value="">À préciser ensemble</option><option value="Essentiel">Essentiel — à partir de 350 €</option><option value="Signature">Signature — à partir de 750 €</option><option value="Sur mesure">Sur mesure — sur devis</option></select></div>
-            <div class="contact-field contact-field--wide"><label for="contact-message">Description du projet</label><textarea id="contact-message" name="message" rows="5" maxlength="4000"></textarea></div>
-            <div class="contact-honeypot" aria-hidden="true"><label for="contact-website">Ne pas remplir ce champ</label><input id="contact-website" name="website" tabindex="-1" autocomplete="off"></div>
-            <p class="contact-privacy-note contact-field--wide">Nos prestations sont réservées aux professionnels. Vos informations servent uniquement à répondre à votre demande et à préparer un devis ; elles sont supprimées au bout de 6 mois si aucun devis n’est établi. En savoir plus et exercer vos droits : <a href="politique-confidentialite.html">politique de confidentialité</a>.</p>
-          </div>
-          <p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p>
-          <button class="contact-submit" id="contact-submit" type="submit"><span>Envoyer ma demande</span><span aria-hidden="true">↗︎</span></button>
-        </form>
-        </div></div>
       </div>
     </section>
   </main>
