@@ -836,10 +836,10 @@
   </style>
   <link rel="preload" href="fonts/introrust.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="fonts.css?v=2">
-  <link rel="stylesheet" href="redesign.css?v=73">
+  <link rel="stylesheet" href="redesign.css?v=75">
   <link rel="stylesheet" href="site-nav.css?v=prestations">
   <link rel="stylesheet" href="cursor.css?v=7">
-  <script src="i18n.js?v=prestations" defer></script>
+  <script src="i18n.js?v=accueil4" defer></script>
   <script type="module" src="site-nav.js?v=prestations2"></script>
   <link rel="stylesheet" href="section-marker.css?v=bord">
   <script src="cursor.js?v=3" defer></script>
@@ -981,30 +981,100 @@
       </div>
     </section>
 
-    <section class="studio-services" id="univers" aria-labelledby="studio-services-title">
+    <section class="studio-services home-services" id="univers" aria-labelledby="studio-services-title">
       <header class="studio-section-heading">
         <p class="studio-eyebrow">Nos domaines d’intervention</p>
-        <h2 id="studio-services-title">Trois façons de raconter votre projet.</h2>
+        <h2 id="studio-services-title">Quatre façons de raconter votre projet.</h2>
       </header>
-      <div class="studio-service-grid">
-        <a class="studio-service-card" href="photo-video.html">
-          <span class="studio-service-number">01</span>
-          <h3>Photo &amp; vidéo</h3>
-          <p>Des images vivantes pour faire ressentir votre univers, vos événements et vos savoir-faire.</p>
-          <span class="studio-card-arrow" aria-hidden="true">↗︎</span>
-        </a>
-        <a class="studio-service-card" href="sites-internet.html">
-          <span class="studio-service-number">02</span>
-          <h3>Sites internet</h3>
-          <p>Des expériences web singulières, pensées pour vos besoins et votre identité.</p>
-          <span class="studio-card-arrow" aria-hidden="true">↗︎</span>
-        </a>
-        <a class="studio-service-card" href="reseaux.html">
-          <span class="studio-service-number">03</span>
-          <h3>Contenus réseaux</h3>
-          <p>Des contenus cohérents pour nourrir votre présence et créer du lien avec votre communauté.</p>
-          <span class="studio-card-arrow" aria-hidden="true">↗︎</span>
-        </a>
+      <div class="home-offers">
+        <article class="home-offer">
+          <div class="flip-card photo-hero-flip home-offer-card" tabindex="0" aria-label="Photo &amp; vidéo : voir des exemples de prestations">
+            <div class="flip-card-inner">
+              <figure class="redesign-hero-image flip-card-face">
+                <img src="images/hero-photo-nb.webp?v=2" alt="Photographie de concert en noir et blanc" loading="lazy" decoding="async">
+                <figcaption class="flip-hint">Survolez pour découvrir ↻︎</figcaption>
+              </figure>
+              <div class="flip-card-face flip-card-face--back" style="--back-photo: url('images/hero-photo-nb.webp?v=2')">
+                <span class="studio-eyebrow">Exemples de prestations</span>
+                <h3>Photo &amp; vidéo</h3>
+                <ul class="flip-list"><li>Portraits et séances</li><li>Reportages d’événements</li><li>Lieux et marques</li><li>Films, clips et formats courts</li><li>Prises de vue par drone</li></ul>
+              </div>
+            </div>
+          </div>
+          <div class="home-offer-copy">
+            <span class="studio-service-number">01</span>
+            <div class="home-pills" aria-label="Pris en charge par"><span class="home-pill">Alex</span></div>
+            <h3>Photo &amp; vidéo</h3>
+            <p>Des images vivantes pour faire ressentir votre univers, vos événements et vos savoir-faire. Portraits, reportages, films et prises de vue aériennes.</p>
+            <a class="studio-text-link home-offer-link" href="photo-video.html">Découvrir <span aria-hidden="true">↗︎</span></a>
+          </div>
+        </article>
+        <article class="home-offer home-offer--reverse">
+          <div class="flip-card photo-hero-flip home-offer-card" tabindex="0" aria-label="Sites internet : voir des exemples de prestations">
+            <div class="flip-card-inner">
+              <figure class="redesign-hero-image flip-card-face">
+                <img src="images/hero-accueil-web-1200.webp" alt="Photographie de spectacle en noir et blanc, univers d’un site réalisé" loading="lazy" decoding="async">
+                <figcaption class="flip-hint">Survolez pour découvrir ↻︎</figcaption>
+              </figure>
+              <div class="flip-card-face flip-card-face--back" style="--back-photo: url('images/hero-accueil-web-1200.webp')">
+                <span class="studio-eyebrow">Exemples de prestations</span>
+                <h3>Sites internet</h3>
+                <ul class="flip-list"><li>Site essentiel, une page</li><li>Site vitrine</li><li>Site sur mesure</li><li>Mise en ligne et prise en main</li></ul>
+              </div>
+            </div>
+          </div>
+          <div class="home-offer-copy">
+            <span class="studio-service-number">02</span>
+            <div class="home-pills" aria-label="Pris en charge par"><span class="home-pill">Elisa</span></div>
+            <h3>Sites internet</h3>
+            <p>Des expériences web singulières, pensées pour vos besoins et votre identité, de la première maquette à la mise en ligne.</p>
+            <a class="studio-text-link home-offer-link" href="sites-internet.html">Découvrir <span aria-hidden="true">↗︎</span></a>
+          </div>
+        </article>
+        <article class="home-offer">
+          <div class="flip-card photo-hero-flip home-offer-card" tabindex="0" aria-label="Identité visuelle : voir des exemples de prestations">
+            <div class="flip-card-inner">
+              <figure class="redesign-hero-image flip-card-face">
+                <img src="images/identite-visuelle/saison-culturelle-1200.webp" alt="Affiche de saison culturelle, branches de noyer illustrées en vert" loading="lazy" decoding="async">
+                <figcaption class="flip-hint">Survolez pour découvrir ↻︎</figcaption>
+              </figure>
+              <div class="flip-card-face flip-card-face--back" style="--back-photo: url('images/identite-visuelle/saison-culturelle-1200.webp')">
+                <span class="studio-eyebrow">Exemples de prestations</span>
+                <h3>Identité visuelle</h3>
+                <ul class="flip-list"><li>Logo et charte graphique</li><li>Print et édition</li><li>Communication événementielle</li><li>Textile et merchandising</li></ul>
+              </div>
+            </div>
+          </div>
+          <div class="home-offer-copy">
+            <span class="studio-service-number">03</span>
+            <div class="home-pills" aria-label="Pris en charge par"><span class="home-pill">Elisa</span></div>
+            <h3>Identité visuelle</h3>
+            <p>Des univers graphiques cohérents pour les marques, les lieux et les événements, du logo jusqu’au textile et à l’impression.</p>
+            <a class="studio-text-link home-offer-link" href="identite-visuelle.html">Découvrir <span aria-hidden="true">↗︎</span></a>
+          </div>
+        </article>
+        <article class="home-offer home-offer--reverse">
+          <div class="flip-card photo-hero-flip home-offer-card" tabindex="0" aria-label="Contenus réseaux : voir des exemples de prestations">
+            <div class="flip-card-inner">
+              <figure class="redesign-hero-image flip-card-face">
+                <img src="images/contenus-reseaux/lpm1-800.webp" alt="Chambre d’hôtel reflétée dans un miroir ancien" loading="lazy" decoding="async">
+                <figcaption class="flip-hint">Survolez pour découvrir ↻︎</figcaption>
+              </figure>
+              <div class="flip-card-face flip-card-face--back" style="--back-photo: url('images/contenus-reseaux/lpm1-800.webp')">
+                <span class="studio-eyebrow">Exemples de prestations</span>
+                <h3>Contenus réseaux</h3>
+                <ul class="flip-list"><li>Reels et vidéos courtes</li><li>Photographies</li><li>Stories</li><li>Carrousels et contenus graphiques</li></ul>
+              </div>
+            </div>
+          </div>
+          <div class="home-offer-copy">
+            <span class="studio-service-number">04</span>
+            <div class="home-pills" aria-label="Pris en charge par"><span class="home-pill">Alex &amp; Elisa</span></div>
+            <h3>Contenus réseaux</h3>
+            <p>Des contenus photo et vidéo cohérents pour nourrir votre présence en ligne et créer du lien avec votre communauté.</p>
+            <a class="studio-text-link home-offer-link" href="reseaux.html">Découvrir <span aria-hidden="true">↗︎</span></a>
+          </div>
+        </article>
       </div>
     </section>
 
