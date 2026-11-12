@@ -273,3 +273,5 @@ html[data-theme="light"] .rs-mock-dots button { background: rgba(23, 23, 21, 0.2
 
 /* Mini-portfolio : pas de points indiquant l'exemple affiché (navigation par les flèches) */
 .rs-mock-dots { display: none !important; }
+/* Mini-portfolio : présentation centrée verticalement à droite du visuel (comme Photo & vidéo et Identité visuelle) */
+.rs-mock-carousel > .portfolio-description { align-self: center; }
