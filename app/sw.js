@@ -2,11 +2,11 @@
 // - Hors connexion : l'interface (fichiers de /app/, polices, styles partagés) est gardée en cache ;
 //   les données ne passent jamais par ce cache (l'application garde elle-même la dernière version lue).
 // - Notifications push : affichage et ouverture de l'écran concerné.
-const VERSION = "app-v2";
+const VERSION = "app-v3";
 const SHELL = [
   "/app/",
   "/app/app.css?v=2",
-  "/app/app.js?v=2",
+  "/app/app.js?v=3",
   "/app/manifest.webmanifest",
   "/app/icons/icon-192.png",
   "/app/icons/apple-touch-icon.png",

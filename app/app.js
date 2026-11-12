@@ -597,6 +597,7 @@ async function renderPlanning() {
     <div class="app-chips" role="group" aria-label="Filtrer">${[["all", "Tout"], ["confirmed", "Confirmés"], ["pending", "En attente"], ["other", "Autres"]].map(([k, l]) => `<button type="button" class="notif-filter${plan.filter === k ? " is-active" : ""}" data-pfilter="${k}">${l}</button>`).join("")}</div>
     <div class="app-cal-nav"><button type="button" data-move="-1" aria-label="Précédent">‹</button><strong>${esc(title)}</strong><button type="button" data-move="1" aria-label="Suivant">›</button></div>
     ${body}
+    <p class="app-hint" style="margin-top:14px"><button type="button" class="app-link" style="margin:0;padding:0" id="plan-calendar">Afficher ce planning dans le Calendrier de mon iPhone</button></p>
     <p class="app-legend"><span><i class="is-confirmed"></i>Confirmé</span><span><i class="is-pending"></i>En attente (devis, option, demande)</span><span><i class="is-other"></i>Autre</span></p>`;
 }
 TABS.planning.bind = (root) => {
@@ -613,6 +614,7 @@ TABS.planning.bind = (root) => {
   }));
   root.querySelectorAll("[data-day]").forEach((b) => b.addEventListener("click", () => { plan.selected = b.dataset.day; render(); }));
   root.querySelectorAll("[data-add]").forEach((b) => b.addEventListener("click", () => eventSheet({ date: b.dataset.add })));
+  $("plan-calendar")?.addEventListener("click", calendarSheet);
   bindEntries(root);
 };
 
@@ -943,6 +945,7 @@ function menuSheet() {
   openSheet(`<p class="app-eyebrow">Connecté${session?.email ? ` · ${esc(session.email)}` : ""}</p><h2>Menu</h2>
     <div class="app-actions">
       <button class="app-button" type="button" data-m="notifications">Notifications</button>
+      <button class="app-button-ghost" type="button" data-m="calendar">Planning dans mon Calendrier</button>
       <button class="app-button-ghost" type="button" data-m="install">Installer sur l'iPhone</button>
       <button class="app-button-ghost" type="button" data-m="commerce">Gestion commerciale complète</button>
       <button class="app-button-ghost" type="button" data-m="spaces">Espaces clients (création, envoi de photos)</button>
@@ -951,11 +954,52 @@ function menuSheet() {
   $("sheet-body").querySelectorAll("[data-m]").forEach((b) => b.addEventListener("click", () => {
     const m = b.dataset.m;
     if (m === "notifications") notificationsSheet();
+    if (m === "calendar") calendarSheet();
     if (m === "install") installSheet();
     if (m === "commerce") openDesktop("/gestion-commerciale.html");
     if (m === "spaces") openDesktop("/admin-galeries.html");
     if (m === "logout" && window.confirm("Se déconnecter de l'application ?")) logout("Vous êtes déconnecté.");
   }));
+}
+
+// ================================================================ planning dans le Calendrier (abonnement)
+
+async function calendarSheet() {
+  const body = openSheet(`<h2>Planning dans mon Calendrier</h2><p class="app-loading">Chargement…</p>`);
+  let link;
+  try {
+    needOnline();
+    link = await call("calendar", { body: { action: "get-link" } });
+  } catch (error) {
+    body.innerHTML = `<h2>Planning dans mon Calendrier</h2><p class="app-empty">${esc(error.message)}</p>`;
+    return;
+  }
+  openSheet(`<h2>Planning dans mon Calendrier</h2>
+    <p class="app-hint" style="font-size:.88rem;color:var(--soft)">Le planning apparaît comme un calendrier « Alex &amp; Elisa — Planning » dans l'app Calendrier de votre iPhone, à côté de vos calendriers personnels. Tout ce qui est ajouté, modifié ou supprimé au planning (ici ou sur ordinateur) s'y met à jour automatiquement.</p>
+    <div class="app-actions">
+      <a class="app-button" href="${esc(link.webcal)}" id="cal-subscribe">Ajouter au Calendrier de l'iPhone</a>
+      <button class="app-button-ghost" type="button" id="cal-copy">Copier le lien (Google Agenda, Mac…)</button>
+    </div>
+    <h3>Comment ça marche</h3>
+    <ol class="app-steps">
+      <li>Touchez « Ajouter au Calendrier », puis <strong>S'abonner</strong> et <strong>Ajouter</strong>.</li>
+      <li>Rendez-vous confirmés et devis acceptés : événements normaux. Options, devis en attente et dates demandées par des clients : marqués « provisoire ». Durée affichée : 2 h (le planning n'a pas d'heure de fin).</li>
+      <li>L'iPhone relit le planning tout seul, en général toutes les 15 minutes à 1 heure. Pour accélérer : Réglages → Calendrier → Comptes → Nouvelles données → <strong>Toutes les 15 minutes</strong>.</li>
+      <li>Ce calendrier est en lecture seule : les modifications se font dans l'application.</li>
+    </ol>
+    ${link.lastFetchedAt ? `<p class="app-hint">Dernière lecture par un agenda : ${esc(new Date(link.lastFetchedAt).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }))}.</p>` : ""}
+    <h3>Confidentialité</h3>
+    <p class="app-hint">Ce lien est personnel : il donne accès à votre planning (noms des clients, lieux). Ne le partagez pas. En cas de doute, changez-le : l'ancien cessera de fonctionner et il faudra vous réabonner.</p>
+    <div class="app-actions"><button class="app-button-danger" type="button" id="cal-reset">Changer le lien</button></div>`);
+  $("cal-copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(link.url); toast("Lien copié."); }
+    catch { window.prompt("Copiez ce lien :", link.url); }
+  });
+  $("cal-reset").addEventListener("click", async (event) => {
+    if (!window.confirm("Changer le lien du calendrier ? Les agendas abonnés avec l'ancien lien ne seront plus mis à jour : il faudra vous réabonner.")) return;
+    const done = await guarded(event.currentTarget, async () => { needOnline(); return await call("calendar", { body: { action: "reset-link" } }); });
+    if (done) { toast("Nouveau lien créé : réabonnez-vous."); calendarSheet(); }
+  });
 }
 
 // ================================================================ notifications push

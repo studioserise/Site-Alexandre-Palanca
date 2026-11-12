@@ -43,6 +43,28 @@ Les rubriques demandées « Établissements », « Contenus/publications » et �
 - les **contenus** sont l'« Espace client » ;
 - l'**administration** est « Gestion » et le menu.
 
+## Planning dans le Calendrier de l'iPhone
+
+**Accès :** Menu ⋮ → **Planning dans mon Calendrier**, ou le lien sous le planning. Le bouton **Ajouter au Calendrier de l'iPhone** abonne l'app Calendrier au planning, qui devient un calendrier « Alex & Elisa — Planning ». Le lien peut aussi être copié pour Google Agenda ou le Mac.
+
+**Mise à jour :** automatique, dans les deux sens de la gestion (application et ordinateur) : ajouts, modifications et suppressions. Chaque événement garde le même identifiant d'une lecture à l'autre. L'iPhone relit le calendrier tout seul, en général toutes les 15 min à 1 h ; le réglage « Nouvelles données → Toutes les 15 minutes » accélère.
+
+**Ce qui est affiché :**
+- **confirmés** : séances confirmées et devis acceptés ;
+- **provisoires** : options, devis en attente et dates demandées par des clients ;
+- période : 90 jours passés et 400 jours à venir ;
+- durée de 2 h par défaut, faute d'heure de fin dans le planning ;
+- le calendrier est en lecture seule.
+
+**Technique :**
+- fonction `calendar` (GET `?t=` pour le flux iCalendar RFC 5545, POST pour obtenir ou changer son lien) ;
+- `supabase/functions/_shared/ical.ts` ;
+- table `calendar_feeds`, migration 0026 : un lien secret de 256 bits par administrateur, révocable avec « Changer le lien » ; le lien ne fonctionne plus si le compte n'est plus administrateur.
+
+**Vérification :** le fichier produit a été relu avec la bibliothèque ical.js de Mozilla. Heures d'été et d'hiver, rendez-vous passant minuit, accents et points-virgules : tout est correct.
+
+**À tester sur l'iPhone :** l'abonnement, puis l'apparition d'un événement ajouté dans l'application.
+
 ## Hors connexion
 
 - L'interface s'ouvre sans réseau (service worker `app/sw.js`).
