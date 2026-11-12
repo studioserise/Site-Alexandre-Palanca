@@ -208,6 +208,9 @@ async function openDesktop(path) {
   window.location.href = path;
 }
 
+// Seules pages ouvertes dans l'application (administration) ; le site public s'ouvre dans Safari
+const ADMIN_PAGES = /^\/(admin(\.html)?|gestion-commerciale(\.html)?|admin-galeries(\.html)?)$/;
+
 // PDF : le lien signé est ouvert dans un nouvel onglet (sans quitter l'application)
 async function openPdf(button, params) {
   await guarded(button, async () => {
@@ -351,8 +354,10 @@ function openLink(link) {
   const [kind, id] = hash.split("=");
   if (kind === "devis" && id) return quoteSheet(id);
   if (kind === "facture" && id) return invoiceSheet(id);
-  if (/^https?:/.test(link) && !link.startsWith(window.location.origin)) return window.open(link, "_blank", "noopener");
-  return openDesktop(link.startsWith("http") ? link : `/${link.replace(/^\//, "")}`);
+  const url = new URL(link, `${window.location.origin}/`);
+  // L'application ne contient que l'administration : toute autre page s'ouvre dans Safari
+  if (url.origin !== window.location.origin || !ADMIN_PAGES.test(url.pathname)) return window.open(url.href, "_blank", "noopener");
+  return openDesktop(url.pathname + url.hash);
 }
 
 function openNote(key) {
@@ -939,18 +944,16 @@ function menuSheet() {
     <div class="app-actions">
       <button class="app-button" type="button" data-m="notifications">Notifications</button>
       <button class="app-button-ghost" type="button" data-m="install">Installer sur l'iPhone</button>
-      <button class="app-button-ghost" type="button" data-m="desktop">Administration complète</button>
       <button class="app-button-ghost" type="button" data-m="commerce">Gestion commerciale complète</button>
-      <button class="app-button-ghost" type="button" data-m="site">Voir le site</button>
+      <button class="app-button-ghost" type="button" data-m="spaces">Espaces clients (création, envoi de photos)</button>
       <button class="app-button-danger" type="button" data-m="logout">Se déconnecter</button>
     </div>`);
   $("sheet-body").querySelectorAll("[data-m]").forEach((b) => b.addEventListener("click", () => {
     const m = b.dataset.m;
     if (m === "notifications") notificationsSheet();
     if (m === "install") installSheet();
-    if (m === "desktop") openDesktop("/admin.html");
     if (m === "commerce") openDesktop("/gestion-commerciale.html");
-    if (m === "site") window.open("/", "_blank", "noopener");
+    if (m === "spaces") openDesktop("/admin-galeries.html");
     if (m === "logout" && window.confirm("Se déconnecter de l'application ?")) logout("Vous êtes déconnecté.");
   }));
 }

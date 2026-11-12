@@ -25,7 +25,11 @@ L'application s'ouvre en plein écran, sans barre Safari, et reste connectée. L
 | À faire | centre de notifications : filtres, suppression, télécharger ou envoyer la proposition commune, demandes clients (créer le devis, ignorer) | `notifications`, `dismiss-*`, `document-url`, `send-document` |
 | Espace client | galeries, vidéos, suivi de site, contenus réseaux ; code d'accès ; partage de l'accès ; fermeture ; commandes et retours | `admin-api` (GET, `close-gallery`) |
 | Gestion | devis, factures et clients (Alex, Elisa ou les deux) ; PDF, PDF signé, envoi au client, enregistrement d'un règlement, appel, e-mail, effacement RGPD | `list-*`, `get-*`, `add-payment`, `erase-client` |
-| Menu ⋮ | Notifications, Installer, Administration complète, Gestion commerciale complète, Voir le site, Se déconnecter | — |
+| Menu ⋮ | Notifications, Installer, Gestion commerciale complète, Espaces clients (création, envoi de photos), Se déconnecter | — |
+
+**L'application ne contient que l'administration.**
+- Le site public n'y est jamais affiché : ni menu ni pied de page du site sur les pages de gestion ouvertes depuis l'application, dont le logo ramène à l'application.
+- Tout lien vers une page publique (galerie d'un client, page de rappel, etc.) s'ouvre dans Safari, hors de l'application.
 
 Certaines opérations restent dans la version complète, adaptée au téléphone, qui s'ouvre dans l'application. Un bouton « ‹ Application » permet d'en revenir. Il s'agit de :
 - la **création ou modification d'un devis** (catalogue, lignes, aperçu PDF) ;
@@ -76,7 +80,7 @@ Les rubriques demandées « Établissements », « Contenus/publications » et �
 
 **Créés :**
 - `app/index.html`, `app/app.css`, `app/app.js`, `app/sw.js`, `app/manifest.webmanifest`, `app/icons/*` ;
-- `app-return.js` (bouton « ‹ Application » sur les pages complètes, visible seulement dans l'application installée) ;
+- `app-return.js` (dans l'application installée seulement : bouton « ‹ Application », menu et pied de page du site masqués, liens publics ouverts dans Safari) ;
 - `supabase/functions/push/index.ts`, `supabase/functions/push-dispatch/index.ts` ;
 - `supabase/functions/_shared/webpush.ts`, `supabase/functions/_shared/push-core.ts` ;
 - `supabase/migrations/202611120025_push_notifications.sql` :
