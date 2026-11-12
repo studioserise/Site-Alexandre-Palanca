@@ -175,7 +175,6 @@ html[data-theme="light"] .iv-gallery-track figure { background: rgba(23, 23, 21,
 html[data-theme="light"] .iv-gallery-nav button { background: rgba(23, 23, 21, 0.05); }
 
 /* Titres de section : même taille partout sur la page (formules et portfolio compris) */
-.iv-page h2.studio-section-heading { max-width: 900px; font-size: clamp(2.3rem, 4.7vw, 4.6rem); font-weight: 400; letter-spacing: -0.045em; line-height: 1.04; }
 .iv-page .rs-showcase-intro { margin-top: -18px; }
 
 /* Retouches après vérification */
