@@ -280,3 +280,7 @@ html[data-theme="light"] .iv-compo-item.is-cutout { background: transparent; }
 @media (max-width: 640px) {
   .iv-compo--0.has-cutout .is-cutout:nth-child(2) { right: 2%; bottom: -5%; width: 64%; height: 68%; }
 }
+
+/* Introduction : téléphone agrandi de 20 % (34 % -> 40,8 % ; mobile 38 % -> 45,6 %) */
+.iv-hero-phone { width: 40.8%; right: 4%; }
+@media (max-width: 640px) { .iv-hero-phone { width: 45.6%; right: 0; } }
