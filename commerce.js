@@ -18,7 +18,7 @@ const TABS = [
 ];
 
 // Deux prestataires indépendants : chaque devis, facture et prestation appartient à l'un d'eux.
-const ISSUERS = [["alexandre", "Alexandre Palanca", "Photo & vidéo"], ["elisa", "Elisa Martignac", "Sites internet"]];
+const ISSUERS = [["alexandre", "Alexandre Palanca", "Photo & vidéo"], ["elisa", "Elisa Martignac", "Sites internet & identité visuelle"]];
 const issuerLabel = (key) => (ISSUERS.find(([k]) => k === key) || ISSUERS[0])[1];
 const issuerTag = (key) => `<span class="com-issuer is-${key === "elisa" ? "elisa" : "alexandre"}">${key === "elisa" ? "EM" : "AP"}</span>`;
 let listIssuer = "all";
@@ -877,13 +877,16 @@ async function openFromHash() {
         projectDescription: [bundleProject(shared, f ? f[0] : ""), r.message].filter(Boolean).join("\n\n")
       });
     }
+    // Demande « Identité visuelle » : formule choisie dans le formulaire rappelée dans le projet
+    const identity = /identit/i.test(r.service || "");
+    const formula = identity ? (/Formule envisagée : ([^\n]+)/.exec(r.message || "") || [])[1] : "";
     return quoteEditor(null, client, {
-      // Demande « Sites internet » → devis d'Elisa ; sinon devis d'Alexandre
-      issuer: /site/i.test(r.service || "") ? "elisa" : "alexandre",
+      // Demandes « Sites internet » et « Identité visuelle » → devis d'Elisa ; sinon devis d'Alexandre
+      issuer: /site/i.test(r.service || "") || identity ? "elisa" : "alexandre",
       contactRequestId: r.id,
       serviceDate: r.wanted_date || "",
       servicePeriod: r.wanted_date ? "" : (r.date_text || ""),
-      projectDescription: [project, r.message].filter(Boolean).join("\n\n")
+      projectDescription: [identity && formula ? `Identité visuelle — formule ${formula.trim()}` : project, r.message].filter(Boolean).join("\n\n")
     });
   }
   go("dashboard");

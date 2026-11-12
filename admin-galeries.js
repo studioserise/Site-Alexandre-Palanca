@@ -323,8 +323,10 @@ function renderWebFollowUp(gallery, feedback) {
   return box;
 }
 
-// Contenus réseaux : dossiers et guide PDF
+// Contenus réseaux et identité visuelle : dossiers et PDF (guide ou charte graphique)
+const hasFolders = (delivery) => delivery === "social" || delivery === "identite";
 function renderSocial(gallery) {
+  const pdfName = gallery.delivery === "identite" ? "Charte graphique" : "Guide PDF";
   const box = document.createElement("div");
   box.className = "admin-video-links";
   const list = document.createElement("ul");
@@ -337,9 +339,9 @@ function renderSocial(gallery) {
     if (folder.description) item.append(` — ${folder.description}`);
     list.append(item);
   }
-  box.append(list, makeText("small", "", gallery.tutorial_path ? "Guide PDF : déposé ✓" : "Guide PDF : pas encore déposé"));
+  box.append(list, makeText("small", "", gallery.tutorial_path ? `${pdfName} : déposé ✓` : `${pdfName} : pas encore déposé`));
   if (gallery.status !== "open") return box;
-  const edit = makeText("button", "gallery-quiet-button", "Modifier les dossiers / le guide");
+  const edit = makeText("button", "gallery-quiet-button", gallery.delivery === "identite" ? "Modifier les fichiers / la charte" : "Modifier les dossiers / le guide");
   edit.type = "button";
   const form = document.createElement("form");
   form.hidden = true;
@@ -351,7 +353,7 @@ function renderSocial(gallery) {
   const pdf = document.createElement("input");
   pdf.className = "gallery-admin-input";
   pdf.type = "file"; pdf.accept = "application/pdf";
-  const pdfLabel = makeText("label", "gallery-admin-label", gallery.tutorial_path ? "Remplacer le guide PDF (facultatif)" : "Guide PDF (facultatif)");
+  const pdfLabel = makeText("label", "gallery-admin-label", gallery.tutorial_path ? `Remplacer : ${pdfName.toLowerCase()} (facultatif)` : `${pdfName} (facultatif)`);
   pdfLabel.append(pdf);
   const save = makeText("button", "gallery-primary-button", "Enregistrer");
   save.type = "submit";
@@ -364,7 +366,7 @@ function renderSocial(gallery) {
       await callAdmin({ action: "set-social-folders", galleryId: gallery.id, socialFolders: readLinkRows(rows, SOCIAL_FIELDS) });
       if (pdf.files[0]) await uploadTutorial(gallery.id, pdf.files[0]);
       await loadDashboard();
-      setMessage(`Contenus de « ${gallery.name} » enregistrés.`, false);
+      setMessage(`Fichiers de « ${gallery.name} » enregistrés.`, false);
     } catch (error) {
       setMessage(error.message);
       save.disabled = false;
@@ -382,13 +384,13 @@ function syncDelivery() {
   const value = deliverySelect.value;
   document.getElementById("admin-video-links").hidden = value !== "video";
   document.getElementById("admin-web-fields").hidden = value !== "web";
-  document.getElementById("admin-social-fields").hidden = value !== "social";
+  document.getElementById("admin-social-fields").hidden = !hasFolders(value);
   document.getElementById("admin-gallery-tariff-field").hidden = value !== "photos";
   if (value === "video" && !videoRows.children.length) videoRows.append(videoRow());
   if (value === "web" && !webRows.children.length) webRows.append(linkRow(WEB_FIELDS));
-  if (value === "social" && !socialRows.children.length) socialRows.append(linkRow(SOCIAL_FIELDS));
-  // Suivi de site et contenus réseaux : jusqu'à 90 jours
-  const long = value === "web" || value === "social";
+  if (hasFolders(value) && !socialRows.children.length) socialRows.append(linkRow(SOCIAL_FIELDS));
+  // Suivi de site, contenus réseaux et identité visuelle : jusqu'à 90 jours
+  const long = value === "web" || hasFolders(value);
   const days = document.getElementById("admin-gallery-days");
   days.max = long ? "90" : "15";
   document.getElementById("admin-gallery-days-label").textContent = `Accès (jours, maximum ${long ? 90 : 15})`;
@@ -448,6 +450,8 @@ function renderGalleries(galleries) {
     const closes = new Date(gallery.expires_at).toLocaleDateString("fr-FR");
     record.append(makeText("small", "", gallery.delivery === "web"
       ? `Suivi de site · ${gallery.web_pages?.length ?? 0} page(s) · ferme le ${closes}`
+      : gallery.delivery === "identite"
+      ? `Identité visuelle · ${gallery.social_folders?.length ?? 0} dossier(s) · ferme le ${closes}`
       : gallery.delivery === "social"
       ? `Contenus réseaux · ${gallery.social_folders?.length ?? 0} dossier(s) · ferme le ${closes}`
       : gallery.delivery === "video"
@@ -456,7 +460,7 @@ function renderGalleries(galleries) {
     record.append(renderAccessCode(gallery));
     if (gallery.delivery === "video") record.append(renderVideoLinks(gallery));
     if (gallery.delivery === "web") record.append(renderWebFollowUp(gallery, lastFeedback));
-    if (gallery.delivery === "social") record.append(renderSocial(gallery));
+    if (hasFolders(gallery.delivery)) record.append(renderSocial(gallery));
     if (gallery.status === "open") {
       const button = makeText("button", "gallery-quiet-button", "Fermer cette galerie");
       button.type = "button";
@@ -622,11 +626,11 @@ document.getElementById("admin-create-gallery-form").addEventListener("submit", 
       videoLinks: deliverySelect.value === "video" ? readVideoRows(videoRows) : undefined,
       webPages: deliverySelect.value === "web" ? readLinkRows(webRows, WEB_FIELDS) : undefined,
       feedbackRounds: deliverySelect.value === "web" ? Number(document.getElementById("admin-web-rounds").value) : undefined,
-      socialFolders: deliverySelect.value === "social" ? readLinkRows(socialRows, SOCIAL_FIELDS) : undefined,
+      socialFolders: hasFolders(deliverySelect.value) ? readLinkRows(socialRows, SOCIAL_FIELDS) : undefined,
       code
     });
     const pdfFile = document.getElementById("admin-social-pdf").files[0];
-    if (deliverySelect.value === "social" && pdfFile && result.gallery?.id) {
+    if (hasFolders(deliverySelect.value) && pdfFile && result.gallery?.id) {
       await uploadTutorial(result.gallery.id, pdfFile);
     }
     document.getElementById("admin-created-code").textContent =

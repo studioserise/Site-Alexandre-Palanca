@@ -215,10 +215,10 @@ Deno.serve(async (request) => {
       if (type !== "event" && type !== "individual") {
         return jsonResponse(request, 400, { message: "Type de galerie invalide." });
       }
-      const delivery = ["video", "web", "social"].includes(String(body.delivery)) ? String(body.delivery) : "photos";
+      const delivery = ["video", "web", "social", "identite"].includes(String(body.delivery)) ? String(body.delivery) : "photos";
       const videoLinks = delivery === "video" ? parseVideoLinks(body.videoLinks) : [];
       const webPages = delivery === "web" ? parseWebPages(body.webPages) : [];
-      const socialFolders = delivery === "social" ? parseSocialFolders(body.socialFolders) : [];
+      const socialFolders = delivery === "social" || delivery === "identite" ? parseSocialFolders(body.socialFolders) : [];
       const rounds = Number(body.feedbackRounds ?? 2);
       if (!Number.isInteger(rounds) || rounds < 0 || rounds > 20) {
         return jsonResponse(request, 400, { message: "Nombre de séries de modifications invalide (0 à 20)." });
@@ -236,7 +236,7 @@ Deno.serve(async (request) => {
       }
       const days = Number(body.daysOpen);
       // Suivi de site et contenus réseaux : jusqu'à 90 jours ; galeries : 15 jours
-      const maxDays = delivery === "web" || delivery === "social" ? 90 : 15;
+      const maxDays = delivery === "web" || delivery === "social" || delivery === "identite" ? 90 : 15;
       if (!Number.isInteger(days) || days < 1 || days > maxDays) {
         return jsonResponse(request, 400, { message: `La durée d’accès doit être comprise entre 1 et ${maxDays} jours.` });
       }
@@ -302,7 +302,7 @@ Deno.serve(async (request) => {
     // Contenus réseaux : dossiers à télécharger
     if (body.action === "set-social-folders") {
       const galleryId = requiredText(body.galleryId, "Galerie", 64);
-      await databaseRequest(`galleries?id=eq.${encodeURIComponent(galleryId)}&delivery=eq.social`, {
+      await databaseRequest(`galleries?id=eq.${encodeURIComponent(galleryId)}&delivery=in.(social,identite)`, {
         method: "PATCH",
         body: JSON.stringify({ social_folders: parseSocialFolders(body.socialFolders) })
       });
@@ -322,7 +322,7 @@ Deno.serve(async (request) => {
       if (!path.startsWith(`${galleryId}/guide-`) || !path.endsWith(".pdf")) {
         return jsonResponse(request, 400, { message: "Fichier invalide." });
       }
-      await databaseRequest(`galleries?id=eq.${encodeURIComponent(galleryId)}&delivery=eq.social`, {
+      await databaseRequest(`galleries?id=eq.${encodeURIComponent(galleryId)}&delivery=in.(social,identite)`, {
         method: "PATCH",
         body: JSON.stringify({ tutorial_path: path })
       });

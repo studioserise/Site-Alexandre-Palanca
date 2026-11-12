@@ -9,6 +9,19 @@ function showError(text) {
   $("social-error").hidden = false;
 }
 
+const SPACES = {
+  social: {
+    service: "reseaux", eyebrow: "Contenus réseaux", folders: "Vos dossiers", pdf: "Guide d’utilisation", pdfShort: "le guide", file: "Guide",
+    intro: "Téléchargez vos dossiers, puis suivez le guide pour publier vos contenus sur les réseaux sociaux.",
+    empty: "Le guide sera bientôt disponible."
+  },
+  identite: {
+    service: "identite", eyebrow: "Identité visuelle", folders: "Vos fichiers", pdf: "Charte graphique", pdfShort: "la charte graphique", file: "Charte graphique",
+    intro: "Téléchargez les fichiers de votre identité visuelle (logos, éléments graphiques, fichiers d’impression) et consultez votre charte graphique.",
+    empty: "La charte graphique sera bientôt disponible."
+  }
+};
+
 async function start() {
   let data;
   try {
@@ -16,8 +29,18 @@ async function start() {
   } catch (error) {
     return showError(`${error.message} Saisissez à nouveau votre code dans l’espace client.`);
   }
-  if (data.gallery?.delivery !== "social") return showError("Ce code ne correspond pas à des contenus réseaux.");
-  document.title = `${data.gallery.name} — Contenus réseaux`;
+  const kind = SPACES[data.gallery?.delivery];
+  if (!kind) return showError("Ce code ne correspond pas à cet espace.");
+  // Même page pour les contenus réseaux et l'identité visuelle : seuls les textes changent
+  $("space-eyebrow").textContent = kind.eyebrow;
+  $("space-intro").textContent = kind.intro;
+  $("space-folders-title").textContent = kind.folders;
+  $("space-pdf-title").textContent = kind.pdf;
+  $("space-back").href = `galerie.html?service=${kind.service}`;
+  $("social-guide-frame").title = `${kind.pdf} (PDF)`;
+  $("social-guide-download").textContent = `Télécharger ${kind.pdfShort} (PDF)`;
+  $("social-guide-empty").textContent = kind.empty;
+  document.title = `${data.gallery.name} — ${kind.eyebrow}`;
   $("social-title").textContent = data.gallery.name;
 
   $("social-folders").replaceChildren(...data.folders.map((folder) => {
@@ -53,7 +76,7 @@ async function start() {
     frame.src = data.tutorialUrl;
     frame.hidden = false;
     const download = $("social-guide-download");
-    download.href = `${data.tutorialUrl}${data.tutorialUrl.includes("?") ? "&" : "?"}download=${encodeURIComponent(`Guide — ${data.gallery.name}.pdf`)}`;
+    download.href = `${data.tutorialUrl}${data.tutorialUrl.includes("?") ? "&" : "?"}download=${encodeURIComponent(`${kind.file} — ${data.gallery.name}.pdf`)}`;
     download.hidden = false;
   } else {
     $("social-guide-empty").hidden = false;

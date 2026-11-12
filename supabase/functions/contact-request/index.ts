@@ -55,6 +55,15 @@ const typesByService: Record<string, string[]> = {
     "Site sur mesure",
     "Refonte d’un site existant",
     "Autre projet"
+  ],
+  "Identité visuelle": [
+    "Identité visuelle",
+    "Refonte",
+    "Événementiel",
+    "Print",
+    "Textile",
+    "Merchandising",
+    "Autre"
   ]
 };
 

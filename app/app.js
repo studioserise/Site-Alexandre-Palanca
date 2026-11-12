@@ -669,7 +669,7 @@ function eventSheet(event = {}) {
 
 // ================================================================ espace client
 
-const DELIVERY = { photos: "Galerie photos", video: "Vidéos", web: "Suivi de site", social: "Contenus réseaux" };
+const DELIVERY = { photos: "Galerie photos", video: "Vidéos", web: "Suivi de site", social: "Contenus réseaux", identite: "Identité visuelle" };
 let spaceFilter = "open";
 let spaces = { galleries: [], orders: [], feedback: [] };
 

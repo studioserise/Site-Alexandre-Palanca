@@ -11,9 +11,9 @@
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=prestations">
   <link rel="stylesheet" href="cursor.css?v=7">
-  <script src="site-nav.js?v=prestations2" defer></script>
+  <script src="site-nav.js?v=identite" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="admin-galeries.js?v=espace"></script>
+  <script type="module" src="admin-galeries.js?v=identite"></script>
   <script src="app-return.js?v=3"></script>
 </head>
 <body>
@@ -82,6 +82,7 @@
                 <option value="video">Livraison vidéo (lien de téléchargement)</option>
                 <option value="web">Suivi de site internet (retours du client)</option>
                 <option value="social">Contenus réseaux (dossiers + guide PDF)</option>
+                <option value="identite">Identité visuelle (fichiers + charte graphique PDF)</option>
               </select>
             </label>
             <div class="admin-video-links" id="admin-web-fields" hidden>
@@ -94,11 +95,11 @@
               </label>
             </div>
             <div class="admin-video-links" id="admin-social-fields" hidden>
-              <p class="gallery-admin-note">Un lien par dossier (Google Drive, WeTransfer…), avec une courte description. Le guide PDF s’affiche à côté des dossiers.</p>
+              <p class="gallery-admin-note">Un lien par dossier (Google Drive, WeTransfer…), avec une courte description. Le PDF (guide d’utilisation ou charte graphique) s’affiche à côté des dossiers.</p>
               <div id="admin-social-rows"></div>
               <button class="gallery-quiet-button" id="admin-social-add" type="button">+ Ajouter un dossier</button>
               <label class="gallery-admin-label" for="admin-social-pdf">
-                Guide PDF (facultatif, 20 Mo maximum)
+                Guide ou charte graphique en PDF (facultatif, 20 Mo maximum)
                 <input class="gallery-admin-input" id="admin-social-pdf" type="file" accept="application/pdf">
               </label>
             </div>

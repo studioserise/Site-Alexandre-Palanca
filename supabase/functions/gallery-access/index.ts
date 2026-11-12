@@ -75,7 +75,7 @@ Deno.serve(async (request) => {
     return jsonResponse(request, 200, {
       accessToken: await createGallerySession(gallery.id),
       // Livraison vidéo : la page du code affiche une fenêtre de téléchargement (pas de galerie)
-      delivery: ["video", "web", "social"].includes(gallery.delivery) ? gallery.delivery : "photos"
+      delivery: ["video", "web", "social", "identite"].includes(gallery.delivery) ? gallery.delivery : "photos"
     });
   } catch (error) {
     return errorResponse(request, error);

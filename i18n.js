@@ -14,6 +14,9 @@
     // Navigation, bas de page, éléments communs
     "Photo & vidéo": "Photo & video",
     "Prestations": "Services",
+    "Sites internet & identité visuelle": "Websites & visual identity",
+    "Sites internet &amp;": "Websites &amp;",
+    "identité visuelle": "visual identity",
     "Quatre façons de raconter votre projet.": "Four ways to tell your story.",
     "Exemples de prestations": "Examples of services",
     "Découvrir": "Discover",

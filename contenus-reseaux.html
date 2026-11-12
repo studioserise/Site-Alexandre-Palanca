@@ -20,9 +20,9 @@
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=prestations">
   <link rel="stylesheet" href="cursor.css?v=7">
-  <script src="site-nav.js?v=prestations2" defer></script>
+  <script src="site-nav.js?v=identite" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="contenus-reseaux.js?v=1"></script>
+  <script type="module" src="contenus-reseaux.js?v=2"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -45,21 +45,21 @@
 
   <main class="client-space" id="client-space">
     <div class="client-space-head">
-      <a class="client-back" href="galerie.html?service=reseaux">←︎ Espace client</a>
-      <p class="gallery-eyebrow">Contenus réseaux</p>
+      <a class="client-back" id="space-back" href="galerie.html?service=reseaux">←︎ Espace client</a>
+      <p class="gallery-eyebrow" id="space-eyebrow">Contenus réseaux</p>
       <h1 id="social-title">Chargement…</h1>
-      <p class="client-space-intro">Téléchargez vos dossiers, puis suivez le guide pour publier vos contenus sur les réseaux sociaux.</p>
+      <p class="client-space-intro" id="space-intro">Téléchargez vos dossiers, puis suivez le guide pour publier vos contenus sur les réseaux sociaux.</p>
     </div>
     <p class="gallery-error" id="social-error" role="alert" hidden></p>
     <div class="social-layout" id="social-layout" hidden>
       <aside class="social-folders">
-        <h2>Vos dossiers</h2>
+        <h2 id="space-folders-title">Vos dossiers</h2>
         <div id="social-folders"></div>
         <p class="site-note">Pensez à enregistrer vos fichiers : l’accès à cette page est limité dans le temps.</p>
       </aside>
       <section class="social-guide">
         <div class="social-guide-head">
-          <h2>Guide d’utilisation</h2>
+          <h2 id="space-pdf-title">Guide d’utilisation</h2>
           <a class="gallery-primary-button" id="social-guide-download" href="#" hidden>Télécharger le guide (PDF)</a>
         </div>
         <iframe class="social-guide-frame" id="social-guide-frame" title="Guide d’utilisation (PDF)" hidden></iframe>

@@ -10,7 +10,7 @@ const demoNote = document.getElementById("gallery-demo-note");
 
 demoNote.hidden = !config.demoMode;
 
-// Espace client : trois services, galeries par défaut. Le code ouvre toujours le bon contenu.
+// Espace client : quatre services, galeries par défaut. Le code ouvre toujours le bon contenu.
 const SPACES = {
   galerie: {
     intro: "Retrouvez les photographies de votre événement ou de votre séance grâce au code d’accès transmis par Alexandre.",
@@ -19,6 +19,10 @@ const SPACES = {
   site: {
     intro: "Suivez l’avancement de votre site internet : parcourez chaque page et donnez vos retours, grâce au code transmis par Elisa.",
     button: "Voir mon site en cours"
+  },
+  identite: {
+    intro: "Retrouvez les fichiers de votre identité visuelle (logos, charte graphique, fichiers d’impression) grâce au code transmis par Elisa.",
+    button: "Accéder à mes fichiers"
   },
   reseaux: {
     intro: "Téléchargez vos contenus prêts à publier sur les réseaux sociaux, avec le guide d’utilisation, grâce à votre code d’accès.",
@@ -118,7 +122,7 @@ form.addEventListener("submit", async (event) => {
     window.sessionStorage.setItem("gallery-session-token", result.accessToken);
     window.location.assign(
       result.delivery === "web" ? "suivi-site.html"
-        : result.delivery === "social" ? "contenus-reseaux.html"
+        : result.delivery === "social" || result.delivery === "identite" ? "contenus-reseaux.html"
         : "galerie-privee.html"
     );
   } catch (error) {

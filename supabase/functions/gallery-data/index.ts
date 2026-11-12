@@ -14,7 +14,7 @@ type Gallery = {
   tariff: "tarif0" | "tarif2" | "tarif5";
   status: "open" | "closed";
   expires_at: string;
-  delivery: "photos" | "video" | "web" | "social";
+  delivery: "photos" | "video" | "web" | "social" | "identite";
   video_links: Array<{ label: string; url: string; multiple?: boolean }>;
   web_pages: Array<{ name: string; url: string }>;
   feedback_rounds: number;
@@ -58,8 +58,8 @@ Deno.serve(async (request) => {
       });
     }
 
-    // Contenus réseaux : dossiers (liens) et guide PDF (lien signé valable 8 h)
-    if (gallery.delivery === "social") {
+    // Contenus réseaux et identité visuelle : dossiers (liens) et PDF (guide ou charte, lien signé valable 8 h)
+    if (gallery.delivery === "social" || gallery.delivery === "identite") {
       if (new URL(request.url).searchParams.get("compter") === "video") {
         await databaseRequest("rpc/count_gallery_download", {
           method: "POST", body: JSON.stringify({ p_gallery: gallery.id })
@@ -80,7 +80,7 @@ Deno.serve(async (request) => {
         if (signed.ok && result.signedURL) tutorialUrl = `${base}/storage/v1${result.signedURL}`;
       }
       return jsonResponse(request, 200, {
-        gallery: { id: gallery.id, name: gallery.name, delivery: "social", expiresAt: gallery.expires_at },
+        gallery: { id: gallery.id, name: gallery.name, delivery: gallery.delivery, expiresAt: gallery.expires_at },
         folders: gallery.social_folders ?? [],
         tutorialUrl
       });

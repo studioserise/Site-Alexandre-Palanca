@@ -350,6 +350,8 @@ export async function notifications() {
       title: `Galerie ${gallery.name}`,
       detail: gallery.delivery === "web"
         ? `Suivi de site : ${gallery.view_count} ouverture${gallery.view_count > 1 ? "s" : ""} par le client.`
+        : gallery.delivery === "identite"
+        ? `Identité visuelle : ${gallery.view_count} ouverture${gallery.view_count > 1 ? "s" : ""} · ${gallery.download_count} téléchargement${gallery.download_count > 1 ? "s" : ""} de dossiers.`
         : gallery.delivery === "social"
         ? `Contenus réseaux : ${gallery.view_count} ouverture${gallery.view_count > 1 ? "s" : ""} · ${gallery.download_count} téléchargement${gallery.download_count > 1 ? "s" : ""} de dossiers.`
         : gallery.delivery === "video"
