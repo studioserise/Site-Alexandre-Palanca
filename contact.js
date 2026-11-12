@@ -52,7 +52,6 @@ contactForm.addEventListener("submit", async (event) => {
     type: formData.get("type") || "",
     date: formData.get("date"),
     message: details,
-    consent: formData.get("consent") === "on",
     website: formData.get("website")
   };
 

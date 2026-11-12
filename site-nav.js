@@ -243,6 +243,7 @@ if (!document.querySelector(".site-footer")) {
         <span>© ${new Date().getFullYear()} Alex &amp; Elisa</span>
         <a href="mentions-legales.html">Mentions légales</a>
         <a href="politique-confidentialite.html">Politique de confidentialité</a>
+        <a href="conditions-generales.html">Conditions générales</a>
       </div>
     </div>
     <div class="site-footer-ground" aria-hidden="true"></div>

@@ -431,10 +431,10 @@ export function partyLines(client: Row) {
   ].filter(Boolean);
 }
 
-// Mention « EI » obligatoire pour un entrepreneur individuel (art. L526-22 et R526-26 du Code de commerce),
-// ajoutée si elle ne figure pas déjà dans les mentions du prestataire.
+// Mention « EI » obligatoire juste avant ou après le nom d'un entrepreneur individuel
+// (art. L526-22 et R526-26 du Code de commerce), ajoutée si le nom légal ne la contient pas déjà.
 function hasEiMention(settings: Row) {
-  return /entrepreneur individuel|\bEI\b/i.test(`${settings.legal_name ?? ""} ${settings.legal_footer ?? ""}`);
+  return /entrepreneur individuel|\bEI\b/.test(String(settings.legal_name ?? ""));
 }
 
 export function issuerParty(settings: Row) {
@@ -1272,6 +1272,59 @@ export async function dashboard(issuer: unknown = "alexandre") {
   };
 }
 
+// Droit à l'effacement (art. 17 RGPD) : supprime tout ce qui n'est pas imposé par la loi.
+// Conservés : factures (10 ans, art. L123-22 C. com.) et devis acceptés ou signés (preuve du contrat),
+// qui gardent leur propre copie des coordonnées. Supprimés : autres devis et leurs PDF, demandes du
+// formulaire. La fiche client est supprimée, ou vidée de ses coordonnées si des documents sont conservés.
+export async function eraseClient(id: string) {
+  const client = (await rows(`clients?select=*&id=${eq(id)}`))[0];
+  if (!client) throw new UserError("Client introuvable.", 404);
+  const [quotes, invoices] = await Promise.all([
+    rows(`quotes?select=id,status,signed_at,pdf_path,signed_pdf_path,combined_pdf_path&client_id=${eq(id)}`),
+    rows(`invoices?select=id,quote_id&client_id=${eq(id)}`)
+  ]);
+  const invoiced = new Set(invoices.map((invoice) => invoice.quote_id).filter(Boolean));
+  const keep = quotes.filter((q) => invoiced.has(q.id) || q.status === "accepted" || q.signed_at);
+  const remove = quotes.filter((q) => !keep.includes(q));
+  const filesOf = (q: Row) => [q.pdf_path, q.signed_pdf_path, q.combined_pdf_path].filter(Boolean) as string[];
+  const keptFiles = new Set(keep.flatMap(filesOf));
+  const files = [...new Set(remove.flatMap(filesOf))].filter((path) => !keptFiles.has(path));
+
+  if (files.length) {
+    const response = await storageRequest(`object/${BUCKET}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prefixes: files })
+    });
+    if (!response.ok) throw new Error(`Suppression des PDF impossible (${response.status})`);
+  }
+  if (remove.length) {
+    await databaseRequest(`quotes?id=in.(${remove.map((q) => q.id).join(",")})`, { method: "DELETE" });
+  }
+  const requests = client.email
+    ? `contact_requests?or=(client_id.eq.${id},email.eq.${encodeURIComponent(client.email)})`
+    : `contact_requests?client_id=${eq(id)}`;
+  await databaseRequest(requests, { method: "DELETE" });
+
+  const kept = keep.length + invoices.length > 0;
+  if (kept) {
+    await patchOne("clients", id, {
+      name: "Client effacé", email: "", phone: "", address: "", postal_code: "", city: "",
+      siret: "", vat_number: "", country: "France"
+    });
+  } else {
+    await databaseRequest(`clients?id=${eq(id)}`, { method: "DELETE" });
+  }
+  return {
+    erased: true,
+    clientDeleted: !kept,
+    deletedQuotes: remove.length,
+    deletedFiles: files.length,
+    keptQuotes: keep.length,
+    keptInvoices: invoices.length
+  };
+}
+
 export async function clientDetail(id: string) {
   const client = (await rows(`clients?select=*&id=${eq(id)}`))[0];
   if (!client) throw new UserError("Client introuvable.", 404);
@@ -1346,6 +1399,8 @@ export async function handle(body: Row) {
       return await clientDetail(uuid(body.id, "Client"));
     case "save-client":
       return { client: await upsertClient(body.client ?? {}) };
+    case "erase-client":
+      return await eraseClient(uuid(body.id, "Client"));
 
     case "list-services": {
       const filter = (body.includeInactive ? "" : "&active=is.true") +

@@ -39,10 +39,10 @@ function show(part) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+// Prestations réservées aux professionnels : SIRET toujours demandé.
 function syncType() {
-  const pro = acceptForm.elements.type.value === "professionnel";
-  $("pro-fields").hidden = !pro;
-  $("name-label").textContent = pro ? "Nom de la société *" : "Nom et prénom *";
+  acceptForm.elements.type.value = "professionnel";
+  $("pro-fields").hidden = false;
 }
 
 const STATES = {
@@ -99,7 +99,6 @@ async function start() {
   for (const key of ["name", "email", "phone", "address", "postalCode", "city", "country", "siret", "vatNumber"]) {
     acceptForm.elements[key].value = c[key] || "";
   }
-  acceptForm.elements.type.value = c.type;
   syncType();
   show("summary");
 }
@@ -107,7 +106,6 @@ async function start() {
 $("q-accept").addEventListener("click", () => show("accept"));
 $("q-refuse").addEventListener("click", () => show("refuse"));
 document.querySelectorAll("[data-back]").forEach((button) => button.addEventListener("click", () => show("summary")));
-acceptForm.querySelectorAll('input[name="type"]').forEach((input) => input.addEventListener("change", syncType));
 $("add-comment").addEventListener("click", () => {
   $("add-comment").hidden = true;
   $("accept-comment-field").hidden = false;
@@ -191,13 +189,22 @@ async function submit(form, body, done) {
 acceptForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const f = acceptForm.elements;
-  const pro = f.type.value === "professionnel";
-  const missing = ["name", "email", "address", "postalCode", "city", ...(pro ? ["siret"] : [])]
+  const missing = ["name", "email", "address", "postalCode", "city", "siret"]
     .filter((key) => !f[key].value.trim());
   const message = acceptForm.querySelector(".gallery-form-message");
   if (missing.length) {
     message.textContent = "Merci de remplir les champs marqués d'une étoile.";
     f[missing[0]].focus();
+    return;
+  }
+  if (!/^\d{14}$/.test(f.siret.value.replace(/\s/g, ""))) {
+    message.textContent = "Le SIRET doit comporter 14 chiffres.";
+    f.siret.focus();
+    return;
+  }
+  if (!f.cgv.checked) {
+    message.textContent = "Merci de cocher l'acceptation des conditions générales.";
+    f.cgv.focus();
     return;
   }
   if (!signed) {
@@ -209,7 +216,7 @@ acceptForm.addEventListener("submit", (event) => {
   const client = Object.fromEntries(
     ["name", "email", "phone", "address", "postalCode", "city", "country", "siret", "vatNumber"].map((key) => [key, f[key].value.trim()])
   );
-  submit(acceptForm, { action: "accept", client: { ...client, type: f.type.value }, comment: f.comment.value.trim(), signature: pad.toDataURL("image/png") },
+  submit(acceptForm, { action: "accept", client: { ...client, type: "professionnel" }, cgvAccepted: true, comment: f.comment.value.trim(), signature: pad.toDataURL("image/png") },
     (result) => {
       const payments = result.payments?.length ? result.payments : result.payUrl ? [{ url: result.payUrl, cents: result.depositCents }] : [];
       const several = payments.length > 1;

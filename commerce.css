@@ -106,3 +106,8 @@
 .com-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .com-issuer.is-site { background: #b9d7e8; color: #0d2230; letter-spacing: 0.04em; }
+
+/* Action irréversible (effacement RGPD d'un client) */
+.com-danger { border-color: rgba(229, 115, 95, 0.6) !important; color: #e6aaa2 !important; }
+.com-danger:hover { background: #e5735f !important; color: #160a07 !important; }
+html[data-theme="light"] .com-danger { color: #a3392a !important; border-color: rgba(163, 57, 42, 0.5) !important; }

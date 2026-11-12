@@ -224,7 +224,6 @@ Deno.serve(async (request) => {
     else if (!isEmail(email)) notes.push("adresse e-mail peut-être erronée (répondre par téléphone si besoin)");
     if (!email && !phone) notes.push("aucun moyen de recontacter la personne");
     if (!message) notes.push("pas de message");
-    if (body.consent !== true) notes.push("case d’accord RGPD non cochée");
     if (type && service && typesByService[service] && !typesByService[service].includes(type)) {
       notes.push("type de prestation inhabituel");
     }

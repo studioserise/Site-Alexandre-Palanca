@@ -338,10 +338,14 @@ async function accept(body: Row, request: Request) {
   const { quote, client } = await findQuote(body.token);
   if (stateOf(quote) !== "open") throw new UserError("Ce devis n'attend plus de réponse.", 409);
   const input = body.client ?? {};
-  const type = input.type === "professionnel" ? "professionnel" : "particulier";
+  // Prestations réservées aux professionnels, conditions générales acceptées obligatoirement.
+  if (body.cgvAccepted !== true) {
+    throw new UserError("Merci d'accepter les conditions générales de prestation.");
+  }
+  const type = "professionnel";
   const data = {
     type,
-    name: text(input.name, type === "professionnel" ? "Nom de la société" : "Nom et prénom", 200, true),
+    name: text(input.name, "Nom de la structure", 200, true),
     email: text(input.email, "Adresse e-mail", 254, true),
     phone: text(input.phone, "Téléphone", 40),
     address: text(input.address, "Adresse", 300, true),
@@ -352,10 +356,9 @@ async function accept(body: Row, request: Request) {
     vat_number: text(input.vatNumber, "Numéro de TVA", 30).toUpperCase()
   };
   if (!isEmail(data.email)) throw new UserError("Adresse e-mail invalide.");
-  if (type === "professionnel" && !/^\d{14}$/.test(data.siret)) {
+  if (!/^\d{14}$/.test(data.siret)) {
     throw new UserError("SIRET invalide : 14 chiffres attendus.");
   }
-  if (type === "particulier" && data.siret && !/^\d{9}(\d{5})?$/.test(data.siret)) data.siret = "";
   const comment = text(body.comment, "Commentaire", 3000);
   const png = signaturePng(body.signature);
 

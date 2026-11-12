@@ -12,9 +12,9 @@
   <link rel="stylesheet" href="galeries.css?v=espace2">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=contacts6">
-  <link rel="stylesheet" href="reponse-devis.css?v=commune">
-  <script src="site-nav.js?v=contacts3" defer></script>
-  <script type="module" src="reponse-devis.js?v=commune"></script>
+  <link rel="stylesheet" href="reponse-devis.css?v=pro">
+  <script src="site-nav.js?v=cgv1" defer></script>
+  <script type="module" src="reponse-devis.js?v=pro"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -42,12 +42,9 @@
       <form class="quote-form" id="accept-form" hidden novalidate>
         <h2>Vos coordonnées de facturation</h2>
         <p class="quote-help">Vérifiez et complétez vos informations : elles serviront à établir la facture.</p>
-        <fieldset class="quote-type">
-          <legend>Vous êtes</legend>
-          <label><input type="radio" name="type" value="particulier" checked> Un particulier</label>
-          <label><input type="radio" name="type" value="professionnel"> Une entreprise ou une association</label>
-        </fieldset>
-        <label class="quote-field"><span id="name-label">Nom et prénom *</span><input name="name" autocomplete="name" maxlength="200" required></label>
+        <p class="quote-help">Nos prestations sont réservées aux professionnels (entreprises, indépendants, associations, collectivités).</p>
+        <input type="hidden" name="type" value="professionnel">
+        <label class="quote-field"><span id="name-label">Nom de la structure (raison sociale) *</span><input name="name" autocomplete="organization" maxlength="200" required></label>
         <div class="quote-row">
           <label class="quote-field"><span>E-mail *</span><input name="email" type="email" autocomplete="email" maxlength="254" required></label>
           <label class="quote-field"><span>Téléphone</span><input name="phone" type="tel" autocomplete="tel" maxlength="40"></label>
@@ -58,7 +55,7 @@
           <label class="quote-field"><span>Ville *</span><input name="city" autocomplete="address-level2" maxlength="120" required></label>
         </div>
         <label class="quote-field"><span>Pays</span><input name="country" autocomplete="country-name" maxlength="80"></label>
-        <div class="quote-row" id="pro-fields" hidden>
+        <div class="quote-row" id="pro-fields">
           <label class="quote-field"><span>SIRET (14 chiffres) *</span><input name="siret" inputmode="numeric" maxlength="20"></label>
           <label class="quote-field"><span>N° de TVA</span><input name="vatNumber" maxlength="30"></label>
         </div>
@@ -71,6 +68,7 @@
           <p class="quote-help">Signez simplement dans le cadre, avec la souris ou le doigt : rien à écrire, la mention « Bon pour accord » est ajoutée automatiquement au devis.</p>
           <p class="quote-help" id="sign-date"></p>
         </div>
+        <label class="quote-check quote-cgv"><input type="checkbox" name="cgv" required> <span>J'ai lu et j'accepte les <a href="conditions-generales.html" target="_blank" rel="noopener">conditions générales de prestation</a>, et je confirme agir pour les besoins de mon activité professionnelle. *</span></label>
         <div class="quote-choice">
           <button class="gallery-primary-button" type="submit">Confirmer l'acceptation</button>
           <button class="quote-ghost-button" data-back type="button">Retour</button>

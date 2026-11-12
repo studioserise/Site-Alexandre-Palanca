@@ -421,7 +421,9 @@ export async function signQuotePdf(original: Uint8Array, signature: OnlineSignat
     ["Date et heure", `${when} (heure de Paris)`],
     ["Adresse IP", signature.ip || "non disponible"],
     ["Navigateur", signature.userAgent.slice(0, 160) || "non disponible"],
-    ["Empreinte du devis d'origine (SHA-256)", signature.originalSha256]
+    ["Empreinte du devis d'origine (SHA-256)", signature.originalSha256],
+    ["Qualité du client", "Professionnel, agissant pour les besoins de son activité"],
+    ["Conditions générales", "Acceptées (case cochée) — version en vigueur sur alexandrepalanca.fr/conditions-generales à la date ci-dessus"]
   ];
   for (const [label, value] of rows) {
     page.drawText(pdfSafe(label), { x: MARGIN, y, size: 8.5, font: bold, color: BLACK });
@@ -434,7 +436,7 @@ export async function signQuotePdf(original: Uint8Array, signature: OnlineSignat
   }
   y -= 6;
   for (const line of wrap(
-    "Le client a pris connaissance du devis ci-dessus, de ses conditions et du montant indiqué, puis l'a accepté en ligne avec la mention « Bon pour accord » en apposant la signature ci-dessous, depuis le lien personnel qui lui a été envoyé par e-mail.",
+    "Le client a pris connaissance du devis ci-dessus, de ses conditions, des conditions générales de prestation et du montant indiqué, puis l'a accepté en ligne avec la mention « Bon pour accord » en apposant la signature ci-dessous, depuis le lien personnel qui lui a été envoyé par e-mail.",
     regular, 9, PAGE_WIDTH - 2 * MARGIN
   )) {
     page.drawText(line, { x: MARGIN, y, size: 9, font: regular, color: BLACK });

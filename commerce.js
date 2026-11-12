@@ -229,7 +229,7 @@ async function invoices() {
 
 // ------------------------------------------------------------ clients
 
-const EMPTY_CLIENT = { type: "particulier", name: "", email: "", phone: "", address: "", postalCode: "", city: "", country: "France", siret: "", vatNumber: "" };
+const EMPTY_CLIENT = { type: "professionnel", name: "", email: "", phone: "", address: "", postalCode: "", city: "", country: "France", siret: "", vatNumber: "" };
 const clientFromRow = (c) => ({
   id: c.id, type: c.type, name: c.name, email: c.email, phone: c.phone, address: c.address,
   postalCode: c.postal_code, city: c.city, country: c.country, siret: c.siret, vatNumber: c.vat_number
@@ -292,11 +292,29 @@ async function showClient(id) {
     <dt>Adresse</dt><dd>${esc([c.address, `${c.postal_code} ${c.city}`.trim(), c.country].filter(Boolean).join(", ")) || "—"}</dd>
     <dt>SIRET</dt><dd>${esc(c.siret) || "—"}</dd><dt>Facturé</dt><dd>${money(total)}</dd><dt>Payé</dt><dd>${money(paid)}</dd></dl>
     <div class="com-actions"><button class="gallery-quiet-button" id="client-edit" type="button">Modifier</button>
-    <button class="gallery-quiet-button" id="client-quote" type="button">Nouveau devis</button></div>
+    <button class="gallery-quiet-button" id="client-quote" type="button">Nouveau devis</button>
+    <button class="gallery-quiet-button com-danger" id="client-erase" type="button">Effacer ce client (RGPD)</button></div>
     <h3>Devis</h3>${data.quotes.map((q) => `<p><a href="#" data-q="${q.id}" data-n="${q.number ? 1 : ""}">${esc(q.number || "Brouillon")}</a> — ${money(q.total_ttc_cents)} ${badge(QUOTE_STATUS, q.status)}</p>`).join("") || "<p>Aucun.</p>"}
     <h3>Factures</h3>${data.invoices.map((i) => `<p><a href="#" data-i="${i.id}">${esc(i.number || "Brouillon")}</a> — ${money(i.total_ttc_cents)} ${badge(INVOICE_STATUS, i.status)}</p>`).join("") || "<p>Aucune.</p>"}</div>`;
   document.getElementById("client-edit").onclick = () => editClient(clientFromRow(c));
   document.getElementById("client-quote").onclick = () => quoteEditor(null, clientFromRow(c));
+  document.getElementById("client-erase").onclick = async () => {
+    // Demande d'effacement d'une personne : on garde seulement ce que la loi impose.
+    const ok = window.confirm(`Effacer les données de « ${c.name} » ?
+
+Seront supprimés définitivement : les devis non acceptés (et leurs PDF), les demandes reçues par le formulaire et les coordonnées de la fiche.
+
+Seront conservés (obligation légale) : les factures (10 ans) et les devis acceptés ou signés, avec les coordonnées qu'ils contiennent.
+
+Cette action est irréversible.`);
+    if (!ok) return;
+    const r = await run(() => api("erase-client", { id: c.id }));
+    if (!r) return;
+    say(r.clientDeleted
+      ? `Client effacé : fiche supprimée, ${r.deletedQuotes} devis supprimé(s).`
+      : `Client effacé : coordonnées retirées, ${r.deletedQuotes} devis supprimé(s) ; ${r.keptInvoices} facture(s) et ${r.keptQuotes} devis accepté(s) conservés (obligation légale).`, true);
+    go("clients");
+  };
   box.querySelectorAll("[data-q]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); a.dataset.n ? quoteDetail(a.dataset.q) : quoteEditor(a.dataset.q); }));
   box.querySelectorAll("[data-i]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); invoiceDetail(a.dataset.i); }));
 }

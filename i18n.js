@@ -41,6 +41,7 @@
       "Alexandre Palanca, photographer — 06 79 53 82 80 — instagram alexpalanca — alexpalanca@gmail.com",
     "Mentions légales": "Legal notice",
     "Politique de confidentialité": "Privacy policy",
+    "Conditions générales": "Terms and conditions",
     "politique de confidentialité": "privacy policy",
 
     // Accueil
@@ -297,7 +298,8 @@
     "Contenus réseaux — bientôt disponibles": "Social media content — coming soon",
     "Galeries privées — Alexandre Palanca": "Private galleries — Alexandre Palanca",
     "Mentions légales — Alexandre Palanca": "Legal notice — Alexandre Palanca",
-    "Politique de confidentialité — Alexandre Palanca": "Privacy policy — Alexandre Palanca"
+    "Politique de confidentialité — Alexandre Palanca": "Privacy policy — Alexandre Palanca",
+    "Conditions générales — Alex & Elisa": "Terms and conditions — Alex & Elisa"
   };
 
   // Textes construits par les scripts (« Concerts, image 2 », « L'instant — demander un devis »…)
@@ -308,7 +310,7 @@
   ];
 
   // Pages légales : texte juridique conservé en français, avec une mention en anglais.
-  var LEGAL_PAGE = /(mentions-legales|politique-confidentialite)/.test(location.pathname);
+  var LEGAL_PAGE = /(mentions-legales|politique-confidentialite|conditions-generales)/.test(location.pathname);
 
   var ATTRS = ["alt", "aria-label", "placeholder", "title"];
   var originalText = new WeakMap();   // nœud de texte -> texte français d'origine
