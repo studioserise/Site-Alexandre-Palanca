@@ -36,8 +36,8 @@ contactForm.addEventListener("submit", async (event) => {
 
   const formData = new FormData(contactForm);
   const extras = [];
-  contactForm.querySelectorAll("select[data-extra]").forEach((select) => {
-    if (select.value) extras.push(`${select.labels[0].textContent.trim()} : ${select.value}`);
+  contactForm.querySelectorAll("select[data-extra], input[data-extra]").forEach((select) => {
+    if (select.value.trim()) extras.push(`${select.labels[0].textContent.trim()} : ${select.value.trim()}`);
   });
   contactForm.querySelectorAll("fieldset.contact-chips").forEach((group) => {
     const values = [...group.querySelectorAll("input:checked")].map((input) => input.value);
