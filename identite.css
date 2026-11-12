@@ -186,3 +186,54 @@ html[data-theme="light"] .iv-gallery-nav button { background: rgba(23, 23, 21, 0
 .rs-step--reverse .iv-step-visual { order: 2; }
 .iv-project h4 { font-family: Arial, Helvetica, sans-serif !important; letter-spacing: 0.18em !important; }
 @media (max-width: 640px) { .rs-step--reverse .iv-step-visual { order: 0; } }
+
+/* ---------------------------------------------------------------- portfolio : composition de 1 à 3 visuels par projet */
+.iv-portfolio { align-items: center; }
+.iv-compo { display: grid; gap: clamp(10px, 1.4vw, 18px); min-width: 0; height: clamp(380px, 40vw, 560px); transition: opacity 260ms ease; }
+.iv-compo.is-changing { opacity: 0; }
+.iv-compo--2 { grid-template-columns: 1fr 1fr; }
+.iv-compo--3 { grid-template-columns: 1.15fr 1fr; grid-template-rows: 1fr 1fr; }
+.iv-compo--3 .iv-compo-item:first-child { grid-row: 1 / span 2; }
+.iv-compo-item { display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; overflow: hidden; border-radius: 12px; background: rgba(245, 243, 239, 0.05); }
+.iv-compo-item.is-light { padding: clamp(10px, 1.6vw, 22px); background: #ece8e0; }
+.iv-compo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 1100ms cubic-bezier(.22, .61, .36, 1); }
+.iv-compo-item.is-light img, .iv-compo--1 .iv-compo-item img { object-fit: contain; }
+.iv-compo--1 .iv-compo-item:not(.is-light) { background: transparent; }
+@media (hover: hover) { .iv-compo-item:hover img { transform: scale(1.04); } }
+.iv-count { color: var(--studio-muted) !important; font-size: 0.72rem !important; letter-spacing: 0.18em; }
+html[data-theme="light"] .iv-compo-item { background: rgba(23, 23, 21, 0.05); }
+@media (max-width: 900px) {
+  .iv-compo { grid-column: 2; grid-row: 1; }
+}
+@media (max-width: 640px) {
+  .iv-compo { grid-column: 1 / -1; grid-row: 1; height: auto; }
+  .iv-compo--1 .iv-compo-item { height: min(110vw, 440px); }
+  .iv-compo--2 .iv-compo-item { height: 62vw; }
+  .iv-compo--3 { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+  .iv-compo--3 .iv-compo-item:first-child { grid-column: 1 / -1; grid-row: auto; height: min(120vw, 470px); }
+  .iv-compo--3 .iv-compo-item:not(:first-child) { height: 44vw; }
+}
+@media (prefers-reduced-motion: reduce) { .iv-compo, .iv-compo-item img { transition: none; } }
+
+/* Visuel détouré (PNG) : posé par-dessus la composition, sans cadre, avec une ombre portée */
+.iv-compo { position: relative; }
+.iv-compo-item.is-cutout { position: absolute; z-index: 2; overflow: visible; border-radius: 0; background: transparent; pointer-events: none; }
+.iv-compo-item.is-cutout img { object-fit: contain; filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.55)); }
+/* Deux visuels encadrés + un détouré : affiche à gauche, programme en haut à droite, t-shirt en bas à droite qui déborde */
+.iv-compo--2.has-cutout { grid-template-columns: 1.1fr 1fr; grid-template-rows: 1fr 1fr; }
+.iv-compo--2.has-cutout .iv-compo-item:not(.is-cutout):first-child { grid-row: 1 / span 2; }
+.iv-compo--2.has-cutout .iv-compo-item:not(.is-cutout):nth-child(2) { grid-column: 2; grid-row: 1; }
+.iv-compo--2.has-cutout .is-cutout { right: -5%; bottom: -7%; width: 58%; height: 60%; transform: rotate(4deg); }
+/* Un seul visuel, détouré : centré dans le cadre */
+.iv-compo--0.has-cutout .is-cutout { position: relative; inset: auto; width: 100%; height: 100%; }
+@media (max-width: 640px) {
+  .iv-compo--2.has-cutout { grid-template-columns: 1.1fr 1fr; grid-template-rows: auto auto; padding-bottom: 18vw; }
+  .iv-compo--2.has-cutout .iv-compo-item:not(.is-cutout):first-child { grid-column: 1; grid-row: 1 / span 2; height: 84vw; }
+  .iv-compo--2.has-cutout .iv-compo-item:not(.is-cutout):nth-child(2) { height: 32vw; }
+  .iv-compo--2.has-cutout .is-cutout { right: -3%; bottom: 0; width: 58%; height: 62vw; }
+  .iv-compo--0.has-cutout { height: min(110vw, 440px); }
+}
+html[data-theme="light"] .iv-compo-item.is-cutout img { filter: drop-shadow(0 20px 30px rgba(23, 23, 21, 0.28)); }
+@media (min-width: 641px) {
+  .iv-compo--2.has-cutout .is-cutout { right: auto; left: 38%; bottom: -6%; width: 66%; height: 64%; transform: rotate(4deg); }
+}

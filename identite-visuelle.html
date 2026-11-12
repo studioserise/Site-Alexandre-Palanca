@@ -23,14 +23,14 @@
   <link rel="stylesheet" href="section-marker.css?v=bord">
   <link rel="stylesheet" href="contact.css?v=5">
   <link rel="stylesheet" href="reseaux.css?v=5">
-  <link rel="stylesheet" href="identite.css?v=3">
+  <link rel="stylesheet" href="identite.css?v=6">
   <script src="i18n.js?v=cgv1" defer></script>
   <script src="site-nav.js?v=cgv1" defer></script>
   <script src="redesign.js?v=29" defer></script>
   <script src="cursor.js?v=3" defer></script>
   <script src="section-marker.js?v=10" defer></script>
   <script src="reseaux.js?v=2" defer></script>
-  <script src="identite.js?v=1" defer></script>
+  <script src="identite.js?v=3" defer></script>
   <script type="module" src="contact.js?v=7"></script>
   <script src="contact-reveal.js?v=2" defer></script>
   <link rel="stylesheet" href="mobile.css?v=3" media="(max-width: 800px)">
@@ -221,10 +221,7 @@
       <h2 class="studio-section-heading" id="iv-showcase-title">Des projets, des univers.</h2>
       <div class="portfolio-carousel iv-portfolio" data-iv-portfolio aria-roledescription="carrousel" aria-label="Projets d’identité visuelle">
         <button class="portfolio-arrow portfolio-arrow--previous" type="button" data-iv-prev aria-label="Projet précédent"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 4 7 12 15 20"/></svg></button>
-        <div class="iv-gallery">
-          <div class="iv-gallery-track" data-iv-track></div>
-          <div class="iv-gallery-nav" data-iv-thumbs></div>
-        </div>
+        <div class="iv-compo" data-iv-compo></div>
         <div class="portfolio-description iv-project" data-iv-desc aria-live="polite"></div>
         <button class="portfolio-arrow portfolio-arrow--next" type="button" data-iv-next aria-label="Projet suivant"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 4 17 12 9 20"/></svg></button>
       </div>
@@ -232,7 +229,8 @@
         Champs d'un projet :
           titre, type (Identité visuelle · Projet culturel · Communication événementielle · Édition et print · Textile et merchandising),
           contexte (contexte et intention créative), prestations (liste), conceptuel (true = projet conceptuel, affiché comme tel),
-          images : [{ "src": "chemin", "alt": "description" }, …]
+          images : 1 à 3 visuels, composés ensemble dans le cadre (le premier en grand) :
+                   [{ "src": "chemin", "alt": "description", "detoure": true pour un PNG détouré (t-shirt, objet) posé par-dessus les autres }, …]
       -->
       <script type="application/json" id="iv-projects">
       [
@@ -244,11 +242,18 @@
           "prestations": ["Logo", "Palette de couleurs", "Affiche de saison", "Programme dépliant", "Publication pour les réseaux sociaux", "T-shirts de l’équipe"],
           "images": [
             { "src": "images/identite-visuelle/saison-culturelle-1200.webp", "alt": "Affiche de saison, branches de noyer illustrées en vert" },
-            { "src": "images/identite-visuelle/logo-1400.webp", "alt": "Logo « Saison culturelle » composé comme un tampon", "fond": "clair" },
-            { "src": "images/identite-visuelle/palette-1400.webp", "alt": "Palette de trois couleurs : blanc cassé, vert tendre et vert profond", "fond": "clair" },
             { "src": "images/identite-visuelle/programme-1400.webp", "alt": "Programme de saison dépliant posé à plat" },
-            { "src": "images/identite-visuelle/telephone-1400.webp", "alt": "Publication pour les réseaux sociaux annonçant « Dom Juan »" },
-            { "src": "images/identite-visuelle/tee-shirts-1400.webp", "alt": "T-shirts « Staff » de l’équipe", "fond": "clair" }
+            { "src": "images/identite-visuelle/tee-shirts-1400.webp", "alt": "T-shirts « Staff » de l’équipe", "detoure": true }
+          ]
+        },
+        {
+          "titre": "Bodega Tour",
+          "type": "Textile et merchandising",
+          "conceptuel": null,
+          "contexte": "T-shirt imprimé en rouge sur blanc : au dos, une illustration de taureau, de DJ sur des tonneaux et de foule, encadrée comme une affiche, avec la phrase « Bordel ou pas bordel » ; sur le devant, le nom « Bodega Tour ».",
+          "prestations": ["Illustration", "T-shirt (dos et devant)"],
+          "images": [
+            { "src": "images/identite-visuelle/bodega-tour-1400.webp", "alt": "T-shirt « Bodega Tour » : taureau, DJ sur des tonneaux et foule, imprimés en rouge", "detoure": true }
           ]
         }
       ]
