@@ -364,3 +364,34 @@ html[data-theme="light"] .iv-tee-free img { filter: drop-shadow(0 22px 32px rgba
 @media (hover: hover) { .iv-step-visual:hover .iv-moodboard { transform: rotate(-3deg) scale(1.06); } }
 @media (prefers-reduced-motion: reduce) { .iv-step-visual > * { transition: none; } }
 @media (max-width: 800px) { .iv-page .iv-portrait { width: 100%; margin-top: 22px; } }
+
+/* ---------------------------------------------------------------- 02 · formats : grille compacte (comme la page Contenus réseaux)
+   4 colonnes en escalier, un visuel de même hauteur pour chaque catégorie, le titre et la liste dessous */
+.iv-format-grid { align-items: start; }
+.iv-format-grid .rs-format { gap: 22px; width: 100%; }
+.iv-format-grid .rs-format-copy h3 { font-size: clamp(1.15rem, 1.6vw, 1.45rem) !important; letter-spacing: -0.02em !important; }
+.iv-format-grid .rs-list { margin-top: 12px; font-size: 0.86rem; line-height: 1.75; }
+.iv-fv { position: relative; width: 100%; height: clamp(230px, 20vw, 300px); }
+.iv-fv img { position: absolute; display: block; }
+/* 01 : logo + palette */
+.iv-fv--brand .iv-fv-logo { top: 50%; left: 0; width: 74%; transform: translateY(-50%); }
+.iv-fv--brand .iv-fv-palette { top: 50%; right: 0; width: 17%; transform: translateY(-50%); filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45)); }
+/* 02 : photo du programme, en cadre arrondi */
+.iv-fv--photo { overflow: hidden; border-radius: 12px; }
+.iv-fv--photo img { inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1100ms cubic-bezier(.22, .61, .36, 1); }
+@media (hover: hover) { .iv-fv--photo:hover img { transform: scale(1.06); } }
+/* 03 : affiche + téléphone devant */
+.iv-fv--event .iv-fv-poster { top: 0; left: 0; width: 62%; border-radius: 4px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); transform: rotate(-3deg); }
+.iv-fv--event .iv-fv-phone { right: 2%; bottom: 0; width: 44%; filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.5)); transform: rotate(4deg); }
+/* 04 : t-shirts détourés */
+.iv-fv--tee img { top: 50%; left: 50%; width: 92%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 20px 32px rgba(0, 0, 0, 0.55)); transform: translate(-50%, -50%) rotate(-3deg); }
+html[data-theme="light"] .iv-fv--brand .iv-fv-palette, html[data-theme="light"] .iv-fv--tee img, html[data-theme="light"] .iv-fv--event .iv-fv-phone { filter: drop-shadow(0 14px 24px rgba(23, 23, 21, 0.2)); }
+html[data-theme="light"] .iv-fv--event .iv-fv-poster { box-shadow: 0 16px 34px rgba(23, 23, 21, 0.2); }
+@media (max-width: 1100px) { .iv-fv { height: clamp(240px, 36vw, 320px); } }
+@media (max-width: 640px) {
+  .iv-format-grid .rs-format { justify-items: start; text-align: left; }
+  .iv-fv { height: min(70vw, 280px); }
+}
+/* 03 : tailles calées sur la hauteur du cadre (jamais de débordement sur le texte) */
+.iv-fv--event .iv-fv-poster { width: auto; height: 90%; max-width: 64%; object-fit: cover; }
+.iv-fv--event .iv-fv-phone { width: auto; height: 80%; max-width: 46%; object-fit: contain; }
