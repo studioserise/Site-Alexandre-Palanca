@@ -514,3 +514,10 @@ html[data-theme="light"] .site-footer-ground { filter: invert(1) brightness(0.4)
 
 /* Portfolio Photo & vidéo : présentation du projet centrée verticalement à droite des images (comme la page Identité visuelle) */
 [data-carousel] > [data-carousel-description] { align-self: center; }
+
+/* Espacements resserrés entre sections (alignés sur la page Identité visuelle) */
+.studio-about, .studio-services, .studio-approach, .studio-testimonials, .redesign-section { padding-top: clamp(28px, 3.6vw, 56px); padding-bottom: clamp(28px, 3.6vw, 56px); }
+html body main > section:last-child { padding-bottom: clamp(56px, 7vw, 110px); }
+/* Une section qui suit directement une ouverture de page garde son espacement d'origine (blocs liés) */
+.redesign-hero + .redesign-section { padding-top: clamp(44px, 6vw, 88px); }
+main > section.redesign-hero:not(:first-child) { padding-top: clamp(28px, 3.6vw, 56px); min-height: 0; }

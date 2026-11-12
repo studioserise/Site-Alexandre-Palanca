@@ -275,3 +275,8 @@ html[data-theme="light"] .rs-mock-dots button { background: rgba(23, 23, 21, 0.2
 .rs-mock-dots { display: none !important; }
 /* Mini-portfolio : présentation centrée verticalement à droite du visuel (comme Photo & vidéo et Identité visuelle) */
 .rs-mock-carousel > .portfolio-description { align-self: center; }
+
+/* Espacements resserrés entre sections (alignés sur la page Identité visuelle) */
+.rs-section { padding-top: clamp(36px, 4.4vw, 64px); padding-bottom: clamp(36px, 4.4vw, 64px); }
+.rs-hero { padding-bottom: clamp(36px, 4.4vw, 64px); }
+@media (max-width: 640px) { .rs-section { padding-top: 32px; padding-bottom: 32px; } }
