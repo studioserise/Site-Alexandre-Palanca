@@ -13,7 +13,9 @@
   var EN = {
     // Navigation, bas de page, éléments communs
     "Photo & vidéo": "Photo & video",
+    "Prestations": "Services",
     "Sites internet": "Websites",
+    "Identité visuelle": "Visual identity",
     "Contenus réseaux": "Social media content",
     "Galerie": "Gallery",
     "Espace client": "Client area",

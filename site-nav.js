@@ -24,23 +24,70 @@ try { themePreference = localStorage.getItem(THEME_KEY); } catch (error) { /* st
 document.documentElement.dataset.theme = themePreference === "light" ? "light" : "dark";
 
 const publicNavigation = [
-  { label: "Photo & vidéo", href: "photo-video.html", files: ["photo-video.html"] },
-  { label: "Sites internet", href: "sites-internet.html", files: ["sites-internet.html"] },
-  { label: "Contenus réseaux", href: "reseaux.html", files: ["reseaux.html"] },
+  {
+    label: "Prestations",
+    children: [
+      { label: "Photo & vidéo", href: "photo-video.html", files: ["photo-video.html"] },
+      { label: "Sites internet", href: "sites-internet.html", files: ["sites-internet.html"] },
+      { label: "Identité visuelle", href: "identite-visuelle.html", files: ["identite-visuelle.html"] },
+      { label: "Contenus réseaux", href: "reseaux.html", files: ["reseaux.html"] }
+    ]
+  },
   { label: "Espace client", href: "galerie.html", files: ["galerie.html", "galerie-privee.html", "suivi-site.html", "contenus-reseaux.html"] },
   { label: "Contact", href: "#site-footer", files: [] }
 ];
 
 if (siteNavLinks) {
   const currentFile = window.location.pathname.split("/").pop() || "index.html";
-  siteNavLinks.replaceChildren(...publicNavigation.map(({ label, href, files }) => {
-    const item = document.createElement("li");
+  const makeLink = ({ label, href, files }, className) => {
     const link = document.createElement("a");
-    link.className = "site-nav-link";
+    link.className = className;
     link.href = href;
     link.textContent = label;
-    if (files.includes(currentFile)) link.setAttribute("aria-current", "page");
-    item.append(link);
+    if (files.includes(currentFile) || files.includes(currentFile + ".html")) link.setAttribute("aria-current", "page");
+    return link;
+  };
+  siteNavLinks.replaceChildren(...publicNavigation.map((entry) => {
+    const item = document.createElement("li");
+    if (!entry.children) {
+      item.append(makeLink(entry, "site-nav-link"));
+      return item;
+    }
+    // Menu déroulant « Prestations »
+    item.className = "site-nav-group";
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "site-nav-link site-nav-group-toggle";
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-controls", "site-nav-sub");
+    toggle.innerHTML = `<span>${entry.label}</span><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>`;
+    const sub = document.createElement("ul");
+    sub.className = "site-nav-sub";
+    sub.id = "site-nav-sub";
+    entry.children.forEach((child) => {
+      const li = document.createElement("li");
+      li.append(makeLink(child, "site-nav-link site-nav-sublink"));
+      sub.append(li);
+    });
+    if (sub.querySelector("[aria-current]")) toggle.classList.add("is-current");
+    item.append(toggle, sub);
+
+    const setOpen = (open) => {
+      item.classList.toggle("is-open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+    };
+    const desktop = window.matchMedia("(min-width: 801px) and (hover: hover)");
+    let closeTimer;
+    // Ordinateur : le survol ouvre déjà le menu, un clic le garde ouvert (sinon il se refermerait aussitôt).
+    // Mobile : le clic ouvre et referme.
+    toggle.addEventListener("click", () => setOpen(desktop.matches ? true : !item.classList.contains("is-open")));
+    item.addEventListener("mouseenter", () => { if (desktop.matches) { clearTimeout(closeTimer); setOpen(true); } });
+    item.addEventListener("mouseleave", () => { if (desktop.matches) closeTimer = setTimeout(() => setOpen(false), 180); });
+    item.addEventListener("focusout", (event) => { if (!item.contains(event.relatedTarget) && desktop.matches) setOpen(false); });
+    document.addEventListener("pointerdown", (event) => { if (!item.contains(event.target)) setOpen(false); });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && item.classList.contains("is-open")) { setOpen(false); toggle.focus(); }
+    });
     return item;
   }));
 }
@@ -181,7 +228,7 @@ const FOOTER_PEOPLE = {
   }
 };
 const footerPage = (window.location.pathname.split("/").pop() || "index").replace(/\.html$/, "") || "index";
-const footerWho = footerPage === "photo-video" ? ["alex"] : footerPage === "sites-internet" ? ["elisa"] : ["alex", "elisa"];
+const footerWho = footerPage === "photo-video" ? ["alex"] : (footerPage === "sites-internet" || footerPage === "identite-visuelle") ? ["elisa"] : ["alex", "elisa"];
 const footerSocials = `<nav class="site-footer-socials" aria-label="Réseaux sociaux">
           <a href="https://www.instagram.com/alexpalanca_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor"/></svg></a>
           <a href="https://www.facebook.com/alexandre.palanca.7" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8.5h2.5V5H14a3.5 3.5 0 0 0-3.5 3.5V11H8v3.5h2.5V21H14v-6.5h2.5l.5-3.5h-3V8.8a.3.3 0 0 1 .3-.3z"/></svg></a>
