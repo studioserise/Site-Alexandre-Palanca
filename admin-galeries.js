@@ -1,5 +1,5 @@
 import { getConfig } from "./galeries-config.js?v=2";
-import { callGalleryFunction, uploadSignedObject } from "./galeries-api.js";
+import { callGalleryFunction, uploadSignedObject } from "./galeries-api.js?v=statut1";
 
 const config = getConfig();
 const loginForm = document.getElementById("admin-login-form");
@@ -16,6 +16,15 @@ let accessToken = window.sessionStorage.getItem(accessTokenKey);
 function setMessage(text, isError = true) {
   message.textContent = text;
   message.style.color = isError ? "#e6aaa2" : "#c6d6c1";
+  // Le message est en haut de la page : sur ordinateur, on le fait défiler à l'écran pour qu'une erreur ne passe pas inaperçue.
+  if (text && isError) message.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+// Adresse collée sans « https:// » (ex. « we.tl/… », « drive.google.com/… ») : complétée automatiquement.
+function normalizeUrl(value) {
+  const url = value.trim();
+  if (!url || /^https?:\/\//i.test(url)) return url;
+  return `https://${url.replace(/^\/+/, "")}`;
 }
 
 function makeText(tag, className, value) {
@@ -42,11 +51,24 @@ function updatePhotoUploadNote() {
 }
 
 async function callAdmin(body) {
-  return callGalleryFunction("admin-api", {
-    method: body ? "POST" : "GET",
-    body,
-    accessToken
-  });
+  try {
+    return await callGalleryFunction("admin-api", {
+      method: body ? "POST" : "GET",
+      body,
+      accessToken
+    });
+  } catch (error) {
+    // Connexion expirée (au bout d'une heure, fréquent quand la page reste ouverte sur ordinateur) :
+    // retour à la connexion avec un message clair, au lieu d'un « Invalid JWT » incompréhensible.
+    if (error.status === 401 || /jwt|expired/i.test(String(error.message))) {
+      window.sessionStorage.removeItem(accessTokenKey);
+      accessToken = null;
+      dashboard.hidden = true;
+      loginForm.hidden = false;
+      throw new Error("Votre connexion a expiré. Reconnectez-vous puis recommencez (les informations saisies sont conservées).");
+    }
+    throw error;
+  }
 }
 
 async function signIn(email, password) {
@@ -158,7 +180,7 @@ function videoRow(video = { label: "", url: "", multiple: false }) {
 function readVideoRows(container) {
   return [...container.querySelectorAll(".admin-video-row")]
     .map((row) => ({
-      url: row.querySelector('[data-field="url"]').value.trim(),
+      url: normalizeUrl(row.querySelector('[data-field="url"]').value),
       label: row.querySelector('[data-field="label"]').value.trim(),
       multiple: row.querySelector('[data-field="multiple"]').checked
     }))
@@ -243,7 +265,10 @@ function linkRow(fields, values = {}) {
 }
 function readLinkRows(container, fields) {
   return [...container.querySelectorAll(".admin-link-row")]
-    .map((row) => Object.fromEntries(fields.map((f) => [f.key, row.querySelector(`[data-field="${f.key}"]`).value.trim()])))
+    .map((row) => Object.fromEntries(fields.map((f) => {
+      const value = row.querySelector(`[data-field="${f.key}"]`).value;
+      return [f.key, f.key === "url" ? normalizeUrl(value) : value.trim()];
+    })))
     .filter((entry) => entry.url);
 }
 async function uploadTutorial(galleryId, file) {
@@ -604,11 +629,51 @@ document.getElementById("admin-logout").addEventListener("click", () => {
   setMessage("Vous êtes déconnecté.", false);
 });
 
+// Création : la vérification du navigateur est remplacée par la nôtre (formulaire en « novalidate »).
+// Sur ordinateur, un champ refusé mais masqué (lien vidéo ou dossier d'un autre type de contenu, adresse
+// sans « https:// »…) bloquait le bouton sans aucun message ; désormais chaque refus est expliqué à côté du bouton.
+const createdCode = document.getElementById("admin-created-code");
+function createError(text, field) {
+  createdCode.textContent = text;
+  createdCode.style.color = "#e6aaa2";
+  // Connexion expirée : le formulaire de connexion réapparaît en haut, on y remonte.
+  if (dashboard.hidden) setMessage(text);
+  if (field && !field.closest("[hidden]")) field.focus({ preventScroll: true });
+}
+function checkCreateForm() {
+  const name = document.getElementById("admin-gallery-name");
+  if (!name.value.trim()) return createError("Indiquez le nom affiché de la galerie.", name), false;
+  const days = document.getElementById("admin-gallery-days");
+  const max = Number(days.max) || 15;
+  const value = Number(days.value);
+  if (!Number.isInteger(value) || value < 1 || value > max) {
+    return createError(`La durée d’accès doit être un nombre entier entre 1 et ${max} jours.`, days), false;
+  }
+  const code = document.getElementById("admin-gallery-code");
+  const cleanCode = code.value.trim();
+  if (cleanCode.length < 3 || cleanCode.length > 64 || !/^[A-Za-z0-9-]+$/.test(cleanCode)) {
+    return createError("Le code d’accès doit faire au moins 3 caractères, avec seulement des lettres sans accent, des chiffres et des tirets (pas d’espace).", code), false;
+  }
+  const rows = { video: videoRows, web: webRows, social: socialRows }[deliverySelect.value];
+  for (const input of rows ? rows.querySelectorAll('[data-field="url"]') : []) {
+    const url = normalizeUrl(input.value);
+    if (!url) continue;
+    try { new URL(url); } catch {
+      return createError(`Ce lien n’est pas une adresse valide : « ${input.value.trim()} ».`, input), false;
+    }
+  }
+  return true;
+}
+
 document.getElementById("admin-create-gallery-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
+  createdCode.textContent = "";
+  createdCode.style.color = "";
+  if (!checkCreateForm()) return;
   const button = form.querySelector("button[type=submit]");
   button.disabled = true;
+  button.textContent = "Création…";
   const code = document.getElementById("admin-gallery-code").value.trim().toUpperCase();
   try {
     const result = await callAdmin({
@@ -641,9 +706,10 @@ document.getElementById("admin-create-gallery-form").addEventListener("submit", 
     document.getElementById("admin-created-code").textContent =
       `Galerie créée. Communiquez maintenant le code ${result.accessCode} au client ; il n’est pas conservé en clair.`;
   } catch (error) {
-    setMessage(error.message);
+    createError(error.message);
   } finally {
     button.disabled = false;
+    button.textContent = "Créer la galerie";
   }
 });
 

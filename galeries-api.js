@@ -39,7 +39,9 @@ export async function callGalleryFunction(name, {
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(result.message || "Une erreur est survenue.");
+    const error = new Error(result.message || result.msg || "Une erreur est survenue.");
+    error.status = response.status;
+    throw error;
   }
 
   return result;
