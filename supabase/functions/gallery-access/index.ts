@@ -6,7 +6,10 @@ import {
   jsonResponse,
   preflightResponse,
   readJson,
-  sha256
+  sha256,
+  accessCodeKey,
+  ACCESS_CODE_MIN,
+  ACCESS_CODE_MAX
 } from "../_shared/http.ts";
 
 async function consumeRateLimit(key: string) {
@@ -26,8 +29,8 @@ Deno.serve(async (request) => {
       return jsonResponse(request, 405, { message: "Méthode non autorisée." });
     }
     const body = await readJson(request);
-    const code = typeof body.code === "string" ? body.code.trim().toUpperCase() : "";
-    if (code.length < 3 || code.length > 64) {
+    const code = accessCodeKey(body.code);
+    if ([...code].length < ACCESS_CODE_MIN || [...code].length > ACCESS_CODE_MAX) {
       return jsonResponse(request, 400, { message: "Code d’accès invalide." });
     }
 

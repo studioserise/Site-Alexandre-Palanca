@@ -133,6 +133,19 @@ export async function readGallerySession(request: Request) {
   return claims.galleryId;
 }
 
+// Codes d'accès : tous les caractères sont permis (accents, signes, espaces).
+// Comparaison souple : majuscules/minuscules confondues, espaces multiples réduits à un seul,
+// accents unifiés (un « é » tapé sur Mac ou sur iPhone donne la même empreinte).
+// Les anciens codes (lettres, chiffres, tirets en majuscules) gardent exactement la même empreinte.
+export const ACCESS_CODE_MIN = 3;
+export const ACCESS_CODE_MAX = 100;
+export function cleanAccessCode(value: unknown) {
+  return typeof value === "string" ? value.normalize("NFC").trim().replace(/\s+/g, " ") : "";
+}
+export function accessCodeKey(value: unknown) {
+  return cleanAccessCode(value).toUpperCase();
+}
+
 export async function sha256(value: string) {
   const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(value)));
   return [...digest].map((byte) => byte.toString(16).padStart(2, "0")).join("");
