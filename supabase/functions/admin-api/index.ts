@@ -5,7 +5,11 @@ import {
   jsonResponse,
   preflightResponse,
   readJson,
-  sha256
+  sha256,
+  cleanAccessCode,
+  accessCodeKey,
+  ACCESS_CODE_MIN,
+  ACCESS_CODE_MAX
 } from "../_shared/http.ts";
 
 // Chiffrement du code d'accès pour pouvoir l'afficher à l'administrateur (AES-GCM).
@@ -33,9 +37,14 @@ async function decryptCode(value: string | null) {
     return null;
   }
 }
+// Code d'accès : tout caractère permis (accents, signes, espaces). Il est conservé tel que saisi
+// pour l'affichage ; l'empreinte de vérification ignore majuscules/minuscules (voir accessCodeKey).
 function validCode(value: unknown) {
-  const code = requiredText(value, "Code d’accès", 64).toUpperCase();
-  if (!/^[A-Z0-9-]{3,64}$/.test(code)) throw new Error("Code d’accès invalide : 3 à 64 lettres, chiffres ou tirets.");
+  const code = cleanAccessCode(value);
+  const length = [...code].length;
+  if (length < ACCESS_CODE_MIN || length > ACCESS_CODE_MAX) {
+    throw new Error(`Code d’accès invalide : ${ACCESS_CODE_MIN} à ${ACCESS_CODE_MAX} caractères.`);
+  }
   return code;
 }
 
@@ -228,12 +237,7 @@ Deno.serve(async (request) => {
       if (!["tarif0", "tarif2", "tarif5"].includes(String(tariff))) {
         return jsonResponse(request, 400, { message: "Tarif de galerie invalide." });
       }
-      const code = requiredText(body.code, "Code d’accès", 64).toUpperCase();
-      if (!/^[A-Z0-9-]{3,64}$/.test(code)) {
-        return jsonResponse(request, 400, {
-          message: "Le code doit contenir 3 à 64 lettres, chiffres ou tirets."
-        });
-      }
+      const code = validCode(body.code);
       const days = Number(body.daysOpen);
       // Suivi de site et contenus réseaux : jusqu'à 90 jours ; galeries : 15 jours
       const maxDays = delivery === "web" || delivery === "social" ? 90 : 15;
@@ -255,7 +259,7 @@ Deno.serve(async (request) => {
           name,
           type,
           tariff,
-          access_code_hash: await sha256(code),
+          access_code_hash: await sha256(accessCodeKey(code)),
           access_code_encrypted: await encryptCode(code),
           expires_at: expiresAt,
           delivery,
@@ -279,7 +283,7 @@ Deno.serve(async (request) => {
       await databaseRequest(`galleries?id=eq.${encodeURIComponent(id)}`, {
         method: "PATCH",
         headers: { Prefer: "return=minimal" },
-        body: JSON.stringify({ access_code_hash: await sha256(code), access_code_encrypted: await encryptCode(code) })
+        body: JSON.stringify({ access_code_hash: await sha256(accessCodeKey(code)), access_code_encrypted: await encryptCode(code) })
       });
       return jsonResponse(request, 200, { ok: true, accessCode: code });
     }

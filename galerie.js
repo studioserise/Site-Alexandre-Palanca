@@ -82,18 +82,19 @@ form.addEventListener("submit", async (event) => {
   message.textContent = "";
   message.dataset.kind = "";
 
-  const code = input.value.trim().toUpperCase();
+  // Code tel que saisi : le serveur ignore majuscules/minuscules et accepte accents, signes et espaces.
+  const code = input.value.trim();
   if (!code) {
     message.textContent = "Saisissez le code transmis par votre photographe.";
     return;
   }
 
-  if (config.demoMode && code === config.demoAccessCode) {
+  if (config.demoMode && code.toUpperCase() === config.demoAccessCode) {
     window.location.assign("galerie-privee.html?demo=1");
     return;
   }
 
-  if (config.demoMode && code === config.demoClosedAccessCode) {
+  if (config.demoMode && code.toUpperCase() === config.demoClosedAccessCode) {
     message.textContent = "Cette galerie de démonstration est fermée. Les galeries privées ne sont pas encore connectées au serveur.";
     return;
   }

@@ -7,13 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <title>Administration des galeries — Alexandre Palanca</title>
-  <link rel="stylesheet" href="galeries.css?v=espace2">
+  <link rel="stylesheet" href="galeries.css?v=code1">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=contacts6">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script src="site-nav.js?v=cgv1" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="admin-galeries.js?v=creation1"></script>
+  <script type="module" src="admin-galeries.js?v=code1"></script>
   <script src="app-return.js?v=3"></script>
 </head>
 <body>
@@ -137,7 +137,8 @@
             </label>
             <label class="gallery-admin-label" for="admin-gallery-code">
               Code d’accès à communiquer
-              <input class="gallery-admin-input" id="admin-gallery-code" minlength="3" maxlength="64" pattern="[A-Za-z0-9-]+" required>
+              <input class="gallery-admin-input" id="admin-gallery-code" maxlength="100" autocomplete="off" spellcheck="false" required>
+              <span class="gallery-admin-note">Tous les caractères sont permis : accents, signes, espaces. Le client peut le saisir en majuscules ou en minuscules.</span>
             </label>
             <button class="gallery-primary-button" type="submit">Créer la galerie</button>
             <p class="gallery-admin-note" id="admin-created-code" role="status"></p>

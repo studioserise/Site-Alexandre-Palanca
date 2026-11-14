@@ -119,9 +119,8 @@ function renderAccessCode(gallery) {
     form.hidden = true;
     const input = document.createElement("input");
     input.className = "gallery-admin-input";
-    input.placeholder = "NOUVEAU-CODE-2026";
-    input.minLength = 3;
-    input.maxLength = 64;
+    input.placeholder = "Nouveau code (lettres, accents, signes, espaces…)";
+    input.maxLength = 100;
     input.value = randomCode();
     const save = makeText("button", "gallery-primary-button", "Enregistrer");
     save.type = "submit";
@@ -132,7 +131,7 @@ function renderAccessCode(gallery) {
       event.preventDefault();
       save.disabled = true;
       try {
-        const result = await callAdmin({ action: "set-access-code", galleryId: gallery.id, code: input.value.trim().toUpperCase() });
+        const result = await callAdmin({ action: "set-access-code", galleryId: gallery.id, code: input.value.trim() });
         await loadDashboard();
         setMessage(`Nouveau code enregistré pour « ${gallery.name} » : ${result.accessCode}`, false);
       } catch (error) {
@@ -650,9 +649,10 @@ function checkCreateForm() {
     return createError(`La durée d’accès doit être un nombre entier entre 1 et ${max} jours.`, days), false;
   }
   const code = document.getElementById("admin-gallery-code");
-  const cleanCode = code.value.trim();
-  if (cleanCode.length < 3 || cleanCode.length > 64 || !/^[A-Za-z0-9-]+$/.test(cleanCode)) {
-    return createError("Le code d’accès doit faire au moins 3 caractères, avec seulement des lettres sans accent, des chiffres et des tirets (pas d’espace).", code), false;
+  // Tout caractère est permis (accents, signes, espaces) ; seule la longueur compte.
+  const codeLength = [...code.value.trim()].length;
+  if (codeLength < 3 || codeLength > 100) {
+    return createError("Le code d’accès doit faire entre 3 et 100 caractères.", code), false;
   }
   const rows = { video: videoRows, web: webRows, social: socialRows }[deliverySelect.value];
   for (const input of rows ? rows.querySelectorAll('[data-field="url"]') : []) {
@@ -674,7 +674,7 @@ document.getElementById("admin-create-gallery-form").addEventListener("submit", 
   const button = form.querySelector("button[type=submit]");
   button.disabled = true;
   button.textContent = "Création…";
-  const code = document.getElementById("admin-gallery-code").value.trim().toUpperCase();
+  const code = document.getElementById("admin-gallery-code").value.trim();
   try {
     const result = await callAdmin({
       action: "create-gallery",

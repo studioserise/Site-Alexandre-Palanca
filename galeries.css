@@ -993,7 +993,7 @@ button {
 .admin-code-label { color: #a9a59e; }
 .admin-code-value { padding: 4px 8px; border-radius: 6px; background: rgba(245, 243, 239, 0.08); color: #f5f3ef; font-size: 0.85rem; letter-spacing: 0.06em; user-select: all; }
 .admin-code-form { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
-.admin-code-form .gallery-admin-input { flex: 1 1 220px; text-transform: uppercase; }
+.admin-code-form .gallery-admin-input { flex: 1 1 220px; }
 .admin-code-form small { width: 100%; color: #a9a59e; }
 
 /* Administration : encadré du logiciel de filigrane */
