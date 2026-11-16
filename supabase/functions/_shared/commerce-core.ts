@@ -1058,6 +1058,50 @@ export async function recordOnlinePayment(quoteId: string, part: string, amountC
   return quote;
 }
 
+// ---------------------------------------------------------------- paiement d'une facture (bouton de l'e-mail)
+// Lien « Régler la facture » : paiement.html?f=<id>.<signature>. La signature (HMAC du secret serveur)
+// empêche de deviner le lien d'une autre facture ; aucune donnée à stocker. Valable pour toutes les
+// factures émises, avec ou sans devis.
+async function invoiceSignature(id: string) {
+  const secret = Deno.env.get("GALLERY_SESSION_SECRET");
+  if (!secret || secret.length < 32) throw new Error("La clé serveur GALLERY_SESSION_SECRET n'est pas configurée.");
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const signature = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`invoice-payment:${id}`)));
+  return toBase64(signature).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "").slice(0, 32);
+}
+
+export async function invoicePaymentUrl(invoice: Row) {
+  const token = `${invoice.id}.${await invoiceSignature(String(invoice.id))}`;
+  return `${requiredEnv("FRONTEND_ORIGIN").replace(/\/$/, "")}/paiement.html?f=${encodeURIComponent(token)}`;
+}
+
+export async function invoiceFromPaymentToken(token: unknown) {
+  const [id, signature] = typeof token === "string" ? token.split(".") : [];
+  if (!id || !UUID.test(id) || !signature || signature !== await invoiceSignature(id)) {
+    throw new UserError("Ce lien n'est pas valide.", 404);
+  }
+  const invoice = (await rows(`invoices?select=*&id=${eq(id)}&number=not.is.null`))[0];
+  if (!invoice || invoice.status === "cancelled") throw new UserError("Cette facture n'est plus disponible.", 404);
+  return invoice;
+}
+
+export const invoiceRemaining = (invoice: Row) =>
+  invoice.status === "issued" || invoice.status === "partially_paid"
+    ? Math.max(0, invoice.amount_due_cents - invoice.paid_cents)
+    : 0;
+
+// Paiement par carte d'une facture (webhook Stripe) : enregistré une seule fois sur la facture.
+export async function recordInvoiceOnlinePayment(invoiceId: string, amountCents: number, reference: string) {
+  const already = await rows(`payments?select=id&reference=eq.${encodeURIComponent(reference)}&limit=1`);
+  const invoice = (await rows(`invoices?select=*&id=${eq(invoiceId)}`))[0];
+  if (!invoice || already.length) return null;
+  const amount = Math.min(amountCents, invoiceRemaining(invoice));
+  if (amount > 0) {
+    await addPayment({ invoiceId: invoice.id, amountCents: amount, method: "carte", paidOn: todayParis(), reference, comment: "Paiement par carte (Stripe)" });
+  }
+  return invoice;
+}
+
 // ---------------------------------------------------------------- documents
 
 export async function documentRecord(kind: unknown, idValue: unknown) {
@@ -1158,15 +1202,19 @@ export async function sendDocument(body: Row) {
     }
     responseUrl = `${requiredEnv("FRONTEND_ORIGIN").replace(/\/$/, "")}/reponse-devis.html?t=${token}`;
   }
+  // Facture émise avec un reste à payer : bouton « Régler la facture » (carte ou virement)
+  const payUrl = !isQuote && invoiceRemaining(record) > 0 ? await invoicePaymentUrl(record) : "";
   const validity = isQuote && record.valid_until
     ? `, valable jusqu'au ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${record.valid_until}T12:00:00Z`))}`
     : "";
   const text = message || (isQuote
     ? `${hello}\n\nMerci pour votre confiance. Vous trouverez ci-joint le devis ${record.number} correspondant à votre projet${validity}.\n\nPour l'accepter ou me faire part de vos remarques, il vous suffit de cliquer sur le bouton « Répondre à la proposition » ci-dessous.\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`
-    : `${hello}\n\nVous trouverez ci-joint votre facture ${record.number}.\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`);
-  const button = responseUrl
-    ? `<p style="margin:28px 0"><a href="${escapeHtml(responseUrl)}" style="display:inline-block;padding:15px 30px;background:#111111;color:#ffffff;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">Répondre à la proposition</a></p>
-      <p style="color:#777777;font-size:12px">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>${escapeHtml(responseUrl)}</p>`
+    : `${hello}\n\nVous trouverez ci-joint votre facture ${record.number}.${payUrl ? "\n\nPour la régler par carte ou par virement, il vous suffit de cliquer sur le bouton « Régler la facture » ci-dessous." : ""}\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`);
+  const buttonUrl = responseUrl || payUrl;
+  const buttonLabel = responseUrl ? "Répondre à la proposition" : "Régler la facture";
+  const button = buttonUrl
+    ? `<p style="margin:28px 0"><a href="${escapeHtml(buttonUrl)}" style="display:inline-block;padding:15px 30px;background:#111111;color:#ffffff;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">${buttonLabel}</a></p>
+      <p style="color:#777777;font-size:12px">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>${escapeHtml(buttonUrl)}</p>`
     : "";
 
   const response = await fetch("https://api.resend.com/emails", {
@@ -1180,7 +1228,7 @@ export async function sendDocument(body: Row) {
       to: [to],
       reply_to: issuerReplyTo(settings),
       subject: `Votre ${label.toLowerCase()} ${record.number} — ${signature}`,
-      text: `${text}\n\n${signature}${responseUrl ? `\n\nRépondre à la proposition : ${responseUrl}` : ""}`,
+      text: `${text}\n\n${signature}${buttonUrl ? `\n\n${buttonLabel} : ${buttonUrl}` : ""}`,
       html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
         <p>${escapeHtml(text).replace(/\n/g, "<br>")}</p><p>${escapeHtml(signature)}</p>${button}</div>`,
       attachments: [{ filename: fileName, content: toBase64(bytes) }]

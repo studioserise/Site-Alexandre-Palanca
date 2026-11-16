@@ -1,12 +1,35 @@
 import { databaseRequest } from "../_shared/http.ts";
 import { formatMoney } from "../_shared/commerce-pdf.ts";
-import { recordOnlinePayment } from "../_shared/commerce-core.ts";
+import { recordInvoiceOnlinePayment, recordOnlinePayment } from "../_shared/commerce-core.ts";
 
 // Paiement par carte de l'acompte ou du solde d'un devis (page de paiement) : enregistré
 // comme règlement par carte, puis Alex est prévenu par e-mail.
 // deno-lint-ignore no-explicit-any
 async function handleCommercePayment(session: Record<string, any>) {
   if (session.payment_status !== "paid") return;
+  // Facture réglée depuis le bouton « Régler la facture » de l'e-mail (avec ou sans devis)
+  const invoiceId = String(session.metadata?.invoice_id ?? "");
+  if (invoiceId) {
+    const paidAmount = Number(session.amount_total) || 0;
+    if (!/^[0-9a-f-]{36}$/i.test(invoiceId) || paidAmount <= 0) return;
+    const invoice = await recordInvoiceOnlinePayment(invoiceId, paidAmount, `Stripe ${session.id}`);
+    if (!invoice) return; // déjà enregistré
+    const who = invoice.client_snapshot?.name ?? "Le client";
+    const message = `${who} a payé par carte ${formatMoney(paidAmount)} pour la facture ${invoice.number}.\n\nLe règlement est enregistré automatiquement dans la gestion commerciale.`;
+    const sent = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: requiredEnv("ORDER_EMAIL_FROM"),
+        to: [requiredEnv("CONTACT_EMAIL_TO")],
+        subject: `💳 Paiement par carte reçu : ${formatMoney(paidAmount)} — facture ${invoice.number} — ${who}`,
+        text: message,
+        html: `<p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6">${message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>")}</p>`
+      })
+    });
+    if (!sent.ok) console.error("Resend rejected the payment notification", sent.status);
+    return;
+  }
   const quoteId = String(session.metadata?.quote_id ?? "");
   const part = session.metadata?.part === "acompte" ? "acompte" : "solde";
   const amount = Number(session.amount_total) || 0;

@@ -1,4 +1,7 @@
-import { getSettings, issuerFrom, issuerReplyTo, quoteDues, Row, todayParis } from "../_shared/commerce-core.ts";
+import {
+  getSettings, invoiceFromPaymentToken, invoiceRemaining, issuerFrom, issuerReplyTo, quoteDues, Row, todayParis,
+  UserError as CoreUserError
+} from "../_shared/commerce-core.ts";
 import { formatMoney } from "../_shared/commerce-pdf.ts";
 import { databaseRequest, sha256 } from "../_shared/http.ts";
 
@@ -169,6 +172,83 @@ async function checkout(quote: Row, part: string, token: string) {
   return { url: result.url };
 }
 
+// ---- Facture (lien « Régler la facture » de l'e-mail, paiement.html?f=…) : avec ou sans devis
+async function invoiceView(invoice: Row) {
+  const settings = await getSettings(invoice.issuer);
+  return {
+    kind: "invoice",
+    number: invoice.number,
+    clientName: invoice.client_snapshot?.name ?? "",
+    part: "facture",
+    amountCents: invoiceRemaining(invoice),
+    dueDate: invoice.due_date ?? null,
+    invoiceNumber: invoice.number,
+    deposit: invoice.kind === "deposit",
+    holder: settings.legal_name ?? "",
+    iban: settings.iban ?? "",
+    bic: settings.bic ?? "",
+    reference: invoice.number,
+    cardAvailable: settings.card_payments === true,
+    notifiedAt: null,
+    today: todayParis()
+  };
+}
+
+async function invoiceNotify(invoice: Row) {
+  const amount = invoiceRemaining(invoice);
+  const name = invoice.client_snapshot?.name ?? "Le client";
+  const text = `${name} indique avoir effectué un virement de ${formatMoney(amount)} pour la facture ${invoice.number}, avec la référence « ${invoice.number} ».\n\nÀ vérifier sur ton compte bancaire, puis à enregistrer comme règlement sur la facture dans la gestion commerciale.`;
+  const settings = await getSettings(invoice.issuer);
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: issuerFrom(settings),
+      to: [issuerReplyTo(settings)],
+      subject: `🏦 Virement signalé : ${formatMoney(amount)} — facture ${invoice.number} — ${name}`,
+      text,
+      html: `<p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6">${text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>")}</p>`
+    })
+  });
+  if (!response.ok) throw new Error(`Resend HTTP ${response.status}`);
+  return { notified: true };
+}
+
+async function invoiceCheckout(invoice: Row, token: string) {
+  if ((await getSettings(invoice.issuer)).card_payments !== true) {
+    throw new UserError("Le paiement par carte n'est pas proposé pour cette prestation : réglez par virement.", 409);
+  }
+  const amount = invoiceRemaining(invoice);
+  if (amount <= 0) throw new UserError("Cette facture est déjà réglée. Merci !", 409);
+  if (amount < 50) throw new UserError("Montant trop faible pour un paiement par carte.");
+  const back = `${requiredEnv("FRONTEND_ORIGIN").replace(/\/$/, "")}/paiement.html?f=${encodeURIComponent(token)}`;
+  const params = new URLSearchParams();
+  params.set("mode", "payment");
+  params.set("success_url", `${back}&ok=1`);
+  params.set("cancel_url", back);
+  if (invoice.client_snapshot?.email) params.set("customer_email", invoice.client_snapshot.email);
+  params.set("client_reference_id", invoice.id);
+  params.set("metadata[commerce]", "1");
+  params.set("metadata[invoice_id]", invoice.id);
+  params.set("metadata[part]", "facture");
+  params.set("line_items[0][price_data][currency]", "eur");
+  params.set("line_items[0][price_data][product_data][name]", `Facture ${invoice.number}`);
+  params.set("line_items[0][price_data][unit_amount]", String(amount));
+  params.set("line_items[0][quantity]", "1");
+  params.set("expires_at", String(Math.floor(Date.now() / 1000) + 60 * 60));
+  const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${requiredEnv("STRIPE_SECRET_KEY")}`, "Content-Type": "application/x-www-form-urlencoded" },
+    body: params
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || typeof result.url !== "string") {
+    console.error("Stripe refused the invoice checkout", response.status, result?.error?.code, result?.error?.message);
+    throw new Error("Stripe n'a pas pu ouvrir le paiement.");
+  }
+  return { url: result.url };
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: allowedOrigins().has(request.headers.get("Origin") ?? "") ? 204 : 403, headers: cors(request) });
@@ -178,6 +258,19 @@ Deno.serve(async (request) => {
     if (request.method !== "POST") throw new UserError("Méthode non autorisée.", 405);
     const body = await request.json().catch(() => null) as Row | null;
     if (!body || typeof body !== "object") throw new UserError("Requête invalide.");
+    if (typeof body.invoice === "string") {
+      const invoice = await invoiceFromPaymentToken(body.invoice);
+      if (body.action === "get") return reply(request, 200, await invoiceView(invoice));
+      if (body.action === "checkout") {
+        await consumeRateLimit(request);
+        return reply(request, 200, await invoiceCheckout(invoice, body.invoice));
+      }
+      if (body.action === "notify") {
+        await consumeRateLimit(request);
+        return reply(request, 200, await invoiceNotify(invoice));
+      }
+      throw new UserError("Requête invalide.");
+    }
     const quote = await findQuote(body.token);
     const part = body.part === "acompte" ? "acompte" : "solde";
     if (body.action === "get") return reply(request, 200, await view(quote, part));
@@ -191,7 +284,7 @@ Deno.serve(async (request) => {
     }
     throw new UserError("Requête invalide.");
   } catch (error) {
-    if (error instanceof UserError) return reply(request, error.status, { message: error.message });
+    if (error instanceof UserError || error instanceof CoreUserError) return reply(request, error.status, { message: error.message });
     console.error("Quote payment error", error);
     return reply(request, 500, { message: "Une erreur est survenue. Réessayez ou contactez-nous." });
   }
