@@ -4,6 +4,8 @@ import { getConfig } from "./galeries-config.js?v=2";
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
 const token = params.get("t") || "";
+// Lien « Régler la facture » des e-mails de facture (avec ou sans devis) : ?f=…
+const invoiceToken = params.get("f") || "";
 const part = params.get("p") === "acompte" ? "acompte" : "solde";
 const money = (cents) => `${((cents || 0) / 100).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 const dateFr = (iso) => (iso ? new Date(`${iso}T12:00:00Z`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : "");
@@ -13,7 +15,7 @@ async function call(body) {
   const response = await fetch(`${supabaseUrl.replace(/\/$/, "")}/functions/v1/quote-payment`, {
     method: "POST",
     headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ ...body, token, part })
+    body: JSON.stringify(invoiceToken ? { ...body, invoice: invoiceToken } : { ...body, token, part })
   });
   const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(result.message || "Une erreur est survenue. Réessayez dans un instant.");
@@ -60,7 +62,7 @@ function row(label, shown, copied) {
 }
 
 async function start() {
-  if (!token) return say("Lien incomplet", "Ouvrez cette page avec le bouton reçu par e-mail.");
+  if (!token && !invoiceToken) return say("Lien incomplet", "Ouvrez cette page avec le bouton reçu par e-mail.");
   if (params.get("ok") === "1") {
     return say("Merci, paiement reçu !", "Votre paiement par carte a bien été effectué. Vous recevrez un reçu par e-mail, et le règlement est enregistré sur votre facture.");
   }
@@ -70,7 +72,8 @@ async function start() {
   } catch (error) {
     return say("Fiche indisponible", error.message);
   }
-  $("p-eyebrow").textContent = `Devis ${data.number}${data.holder ? ` · ${data.holder}` : ""}`;
+  $("p-eyebrow").textContent = `${invoiceToken ? "Facture" : "Devis"} ${data.number}${data.holder ? ` · ${data.holder}` : ""}`;
+  if (invoiceToken) return showInvoice(data);
   if (data.amountCents <= 0) {
     return say(part === "acompte" ? "Acompte réglé" : "Tout est réglé", part === "acompte"
       ? "L'acompte de ce devis est déjà réglé. Merci !"
@@ -97,6 +100,32 @@ async function start() {
     dd.textContent = value;
     return [dt, dd];
   }));
+  showSheet(data);
+}
+
+// Facture : montant restant, échéance, puis carte (si proposée) ou virement
+function showInvoice(data) {
+  if (data.amountCents <= 0) return say("Facture réglée", "Cette facture est déjà entièrement réglée. Merci !");
+  say(data.deposit ? "Régler l'acompte" : "Régler la facture", data.dueDate
+    ? `Merci de régler cette facture au plus tard le ${dateFr(data.dueDate)}, par carte ou par virement.`
+    : "Vous pouvez régler cette facture par carte ou par virement.");
+  $("p-card").textContent = `Payer ${money(data.amountCents)} par carte`;
+  if (!data.cardAvailable) {
+    document.querySelector(".pay-card").hidden = true;
+    document.querySelector(".pay-or").hidden = true;
+  }
+  const facts = [["Client", data.clientName], [data.deposit ? "Facture d'acompte" : "Facture", data.number], ...(data.dueDate ? [["Échéance", dateFr(data.dueDate)]] : [])];
+  $("p-facts").replaceChildren(...facts.flatMap(([label, value]) => {
+    const dt = document.createElement("dt");
+    dt.textContent = label;
+    const dd = document.createElement("dd");
+    dd.textContent = value;
+    return [dt, dd];
+  }));
+  showSheet(data);
+}
+
+function showSheet(data) {
   const euros = (data.amountCents / 100).toFixed(2).replace(".", ",");
   if (!data.iban) {
     $("p-transfer").replaceChildren(row("Coordonnées de virement", "Bientôt disponibles : répondez à l'e-mail reçu pour les obtenir."));
@@ -118,7 +147,9 @@ function markDone() {
   button.textContent = "Virement signalé ✓";
   const message = $("p-message");
   message.dataset.kind = "success";
-  message.textContent = "Merci ! Alexandre vous confirmera la bonne réception du virement.";
+  message.textContent = invoiceToken
+    ? "Merci ! Nous vous confirmerons la bonne réception du virement."
+    : "Merci ! Alexandre vous confirmera la bonne réception du virement.";
 }
 
 $("p-card").addEventListener("click", async () => {
