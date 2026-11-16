@@ -247,7 +247,8 @@ async function invoiceCheckout(invoice: Row, token: string) {
   const result = await response.json().catch(() => ({}));
   if (!response.ok || typeof result.url !== "string") {
     console.error("Stripe refused the invoice checkout", response.status, result?.error?.code, result?.error?.message);
-    throw new Error("Stripe n'a pas pu ouvrir le paiement.");
+    // Raison renvoyée par Stripe affichée sous le bouton, pour pouvoir corriger
+    throw new UserError(`Le paiement par carte n'a pas pu s'ouvrir${result?.error?.message ? ` (Stripe : ${String(result.error.message).slice(0, 200)})` : ""}. Vous pouvez régler par virement ci-dessous.`, 502);
   }
   return { url: result.url };
 }

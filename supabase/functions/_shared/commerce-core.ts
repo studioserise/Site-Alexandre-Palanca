@@ -1203,19 +1203,15 @@ export async function sendDocument(body: Row) {
     responseUrl = `${requiredEnv("FRONTEND_ORIGIN").replace(/\/$/, "")}/reponse-devis.html?t=${token}`;
   }
   // Facture émise avec un reste à payer : bouton « Régler la facture » (carte ou virement)
-  // Paiement par carte proposé (Alex) : le bouton mène directement à Stripe (&carte=1) ;
-  // sinon, à la fiche de virement.
-  const payUrl = !isQuote && invoiceRemaining(record) > 0
-    ? `${await invoicePaymentUrl(record)}${settings.card_payments === true ? "&carte=1" : ""}`
-    : "";
+  const payUrl = !isQuote && invoiceRemaining(record) > 0 ? await invoicePaymentUrl(record) : "";
   const validity = isQuote && record.valid_until
     ? `, valable jusqu'au ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${record.valid_until}T12:00:00Z`))}`
     : "";
   const text = message || (isQuote
     ? `${hello}\n\nMerci pour votre confiance. Vous trouverez ci-joint le devis ${record.number} correspondant à votre projet${validity}.\n\nPour l'accepter ou me faire part de vos remarques, il vous suffit de cliquer sur le bouton « Répondre à la proposition » ci-dessous.\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`
-    : `${hello}\n\nVous trouverez ci-joint votre facture ${record.number}.${payUrl ? "\n\nPour la régler par carte ou par virement, il vous suffit de cliquer sur le bouton « ${settings.card_payments === true ? "Payer la facture" : "Régler la facture"} » ci-dessous." : ""}\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`);
+    : `${hello}\n\nVous trouverez ci-joint votre facture ${record.number}.${payUrl ? "\n\nPour la régler par carte ou par virement, il vous suffit de cliquer sur le bouton « Régler la facture » ci-dessous." : ""}\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`);
   const buttonUrl = responseUrl || payUrl;
-  const buttonLabel = responseUrl ? "Répondre à la proposition" : settings.card_payments === true ? "Payer la facture" : "Régler la facture";
+  const buttonLabel = responseUrl ? "Répondre à la proposition" : "Régler la facture";
   const button = buttonUrl
     ? `<p style="margin:28px 0"><a href="${escapeHtml(buttonUrl)}" style="display:inline-block;padding:15px 30px;background:#111111;color:#ffffff;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;text-decoration:none">${buttonLabel}</a></p>
       <p style="color:#777777;font-size:12px">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>${escapeHtml(buttonUrl)}</p>`
