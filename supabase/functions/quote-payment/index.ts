@@ -159,6 +159,8 @@ async function checkout(quote: Row, part: string, token: string) {
   params.set("metadata[part]", part);
   params.set("line_items[0][price_data][currency]", "eur");
   params.set("line_items[0][price_data][product_data][name]", label);
+  // Code fiscal exigé par le compte Stripe (même code que les galeries : create-checkout)
+  params.set("line_items[0][price_data][product_data][tax_code]", "txcd_10000000");
   params.set("line_items[0][price_data][unit_amount]", String(amount));
   params.set("line_items[0][quantity]", "1");
   params.set("expires_at", String(Math.floor(Date.now() / 1000) + 60 * 60));
@@ -236,6 +238,8 @@ async function invoiceCheckout(invoice: Row, token: string) {
   params.set("metadata[part]", "facture");
   params.set("line_items[0][price_data][currency]", "eur");
   params.set("line_items[0][price_data][product_data][name]", `Facture ${invoice.number}`);
+  // Code fiscal exigé par le compte Stripe (même code que les galeries : create-checkout)
+  params.set("line_items[0][price_data][product_data][tax_code]", "txcd_10000000");
   params.set("line_items[0][price_data][unit_amount]", String(amount));
   params.set("line_items[0][quantity]", "1");
   params.set("expires_at", String(Math.floor(Date.now() / 1000) + 60 * 60));
