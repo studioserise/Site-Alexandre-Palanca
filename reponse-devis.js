@@ -39,7 +39,7 @@ function show(part) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// Prestations réservées aux professionnels : SIRET toujours demandé.
+// Prestations réservées aux professionnels (le SIRET est facultatif).
 function syncType() {
   acceptForm.elements.type.value = "professionnel";
   $("pro-fields").hidden = false;
@@ -189,7 +189,7 @@ async function submit(form, body, done) {
 acceptForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const f = acceptForm.elements;
-  const missing = ["name", "email", "address", "postalCode", "city", "siret"]
+  const missing = ["name", "email", "address", "postalCode", "city"]
     .filter((key) => !f[key].value.trim());
   const message = acceptForm.querySelector(".gallery-form-message");
   if (missing.length) {
@@ -197,8 +197,9 @@ acceptForm.addEventListener("submit", (event) => {
     f[missing[0]].focus();
     return;
   }
-  if (!/^\d{14}$/.test(f.siret.value.replace(/\s/g, ""))) {
-    message.textContent = "Le SIRET doit comporter 14 chiffres.";
+  const siret = f.siret.value.replace(/\s/g, "");
+  if (siret && !/^\d{9}(\d{5})?$/.test(siret)) {
+    message.textContent = "Le SIRET doit comporter 14 chiffres (ou 9 pour un SIREN), ou rester vide.";
     f.siret.focus();
     return;
   }

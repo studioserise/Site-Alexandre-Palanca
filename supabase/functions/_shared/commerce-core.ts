@@ -174,9 +174,7 @@ export function assertClientComplete(client: Row) {
     if (!client.address || !client.postal_code || !client.city) {
       throw new UserError("Adresse complète du client invalide : obligatoire pour un professionnel.");
     }
-    if (!/^\d{14}$/.test(client.siret || "")) {
-      throw new UserError("SIRET du client invalide : 14 chiffres obligatoires pour un professionnel.");
-    }
+    // SIRET du client facultatif ; s'il est saisi, son format (9 ou 14 chiffres) est vérifié à l'enregistrement.
   }
 }
 
