@@ -247,7 +247,7 @@ function clientFields(c) {
     <div class="com-row">${field("E-mail", input("email", c.email, 'type="email"'))}${field("Téléphone", input("phone", c.phone))}</div>
     ${field("Adresse", input("address", c.address))}
     <div class="com-row3 com-row">${field("Code postal", input("postalCode", c.postalCode))}${field("Ville", input("city", c.city))}${field("Pays", input("country", c.country))}</div>
-    <div class="com-row">${field("SIRET (professionnel)", input("siret", c.siret))}${field("N° de TVA", input("vatNumber", c.vatNumber))}</div>`;
+    <div class="com-row">${field("SIRET (facultatif)", input("siret", c.siret))}${field("N° de TVA", input("vatNumber", c.vatNumber))}</div>`;
 }
 function bindFields(root, target, onChange) {
   root.querySelectorAll("[data-k]").forEach((el) => {

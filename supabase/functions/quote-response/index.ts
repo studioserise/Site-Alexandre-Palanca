@@ -356,8 +356,9 @@ async function accept(body: Row, request: Request) {
     vat_number: text(input.vatNumber, "Numéro de TVA", 30).toUpperCase()
   };
   if (!isEmail(data.email)) throw new UserError("Adresse e-mail invalide.");
-  if (!/^\d{14}$/.test(data.siret)) {
-    throw new UserError("SIRET invalide : 14 chiffres attendus.");
+  // SIRET facultatif : vérifié seulement s'il est renseigné
+  if (data.siret && !/^\d{9}(\d{5})?$/.test(data.siret)) {
+    throw new UserError("SIRET invalide : 9 ou 14 chiffres attendus.");
   }
   const comment = text(body.comment, "Commentaire", 3000);
   const png = signaturePng(body.signature);
