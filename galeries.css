@@ -744,6 +744,25 @@ button {
   gap: 12px;
 }
 
+/* Administration : la liste des galeries (ouvertes et fermées) défile dans son cadre
+   au lieu d'allonger la page à chaque nouvelle galerie */
+#admin-gallery-list {
+  align-content: start;
+  max-height: min(72vh, 820px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 243, 239, 0.28) transparent;
+}
+
+#admin-gallery-list::-webkit-scrollbar { width: 6px; }
+#admin-gallery-list::-webkit-scrollbar-thumb { border-radius: 3px; background: rgba(245, 243, 239, 0.28); }
+
+@media (max-width: 760px) {
+  #admin-gallery-list { max-height: 65vh; }
+}
+
 .gallery-admin-record {
   display: grid;
   gap: 8px;
@@ -1089,3 +1108,6 @@ button {
 html[data-theme="light"] .client-tab { border-color: rgba(23, 23, 21, 0.35); background: transparent; color: #171715; }
 html[data-theme="light"] .client-tab:hover { border-color: #171715; background: #fff; }
 html[data-theme="light"] .client-tab[aria-selected="true"] { border-color: #171715; background: #171715; color: #f1eee8; }
+
+html[data-theme="light"] #admin-gallery-list { scrollbar-color: rgba(23, 23, 21, 0.3) transparent; }
+html[data-theme="light"] #admin-gallery-list::-webkit-scrollbar-thumb { background: rgba(23, 23, 21, 0.3); }

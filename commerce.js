@@ -100,6 +100,12 @@ document.addEventListener("click", (event) => {
   }
 });
 
+// Boutons « Facture sans devis — Alex » / « — Elisa » : facture saisie directement
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-new-invoice]");
+  if (button) invoiceEditor(null, { issuer: button.dataset.newInvoice });
+});
+
 const QUOTE_STATUS = {
   draft: ["Brouillon", ""], sent: ["Envoyé", "warn"], accepted: ["Accepté", "ok"],
   refused: ["Refusé", "bad"], expired: ["Expiré", "bad"]
@@ -221,7 +227,7 @@ async function invoices() {
   if (!data) return;
   const shown = data.invoices.filter((i) => listIssuer === "all" || i.issuer === listIssuer);
   view.innerHTML = `${issuerFilter(listIssuer)}<div class="com-table-wrap"><table class="com-table"><thead><tr><th>Numéro</th><th>Type</th><th>Client</th><th>Date</th><th>Échéance</th><th class="com-num">Total TTC</th><th class="com-num">Reste dû</th><th>Statut</th></tr></thead><tbody>
-    ${shown.map((i) => `<tr class="is-click" data-id="${i.id}"><td>${issuerTag(i.issuer)} ${esc(i.number || "Brouillon")}</td><td>${i.kind === "deposit" ? "Acompte" : "Facture"}</td><td>${esc(i.client_name)}</td><td>${dateFr(i.issue_date)}</td><td>${dateFr(i.due_date)}</td><td class="com-num">${money(i.total_ttc_cents)}</td><td class="com-num">${money(i.remaining_cents)}</td><td>${badge(INVOICE_STATUS, i.status)}</td></tr>`).join("") || '<tr><td colspan="8">Aucune facture. Elles se créent depuis un devis accepté.</td></tr>'}
+    ${shown.map((i) => `<tr class="is-click" data-id="${i.id}"><td>${issuerTag(i.issuer)} ${esc(i.number || "Brouillon")}</td><td>${i.kind === "deposit" ? "Acompte" : "Facture"}</td><td>${esc(i.client_name)}</td><td>${dateFr(i.issue_date)}</td><td>${dateFr(i.due_date)}</td><td class="com-num">${money(i.total_ttc_cents)}</td><td class="com-num">${money(i.remaining_cents)}</td><td>${badge(INVOICE_STATUS, i.status)}</td></tr>`).join("") || '<tr><td colspan="8">Aucune facture. Elles se créent depuis un devis accepté, ou directement avec « Facture sans devis ».</td></tr>'}
     </tbody></table></div>`;
   view.querySelectorAll("[data-issuer-filter]").forEach((b) => b.onclick = () => { listIssuer = b.dataset.issuerFilter; invoices(); });
   view.querySelectorAll("tr[data-id]").forEach((row) => { row.onclick = () => invoiceDetail(row.dataset.id); });
@@ -397,6 +403,7 @@ let step = 1;
 let catalog = [];
 let appSettings = null;
 const STEPS = ["Client", "Prestations", "Conditions", "Vérification"];
+const isInvoiceDraft = () => draft?.mode === "invoice";
 
 function newItem(base = {}) {
   return { serviceId: base.id || null, title: base.name || "", description: base.description || "", quantity: "1", unit: base.unit || "forfait", price: toEuros(base.unit_price_cents || 0), vat: String((base.vat_rate_bps ?? 0) / 100), saveToCatalog: false };
@@ -418,6 +425,7 @@ function totalsOf(items) {
   return { ht, vat, ttc: ht + vat, breakdown };
 }
 function depositOf(ttc) {
+  if (isInvoiceDraft()) return 0;
   return draft.depositEnabled ? Math.round(ttc * (parseFloat(String(draft.depositPct).replace(",", ".")) || 0) / 100) : 0;
 }
 
@@ -482,6 +490,7 @@ function previewHtml() {
   const t = totalsOf(draft.items);
   const c = draft.client;
   const dep = depositOf(t.ttc);
+  if (isInvoiceDraft()) return invoicePreviewHtml(t, c);
   return `<h4>Devis</h4>
     <div class="pv-cols"><div><strong>${esc(appSettings.trade_name || appSettings.legal_name)}</strong><br>${esc(appSettings.address)}<br>${esc(`${appSettings.postal_code} ${appSettings.city}`)}</div>
     <div><strong>${esc(c.name) || "Client"}</strong><br>${esc(c.address)}<br>${esc(`${c.postalCode} ${c.city}`.trim())}</div></div>
@@ -497,7 +506,7 @@ function previewHtml() {
 
 function renderEditor() {
   const stepsHtml = `<div class="com-steps">${STEPS.map((l, i) => `<div class="com-step ${i + 1 < step ? "is-done" : ""} ${i + 1 === step ? "is-current" : ""}">${i + 1}. ${l}</div>`).join("")}</div>`;
-  view.innerHTML = `<div class="com-top"><h2>${issuerTag(draft.issuer)} ${draft.id ? "Modifier le brouillon" : "Nouveau devis"} — ${esc(issuerLabel(draft.issuer))}${draft.bundle && BUNDLES[draft.bundle] ? ` · ${BUNDLES[draft.bundle].label.toLowerCase()} (${bundleRole(draft.bundle, draft.issuer)})` : ""}</h2>
+  view.innerHTML = `<div class="com-top"><h2>${issuerTag(draft.issuer)} ${draft.id ? "Modifier le brouillon" : isInvoiceDraft() ? "Nouvelle facture (sans devis)" : "Nouveau devis"}${draft.id && isInvoiceDraft() ? " de facture" : ""} — ${esc(issuerLabel(draft.issuer))}${draft.bundle && BUNDLES[draft.bundle] ? ` · ${BUNDLES[draft.bundle].label.toLowerCase()} (${bundleRole(draft.bundle, draft.issuer)})` : ""}</h2>
     <button class="gallery-quiet-button com-preview-toggle" id="pv-toggle" type="button">Aperçu</button></div>
     <div class="com-layout"><div class="com-panel">${stepsHtml}<div class="com-form" id="step-body"></div>
     <div class="com-actions"><button class="gallery-quiet-button" id="prev" type="button" ${step === 1 ? "disabled" : ""}>←︎ Précédent</button>
@@ -518,7 +527,9 @@ function renderEditor() {
     renderEditor();
   };
   const body = document.getElementById("step-body");
-  [null, stepClient, stepItems, stepTerms, stepReview][step](body, refresh);
+  (isInvoiceDraft()
+    ? [null, stepClient, stepItems, stepInvoiceTerms, stepInvoiceReview]
+    : [null, stepClient, stepItems, stepTerms, stepReview])[step](body, refresh);
 }
 
 function stepClient(body, refresh) {
@@ -770,6 +781,99 @@ async function quoteDetail(id) {
 
 const METHODS = [["virement", "Virement"], ["carte", "Carte"], ["especes", "Espèces"], ["cheque", "Chèque"], ["autre", "Autre"]];
 
+// ------------------------------------------------------------ facture sans devis
+// Même éditeur que les devis (client, prestations), puis échéance, période de réalisation,
+// modalités de paiement et notes. L'enregistrement crée un brouillon de facture (action « save-invoice ») ;
+// l'émission (numéro définitif + PDF) se fait ensuite depuis la fiche de la facture, comme pour les autres.
+async function invoiceEditor(id, preset = {}) {
+  view.innerHTML = "<p>Chargement…</p>";
+  currentTab = "invoices";
+  renderTabs();
+  let issuer = preset.issuer === "elisa" ? "elisa" : "alexandre";
+  let existing = null;
+  if (id) {
+    existing = await run(() => api("get-invoice", { id }));
+    if (!existing) return;
+    issuer = existing.invoice.issuer === "elisa" ? "elisa" : "alexandre";
+  }
+  const [cat, set] = await Promise.all([run(() => api("list-services", { issuer })), run(() => api("get-settings", { issuer }))]);
+  if (!cat || !set) return;
+  catalog = cat.services;
+  appSettings = set.settings;
+  const s = appSettings;
+  draft = {
+    mode: "invoice", id: null, issuer, client: { ...EMPTY_CLIENT }, items: [],
+    dueDate: new Date(Date.now() + (s.invoice_payment_days ?? 30) * 86400000).toISOString().slice(0, 10),
+    servicePeriod: "", notes: "", paymentTerms: s.default_payment_terms || "",
+    depositEnabled: false
+  };
+  if (existing) {
+    const i = existing.invoice;
+    const snap = i.client_snapshot || {};
+    Object.assign(draft, {
+      id: i.id,
+      client: clientFromRow({ id: i.client_id, ...snap, postal_code: snap.postalCode ?? snap.postal_code, vat_number: snap.vatNumber ?? snap.vat_number }),
+      dueDate: i.due_date || draft.dueDate, servicePeriod: i.service_period || "", notes: i.notes || "", paymentTerms: i.payment_terms || draft.paymentTerms,
+      items: i.items.map((it) => ({ serviceId: it.service_id, title: it.title, description: it.description, quantity: String(it.quantity), unit: it.unit, price: toEuros(it.unit_price_cents), vat: String(it.vat_rate_bps / 100), saveToCatalog: false }))
+    });
+    if (i.client_id && !draft.client.id) draft.client.id = i.client_id;
+  }
+  step = 1;
+  renderEditor();
+}
+
+function invoicePreviewHtml(t, c) {
+  return `<h4>Facture</h4>
+    <div class="pv-cols"><div><strong>${esc(appSettings.trade_name || appSettings.legal_name)}</strong><br>${esc(appSettings.address)}<br>${esc(`${appSettings.postal_code} ${appSettings.city}`)}</div>
+    <div><strong>${esc(c.name) || "Client"}</strong><br>${esc(c.address)}<br>${esc(`${c.postalCode} ${c.city}`.trim())}</div></div>
+    <div>Échéance : ${dateFr(draft.dueDate)}${draft.servicePeriod ? ` · ${esc(draft.servicePeriod)}` : ""}</div>
+    <table><thead><tr><th>Désignation</th><th class="r">Qté</th><th class="r">P.U.</th><th class="r">Total</th></tr></thead><tbody>
+    ${draft.items.map((i) => { const p = itemPayload(i); return `<tr><td><strong>${esc(i.title)}</strong><br>${esc(i.description)}</td><td class="r">${esc(i.quantity)} ${esc(i.unit)}</td><td class="r">${money(p.unitPriceCents)}</td><td class="r">${money(Math.round(p.quantity * p.unitPriceCents))}</td></tr>`; }).join("")}
+    </tbody></table>
+    <div class="r">Total HT : ${money(t.ht)}</div>${t.breakdown.map((b) => `<div class="r">TVA ${b.rate / 100} % : ${money(b.vat)}</div>`).join("")}
+    <div class="r pv-total">Total TTC : ${money(t.ttc)}</div>
+    ${draft.notes ? `<div class="pv-note">${esc(draft.notes)}</div>` : ""}`;
+}
+
+function stepInvoiceTerms(body, refresh) {
+  body.innerHTML = `<div class="com-row">${field("Échéance de paiement", input("dueDate", draft.dueDate, 'type="date"'))}${field("Date ou période de réalisation", input("servicePeriod", draft.servicePeriod, 'placeholder="Ex. séance du 12 novembre 2026"'))}</div>
+    ${field("Modalités de paiement", textarea("paymentTerms", draft.paymentTerms))}
+    ${field("Notes (facultatif)", textarea("notes", draft.notes))}`;
+  bindFields(body, draft, refresh);
+}
+
+function stepInvoiceReview(body) {
+  const t = totalsOf(draft.items);
+  body.innerHTML = `<div class="com-detail"><dl><dt>Client</dt><dd>${esc(draft.client.name)}</dd><dt>Prestations</dt><dd>${draft.items.length}</dd>
+    <dt>Total HT</dt><dd>${money(t.ht)}</dd><dt>Total TTC</dt><dd>${money(t.ttc)}</dd><dt>Échéance</dt><dd>${dateFr(draft.dueDate)}</dd></dl>
+    <p>L'émission attribue le numéro définitif et génère le PDF. Une facture émise ne peut plus être modifiée (elle se corrige par un avoir).</p></div>
+    <div class="com-actions"><button class="gallery-quiet-button" id="save-draft" type="button">Enregistrer le brouillon</button>
+    <button class="gallery-primary-button" id="validate" type="button">Émettre la facture et générer le PDF</button>
+    ${draft.id ? '<button class="gallery-quiet-button" id="del-draft" type="button">Supprimer le brouillon</button>' : ""}</div>`;
+  const persist = async () => {
+    const data = await run(() => api("save-invoice", {
+      invoiceId: draft.id || undefined, issuer: draft.issuer, client: draft.client, items: draft.items.map(itemPayload),
+      dueDate: draft.dueDate || null, servicePeriod: draft.servicePeriod, notes: draft.notes, paymentTerms: draft.paymentTerms
+    }));
+    if (data) draft.id = data.invoice.id;
+    return data;
+  };
+  document.getElementById("save-draft").onclick = async () => { if (await persist()) { say("Brouillon de facture enregistré.", true); invoiceDetail(draft.id); } };
+  document.getElementById("validate").onclick = async (e) => {
+    if (!confirm("Émettre la facture ? Le numéro définitif sera attribué et elle ne pourra plus être modifiée.")) return;
+    e.target.disabled = true;
+    if (await persist()) {
+      const done = await run(() => api("issue-invoice", { id: draft.id }));
+      if (done) { say("Facture émise.", true); return invoiceDetail(draft.id); }
+    }
+    e.target.disabled = false;
+  };
+  const del = document.getElementById("del-draft");
+  if (del) del.onclick = async () => {
+    if (confirm("Supprimer ce brouillon ?") && await run(() => api("delete-invoice", { id: draft.id }))) go("invoices");
+  };
+}
+
 async function invoiceDetail(id) {
   currentTab = "invoices";
   renderTabs();
@@ -794,7 +898,7 @@ async function invoiceDetail(id) {
         ${field("Moyen", `<select class="gallery-admin-input" data-k="method">${METHODS.map(([v, l]) => `<option value="${v}">${l}</option>`).join("")}</select>`)}</div>
         <div class="com-row">${field("Référence", input("reference", ""))}${field("Commentaire", input("comment", ""))}</div>
         <div class="com-actions"><button class="gallery-primary-button" id="pay-btn" type="button">Enregistrer le paiement</button></div></div>` : ""}`
-      : `<p>Brouillon : l'émission attribue le numéro et génère le PDF.</p><div class="com-actions"><button class="gallery-primary-button" id="issue" type="button">Émettre la facture</button><button class="gallery-quiet-button" id="del" type="button">Supprimer le brouillon</button></div>`}</div>`;
+      : `<p>Brouillon : l'émission attribue le numéro et génère le PDF.</p><div class="com-actions"><button class="gallery-primary-button" id="issue" type="button">Émettre la facture</button>${i.quote_id ? "" : '<button class="gallery-quiet-button" id="edit" type="button">Modifier le brouillon</button>'}<button class="gallery-quiet-button" id="del" type="button">Supprimer le brouillon</button></div>`}</div>`;
   document.getElementById("back").onclick = (e) => { e.preventDefault(); go("invoices"); };
   if (issued) {
     document.getElementById("dl").onclick = actions.open;
@@ -818,6 +922,8 @@ async function invoiceDetail(id) {
     document.getElementById("del").onclick = async () => {
       if (confirm("Supprimer ce brouillon ?") && await run(() => api("delete-invoice", { id }))) go("invoices");
     };
+    const edit = document.getElementById("edit");
+    if (edit) edit.onclick = () => invoiceEditor(id);
   }
 }
 
