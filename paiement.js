@@ -106,6 +106,22 @@ async function start() {
 // Facture : montant restant, échéance, puis carte (si proposée) ou virement
 function showInvoice(data) {
   if (data.amountCents <= 0) return say("Facture réglée", "Cette facture est déjà entièrement réglée. Merci !");
+  // Bouton « Payer la facture » de l'e-mail (&carte=1) : redirection directe vers Stripe.
+  // En cas d'échec, ou au retour d'une annulation sur Stripe, la fiche (carte + virement) s'affiche.
+  if (params.get("carte") === "1" && data.cardAvailable) {
+    say("Redirection vers le paiement sécurisé…", `Facture ${data.number} — ${money(data.amountCents)}. Vous allez être redirigé vers Stripe.`);
+    call({ action: "checkout" })
+      .then(({ url }) => { window.location.href = url; })
+      .catch((error) => {
+        renderInvoiceSheet(data);
+        $("p-card-message").textContent = error.message;
+      });
+    return;
+  }
+  renderInvoiceSheet(data);
+}
+
+function renderInvoiceSheet(data) {
   say(data.deposit ? "Régler l'acompte" : "Régler la facture", data.dueDate
     ? `Merci de régler cette facture au plus tard le ${dateFr(data.dueDate)}, par carte ou par virement.`
     : "Vous pouvez régler cette facture par carte ou par virement.");
