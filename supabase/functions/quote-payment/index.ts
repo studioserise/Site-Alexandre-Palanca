@@ -97,13 +97,16 @@ async function view(quote: Row, part: string) {
   };
 }
 
-async function consumeRateLimit(request: Request) {
+// Limite par adresse IP. « J'ai effectué le virement » : 5 essais (envoie un e-mail) ;
+// ouverture du paiement par carte : 20 essais, compteur séparé (un client qui revient de Stripe
+// ou clique plusieurs fois ne doit pas être bloqué).
+async function consumeRateLimit(request: Request, scope = "quote-transfer", max = 5) {
   const ip = request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "inconnu";
   const attempts = await databaseRequest("rpc/consume_gallery_rate_limit", {
     method: "POST",
-    body: JSON.stringify({ p_key: await sha256(`quote-transfer:${ip}:${requiredEnv("GALLERY_SESSION_SECRET")}`) })
+    body: JSON.stringify({ p_key: await sha256(`${scope}:${ip}:${requiredEnv("GALLERY_SESSION_SECRET")}`) })
   }) as number;
-  if (attempts > 5) throw new UserError("Trop de tentatives. Réessayez dans quelques minutes.", 429);
+  if (attempts > max) throw new UserError("Trop de tentatives. Réessayez dans quelques minutes.", 429);
 }
 
 // « J'ai effectué le virement » : e-mail au prestataire concerné pour qu'il vérifie et enregistre le règlement.
@@ -244,7 +247,8 @@ async function invoiceCheckout(invoice: Row, token: string) {
   const result = await response.json().catch(() => ({}));
   if (!response.ok || typeof result.url !== "string") {
     console.error("Stripe refused the invoice checkout", response.status, result?.error?.code, result?.error?.message);
-    throw new Error("Stripe n'a pas pu ouvrir le paiement.");
+    // Raison renvoyée par Stripe affichée sous le bouton, pour pouvoir corriger
+    throw new UserError(`Le paiement par carte n'a pas pu s'ouvrir${result?.error?.message ? ` (Stripe : ${String(result.error.message).slice(0, 200)})` : ""}. Vous pouvez régler par virement ci-dessous.`, 502);
   }
   return { url: result.url };
 }
@@ -262,7 +266,7 @@ Deno.serve(async (request) => {
       const invoice = await invoiceFromPaymentToken(body.invoice);
       if (body.action === "get") return reply(request, 200, await invoiceView(invoice));
       if (body.action === "checkout") {
-        await consumeRateLimit(request);
+        await consumeRateLimit(request, "card-checkout", 20);
         return reply(request, 200, await invoiceCheckout(invoice, body.invoice));
       }
       if (body.action === "notify") {
@@ -275,7 +279,7 @@ Deno.serve(async (request) => {
     const part = body.part === "acompte" ? "acompte" : "solde";
     if (body.action === "get") return reply(request, 200, await view(quote, part));
     if (body.action === "checkout") {
-      await consumeRateLimit(request);
+      await consumeRateLimit(request, "card-checkout", 20);
       return reply(request, 200, await checkout(quote, part, String(body.token)));
     }
     if (body.action === "notify") {
