@@ -211,3 +211,30 @@ html[data-theme="light"] .site-phone { box-shadow: 0 0 0 1px rgba(23, 23, 21, 0.
 html[data-theme="light"] .site-phone-toggle { border-color: rgba(23, 23, 21, 0.35); color: #494740; }
 html[data-theme="light"] .site-phone-toggle:hover { border-color: #171715; color: #171715; }
 html[data-theme="light"] .site-intro-note { border-left-color: rgba(23, 23, 21, 0.5); background: rgba(255, 255, 255, 0.6); color: #2b2a26; }
+
+/* Consultation sur téléphone : vue téléphone seule, centrée ; vue ordinateur et bouton masqués */
+.site-stage.is-phone-only .site-frame-wrap { display: none; }
+.site-stage.is-phone-only .site-phone { right: auto; left: 0; }
+@media (max-width: 760px) {
+  .site-phone-toggle { display: none; }
+}
+
+/* Message à l'ouverture sur téléphone */
+.site-phone-notice {
+  width: min(calc(100% - 40px), 420px);
+  padding: 26px 24px 22px;
+  border: 1px solid rgba(245, 243, 239, 0.2);
+  border-radius: 16px;
+  background: #171715;
+  color: #f5f3ef;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  line-height: 1.6;
+}
+.site-phone-notice::backdrop { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); }
+.site-phone-notice h2 { margin: 0 0 12px; font-size: 1.25rem; font-weight: 400; }
+.site-phone-notice p { margin: 0 0 12px; color: #d6d2cc; font-size: 0.95rem; }
+.site-phone-notice .gallery-primary-button { width: 100%; margin-top: 8px; }
+html[data-theme="light"] .site-phone-notice { border-color: rgba(23, 23, 21, 0.15); background: #f5f3ef; color: #171715; }
+html[data-theme="light"] .site-phone-notice p { color: #3b3a35; }
+.site-phone-notice .gallery-primary-button { border: 1px solid #f5f3ef; border-radius: 9px; background: #f5f3ef; color: #171715; cursor: pointer; }
+html[data-theme="light"] .site-phone-notice .gallery-primary-button { border-color: #171715; background: #171715; color: #f1eee8; }

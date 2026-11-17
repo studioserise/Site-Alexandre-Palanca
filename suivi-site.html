@@ -16,13 +16,13 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Suivi de votre site — Alexandre Palanca</title>
   <link rel="stylesheet" href="galeries.css?v=espace2">
-  <link rel="stylesheet" href="espace-client.css?v=duo1">
+  <link rel="stylesheet" href="espace-client.css?v=tel1">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=deroulant3">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script src="site-nav.js?v=footer4" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="suivi-site.js?v=libre1"></script>
+  <script type="module" src="suivi-site.js?v=tel1"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -92,5 +92,13 @@
       <div id="site-history-list"></div>
     </section>
   </main>
+
+  <!-- Ouverture sur téléphone : seule la version téléphone est affichée -->
+  <dialog class="site-phone-notice" id="site-phone-notice" aria-labelledby="site-phone-notice-title">
+    <h2 id="site-phone-notice-title">Vous consultez depuis un téléphone</h2>
+    <p>Vous voyez ici la version téléphone de votre site. L’aperçu de la version ordinateur n’est disponible que depuis un ordinateur.</p>
+    <p>Pour profiter pleinement de l’avancement de votre site et le découvrir dans les meilleures conditions, nous vous conseillons de le consulter sur un ordinateur.</p>
+    <button class="gallery-primary-button" id="site-phone-notice-ok" type="button">J’ai compris</button>
+  </dialog>
 </body>
 </html>

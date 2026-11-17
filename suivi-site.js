@@ -25,9 +25,17 @@ function pageIndexOf(url) {
 function frameUrl(frame) {
   try { return frame.contentWindow.location.href; } catch { return null; }
 }
+// Consultation sur téléphone : seule la vue téléphone est affichée (la vue ordinateur n'est pas chargée)
+const phoneScreen = window.matchMedia("(max-width: 760px)");
+const isPhoneOnly = () => phoneScreen.matches;
 function loadFrame(frame, url) {
   if (frame.dataset.url && samePage(frame.dataset.url, url)) return;
   frame.dataset.url = url;
+  if (frame.id === "site-frame" && isPhoneOnly()) {
+    frame.dataset.pending = url; // chargée seulement si l'écran s'élargit
+    return;
+  }
+  delete frame.dataset.pending;
   frame.src = url;
 }
 // Page atteinte dans une vue : l'autre vue la suit, et la page prévue correspondante devient la page en cours
@@ -212,6 +220,7 @@ async function start() {
   loadDraft();
   $("site-review").hidden = false;
   openPage(0);
+  if (isPhoneOnly()) showPhoneNotice();
 }
 
 $("site-frame").addEventListener("load", onFrameLoad);
@@ -236,14 +245,45 @@ $("site-next").addEventListener("click", () => {
 // L'ensemble (ordinateur + téléphone en bas à droite) tient toujours dans la fenêtre, sans être coupé.
 const DESKTOP = { width: 1440, height: 900 };
 const PHONE = { width: 390, height: 844 };
+// Sur téléphone : le téléphone seul, aussi grand que possible sans être coupé
+function fitPhoneOnly(availableWidth, availableHeight) {
+  const stage = $("site-stage");
+  const phone = $("site-phone");
+  const bezel = 6;
+  const screenWidth = Math.min(availableWidth - 2 * bezel, (availableHeight - 2 * bezel) * (PHONE.width / PHONE.height));
+  const screenHeight = screenWidth * (PHONE.height / PHONE.width);
+  phone.style.width = `${screenWidth + 2 * bezel}px`;
+  phone.style.height = `${screenHeight + 2 * bezel}px`;
+  phone.style.borderWidth = `${bezel}px`;
+  phone.style.borderRadius = `${Math.round(screenWidth * 0.14)}px`;
+  const mobile = $("site-frame-mobile");
+  mobile.style.width = `${PHONE.width}px`;
+  mobile.style.height = `${PHONE.height}px`;
+  mobile.style.transform = `scale(${screenWidth / PHONE.width})`;
+  stage.style.width = `${screenWidth + 2 * bezel}px`;
+  stage.style.height = `${screenHeight + 2 * bezel}px`;
+}
+
 function fitFrames() {
   const stage = $("site-stage");
   const wrap = $("site-frame-wrap");
   const phone = $("site-phone");
-  const showPhone = !phone.hidden;
   const availableWidth = stage.parentElement.clientWidth;
   const navHeight = document.getElementById("site-nav")?.offsetHeight || 80;
   const availableHeight = Math.max(240, window.innerHeight - navHeight - 48);
+  const phoneOnly = isPhoneOnly();
+  stage.classList.toggle("is-phone-only", phoneOnly);
+  if (phoneOnly) {
+    phone.hidden = false;
+    fitPhoneOnly(availableWidth, availableHeight);
+    return;
+  }
+  const desktopFrame = $("site-frame");
+  if (desktopFrame.dataset.pending) {
+    desktopFrame.src = desktopFrame.dataset.pending;
+    delete desktopFrame.dataset.pending;
+  }
+  const showPhone = !phone.hidden;
   const ratio = DESKTOP.height / DESKTOP.width;
   // Téléphone : 78 % de la hauteur de l'écran d'ordinateur, débordant un peu à droite et en bas
   const PHONE_SHARE = 0.78;
@@ -289,6 +329,18 @@ $("site-phone-toggle").addEventListener("click", (event) => {
     try { mirrorScroll($("site-frame-mobile"), scrollRatio($("site-frame").contentWindow)); } catch { /* autre site */ }
   }
 });
+// Message à l'ouverture sur téléphone
+function showPhoneNotice() {
+  const dialog = $("site-phone-notice");
+  if (!dialog || dialog.open) return;
+  if (typeof dialog.showModal === "function") dialog.showModal();
+  else dialog.setAttribute("open", "");
+}
+$("site-phone-notice-ok").addEventListener("click", () => {
+  const dialog = $("site-phone-notice");
+  if (typeof dialog.close === "function") dialog.close(); else dialog.removeAttribute("open");
+});
+phoneScreen.addEventListener?.("change", fitFrames);
 new ResizeObserver(fitFrames).observe($("site-stage").parentElement);
 window.addEventListener("resize", fitFrames);
 $("site-frame-mobile").addEventListener("load", onFrameLoad);
