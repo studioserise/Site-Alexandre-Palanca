@@ -67,6 +67,7 @@ function onFrameLoad() {
     state.expectingLoad = false;
     state.signalled = false;
     guardFrame(frame);
+    linkScroll(frame);
     return;
   }
   // Navigation non prévue dans le cadre
@@ -79,18 +80,89 @@ function onFrameLoad() {
       frame.dataset.url = state.pages[index].url;
       openPage(index);
       guardFrame(frame);
+      linkScroll(frame);
       return;
     }
-    if (index === state.current) { guardFrame(frame); return; }
+    if (index === state.current) { guardFrame(frame); linkScroll(frame); return; }
   }
   if (state.signalled) { state.signalled = false; return; }
   showBlocked();
   reloadCurrent();
 }
-// Autre site équipé d'apercu.js : il demande la permission avant de changer de page
+// ---- Vue téléphone : même page que la vue ordinateur, navigation gardée de la même façon
+let mobileExpecting = false;
+function setMobile(url) {
+  const frame = $("site-frame-mobile");
+  if (frame.dataset.url === url) return;
+  mobileExpecting = true;
+  frame.src = url;
+  frame.dataset.url = url;
+}
+function onMobileLoad() {
+  const frame = $("site-frame-mobile");
+  if (mobileExpecting) {
+    mobileExpecting = false;
+    guardFrame(frame);
+    linkScroll(frame);
+    return;
+  }
+  let url = null;
+  try { url = frame.contentWindow.location.href; } catch { /* autre site */ }
+  const index = url ? pageIndexOf(url) : -1;
+  if (index >= 0 && index !== state.current) { openPage(index); return; }
+  if (index === state.current) { guardFrame(frame); linkScroll(frame); return; }
+  if (state.signalled) { state.signalled = false; return; }
+  showBlocked();
+  frame.dataset.url = "";
+  setMobile(state.pages[state.current].url);
+}
+
+// ---- Défilement synchronisé : faire défiler une vue fait défiler l'autre à la même proportion
+// de la page (les deux versions n'ont pas la même hauteur). Même site : accès direct au cadre ;
+// autre site : grâce à apercu.js (messages « apercu-scroll » / « apercu-scroll-to »).
+const frames = () => [$("site-frame"), $("site-frame-mobile")];
+const otherFrame = (frame) => frames().find((entry) => entry !== frame);
+let scrollLeader = null;
+let scrollTimer;
+function scrollRatio(win) {
+  const doc = win.document.scrollingElement || win.document.documentElement;
+  const max = doc.scrollHeight - win.innerHeight;
+  return max > 0 ? win.scrollY / max : 0;
+}
+function mirrorScroll(target, ratio) {
+  try {
+    const win = target.contentWindow;
+    const doc = win.document.scrollingElement || win.document.documentElement;
+    win.scrollTo(0, ratio * Math.max(0, doc.scrollHeight - win.innerHeight));
+  } catch {
+    target.contentWindow?.postMessage({ type: "apercu-scroll-to", ratio }, "*");
+  }
+}
+function followScroll(source, ratio) {
+  if (scrollLeader && scrollLeader !== source) return; // défilement provoqué par la synchronisation
+  scrollLeader = source;
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => { scrollLeader = null; }, 180);
+  if (source === $("site-frame-mobile") && $("site-phone").hidden) return;
+  mirrorScroll(otherFrame(source), ratio);
+}
+function linkScroll(frame) {
+  let win;
+  try { win = frame.contentWindow; if (!win.document) return; } catch { return; }
+  if (win.__apercuScroll) return;
+  win.__apercuScroll = true;
+  win.addEventListener("scroll", () => followScroll(frame, scrollRatio(win)), { passive: true });
+}
+
+// Autre site équipé d'apercu.js : il demande la permission avant de changer de page, et signale son défilement
 window.addEventListener("message", (event) => {
-  const frame = $("site-frame");
-  if (event.source !== frame.contentWindow || event.data?.type !== "apercu-navigation") return;
+  const frame = frames().find((entry) => entry.contentWindow === event.source);
+  if (!frame) return;
+  if (event.data?.type === "apercu-scroll") {
+    followScroll(frame, Number(event.data.ratio) || 0);
+    return;
+  }
+  if (event.data?.type !== "apercu-navigation") return;
   state.signalled = true;
   setTimeout(() => { state.signalled = false; }, 1500);
   goTo(String(event.data.url || ""));
@@ -143,6 +215,7 @@ function openPage(index) {
     frame.src = page.url;
     frame.dataset.url = page.url;
   }
+  setMobile(page.url);
   $("site-blocked").hidden = true;
   $("site-open").href = page.url;
   $("site-comment-label").textContent = `Votre commentaire sur la page « ${page.name} »`;
@@ -194,7 +267,12 @@ async function start() {
   state.roundsLeft = data.roundsIncluded - data.feedback.length;
   document.title = `${data.gallery.name} — Suivi de site`;
   $("site-title").textContent = data.gallery.name;
-  $("site-intro").textContent = "Parcourez chaque page avec les boutons ci-dessous. Faites défiler la page dans le cadre, puis laissez un commentaire ou cochez « Ça me convient ».";
+  $("site-intro").textContent = "Parcourez chaque page avec les boutons ci-dessous. Faites défiler la page dans la vue ordinateur : la version téléphone, en bas à droite, défile en même temps. Puis laissez un commentaire ou cochez « Ça me convient ».";
+  // Mot de l'administrateur : présentation du travail, instructions
+  if (data.intro) {
+    $("site-note").textContent = data.intro;
+    $("site-note").hidden = false;
+  }
   const round = $("site-round");
   round.hidden = false;
   round.textContent = state.roundsLeft > 0
@@ -225,26 +303,67 @@ $("site-next").addEventListener("click", () => {
   openPage(Math.min(state.current + 1, state.pages.length - 1));
   $("site-pages").scrollIntoView({ behavior: "smooth", block: "start" });
 });
-// Écran réaliste : le site s'affiche à la taille réelle de l'appareil, puis est réduit pour tenir dans le cadre.
-// Ordinateur : 1440 × 900 (portable 16:10) ; téléphone : 390 × 693 (9:16).
-const DEVICES = { desktop: { width: 1440, height: 900 }, mobile: { width: 390, height: 693 } };
-let device = "desktop";
-function fitFrame() {
+// Écrans réalistes : le site s'affiche à la taille réelle de l'appareil, puis est réduit.
+// Ordinateur : 1440 × 900 ; téléphone : 390 × 844 (proportions d'un téléphone actuel).
+// L'ensemble (ordinateur + téléphone en bas à droite) tient toujours dans la fenêtre, sans être coupé.
+const DESKTOP = { width: 1440, height: 900 };
+const PHONE = { width: 390, height: 844 };
+function fitFrames() {
+  const stage = $("site-stage");
   const wrap = $("site-frame-wrap");
-  const frame = $("site-frame");
-  const size = DEVICES[device];
-  const scale = wrap.clientWidth / size.width;
-  frame.style.width = `${size.width}px`;
-  frame.style.height = `${size.height}px`;
-  frame.style.transform = `scale(${scale})`;
+  const phone = $("site-phone");
+  const showPhone = !phone.hidden;
+  const availableWidth = stage.parentElement.clientWidth;
+  const navHeight = document.getElementById("site-nav")?.offsetHeight || 80;
+  const availableHeight = Math.max(240, window.innerHeight - navHeight - 48);
+  const ratio = DESKTOP.height / DESKTOP.width;
+  // Téléphone : 78 % de la hauteur de l'écran d'ordinateur, débordant un peu à droite et en bas
+  const PHONE_SHARE = 0.78;
+  const phoneWidthShare = PHONE_SHARE * ratio * (PHONE.width / PHONE.height);
+  const width = showPhone
+    ? Math.min(availableWidth / (1 + 0.3 * phoneWidthShare), availableHeight / (ratio * (1 + 0.14 * PHONE_SHARE)))
+    : Math.min(availableWidth, availableHeight / ratio);
+  const height = width * ratio;
+  wrap.style.width = `${width}px`;
+  wrap.style.height = `${height}px`;
+  const desktop = $("site-frame");
+  desktop.style.width = `${DESKTOP.width}px`;
+  desktop.style.height = `${DESKTOP.height}px`;
+  desktop.style.transform = `scale(${wrap.clientWidth / DESKTOP.width})`;
+  if (!showPhone) {
+    stage.style.width = `${width}px`;
+    stage.style.height = `${height}px`;
+    return;
+  }
+  const outerHeight = height * PHONE_SHARE;
+  const bezel = Math.max(4, Math.round(outerHeight * 0.022));
+  const screenHeight = outerHeight - 2 * bezel;
+  const screenWidth = screenHeight * (PHONE.width / PHONE.height);
+  const outerWidth = screenWidth + 2 * bezel;
+  phone.style.width = `${outerWidth}px`;
+  phone.style.height = `${outerHeight}px`;
+  phone.style.borderWidth = `${bezel}px`;
+  phone.style.borderRadius = `${Math.round(outerWidth * 0.16)}px`;
+  const mobile = $("site-frame-mobile");
+  mobile.style.width = `${PHONE.width}px`;
+  mobile.style.height = `${PHONE.height}px`;
+  mobile.style.transform = `scale(${screenWidth / PHONE.width})`;
+  stage.style.width = `${width + outerWidth * 0.3}px`;
+  stage.style.height = `${height + outerHeight * 0.14}px`;
 }
-document.querySelectorAll("[data-device]").forEach((button) => button.addEventListener("click", () => {
-  document.querySelectorAll("[data-device]").forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
-  device = button.dataset.device === "mobile" ? "mobile" : "desktop";
-  $("site-frame-wrap").classList.toggle("is-mobile", device === "mobile");
-  fitFrame();
-}));
-new ResizeObserver(fitFrame).observe($("site-frame-wrap"));
+$("site-phone-toggle").addEventListener("click", (event) => {
+  const phone = $("site-phone");
+  phone.hidden = !phone.hidden;
+  event.currentTarget.setAttribute("aria-pressed", String(!phone.hidden));
+  event.currentTarget.textContent = phone.hidden ? "Afficher la version téléphone" : "Masquer la version téléphone";
+  fitFrames();
+  if (!phone.hidden) {
+    try { mirrorScroll($("site-frame-mobile"), scrollRatio($("site-frame").contentWindow)); } catch { /* autre site */ }
+  }
+});
+new ResizeObserver(fitFrames).observe($("site-stage").parentElement);
+window.addEventListener("resize", fitFrames);
+$("site-frame-mobile").addEventListener("load", onMobileLoad);
 
 $("site-send").addEventListener("click", async () => {
   const button = $("site-send");

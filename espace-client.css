@@ -31,23 +31,54 @@
 .site-device button[aria-pressed="true"] { background: rgba(245, 243, 239, 0.14); color: var(--gallery-text); }
 .site-open { color: #c5c1bb; font-size: 0.82rem; }
 
+/* Vue ordinateur + vue téléphone : tailles calculées par suivi-site.js (fitFrames) pour que
+   l'ensemble tienne dans la fenêtre ; le téléphone chevauche le coin bas droit de l'écran d'ordinateur. */
+.site-stage { position: relative; margin: 0 auto; }
 .site-frame-wrap {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   overflow: hidden;
   width: 100%;
-  margin: 0 auto;
   aspect-ratio: 1440 / 900;
   border: 1px solid rgba(245, 243, 239, 0.18);
   border-radius: 12px;
   background: #fff;
 }
-/* Téléphone : écran 9:16 avec un contour d'appareil */
-.site-frame-wrap.is-mobile {
-  width: min(100%, 360px);
-  aspect-ratio: 390 / 693;
-  border: 10px solid #121211;
+.site-phone {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 8px solid #121211;
   border-radius: 34px;
-  box-shadow: 0 0 0 1px rgba(245, 243, 239, 0.18), 0 18px 40px rgba(0, 0, 0, 0.35);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(245, 243, 239, 0.22), 0 22px 50px rgba(0, 0, 0, 0.45);
+}
+.site-phone-toggle {
+  padding: 7px 14px;
+  border: 1px solid rgba(245, 243, 239, 0.22);
+  border-radius: 999px;
+  background: transparent;
+  color: #c5c1bb;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+}
+.site-phone-toggle:hover { color: var(--gallery-text); border-color: rgba(245, 243, 239, 0.45); }
+/* Mot de l'administrateur (présentation du travail, instructions) */
+.site-intro-note {
+  max-width: 760px;
+  margin: 0 0 26px;
+  padding: 16px 20px;
+  border-left: 2px solid rgba(245, 243, 239, 0.45);
+  border-radius: 4px;
+  background: rgba(245, 243, 239, 0.05);
+  color: #dedad4;
+  line-height: 1.7;
+  white-space: pre-wrap;
 }
 .site-frame {
   position: absolute;
@@ -155,7 +186,6 @@ html[data-theme="light"] .client-space .gallery-form-message[data-kind="success"
 .site-frame-help { margin-top: 8px; }
 
 /* Message : page hors de l'aperçu (pas encore créée) */
-.site-frame-wrap { position: relative; }
 .site-blocked {
   position: absolute;
   top: 16px;
@@ -176,3 +206,8 @@ html[data-theme="light"] .client-space .gallery-form-message[data-kind="success"
 }
 .site-blocked p { margin: 0; }
 .site-blocked button { flex: none; width: 28px; height: 28px; border: 1px solid rgba(245, 243, 239, 0.3); border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
+
+html[data-theme="light"] .site-phone { box-shadow: 0 0 0 1px rgba(23, 23, 21, 0.2), 0 18px 40px rgba(0, 0, 0, 0.22); }
+html[data-theme="light"] .site-phone-toggle { border-color: rgba(23, 23, 21, 0.35); color: #494740; }
+html[data-theme="light"] .site-phone-toggle:hover { border-color: #171715; color: #171715; }
+html[data-theme="light"] .site-intro-note { border-left-color: rgba(23, 23, 21, 0.5); background: rgba(255, 255, 255, 0.6); color: #2b2a26; }

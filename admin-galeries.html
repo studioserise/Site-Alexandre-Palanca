@@ -7,13 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <title>Administration des galeries — Alexandre Palanca</title>
-  <link rel="stylesheet" href="galeries.css?v=liste1">
+  <link rel="stylesheet" href="galeries.css?v=intro1">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=contacts6">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script src="site-nav.js?v=cgv1" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="admin-galeries.js?v=code1"></script>
+  <script type="module" src="admin-galeries.js?v=intro1"></script>
   <script src="app-return.js?v=3"></script>
 </head>
 <body>
@@ -88,6 +88,10 @@
               <p class="gallery-admin-note">Collez l’adresse de chaque page du site en cours (ex. version de test en ligne). Le client voit chaque page dans un cadre et laisse un commentaire ou coche « Ça me convient ». Le site doit accepter d’être affiché dans un cadre.</p>
               <div id="admin-web-rows"></div>
               <button class="gallery-quiet-button" id="admin-web-add" type="button">+ Ajouter une page</button>
+              <label class="gallery-admin-label" for="admin-web-intro">
+                Texte d’introduction pour le client (facultatif)
+                <textarea class="gallery-admin-input admin-web-intro" id="admin-web-intro" rows="5" maxlength="4000" placeholder="Présentez votre travail, ce qui a changé depuis la dernière version, ce que le client doit regarder en priorité…"></textarea>
+              </label>
               <label class="gallery-admin-label" for="admin-web-rounds">
                 Séries de modifications prévues au contrat
                 <input class="gallery-admin-input" id="admin-web-rounds" type="number" min="0" max="20" value="2">

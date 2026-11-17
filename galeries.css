@@ -1111,3 +1111,7 @@ html[data-theme="light"] .client-tab[aria-selected="true"] { border-color: #1717
 
 html[data-theme="light"] #admin-gallery-list { scrollbar-color: rgba(23, 23, 21, 0.3) transparent; }
 html[data-theme="light"] #admin-gallery-list::-webkit-scrollbar-thumb { background: rgba(23, 23, 21, 0.3); }
+
+/* Suivi de site : texte d'introduction pour le client */
+.admin-web-intro { min-height: 110px; resize: vertical; font: inherit; line-height: 1.5; }
+.admin-web-intro-current { white-space: pre-wrap; }
