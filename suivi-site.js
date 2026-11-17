@@ -4,12 +4,12 @@ import { callGalleryFunction } from "./galeries-api.js";
 // Sous chaque page : un commentaire, ou « Ça me convient ». L'envoi n'est possible que lorsque
 // toutes les pages sont commentées ou validées ; un dernier commentaire général est possible.
 const $ = (id) => document.getElementById(id);
-const state = { pages: [], answers: [], current: 0, galleryId: "", roundsLeft: 0, expectingLoad: false, signalled: false };
+const state = { pages: [], answers: [], current: 0, galleryId: "", roundsLeft: 0 };
 
-// ---- Navigation dans le cadre : seules les pages prévues (boutons au-dessus) sont accessibles.
-// Même site : les clics sont interceptés directement. Autre site : le site en cours peut inclure
-// https://alexandrepalanca.fr/apercu.js pour signaler ses clics ; sans ce script, toute navigation
-// dans le cadre est annulée.
+// ---- Navigation libre dans l'aperçu : le client peut suivre tous les liens du site.
+// Les deux vues (ordinateur, téléphone) restent sur la même page. Quand la page atteinte fait partie
+// des pages prévues (boutons au-dessus), son commentaire et « Ça me convient » s'affichent.
+// Même site : l'adresse de la page est lue directement ; autre site : apercu.js la signale.
 function samePage(a, b) {
   const clean = (value) => {
     try {
@@ -22,99 +22,27 @@ function samePage(a, b) {
 function pageIndexOf(url) {
   return state.pages.findIndex((page) => samePage(page.url, url));
 }
-let blockTimer;
-function showBlocked() {
-  const box = $("site-blocked");
-  box.hidden = false;
-  clearTimeout(blockTimer);
-  blockTimer = setTimeout(() => { box.hidden = true; }, 4500);
+function frameUrl(frame) {
+  try { return frame.contentWindow.location.href; } catch { return null; }
 }
-function goTo(url) {
-  const index = pageIndexOf(url);
-  if (index === state.current) return;
-  if (index >= 0) {
-    openPage(index);
-  } else {
-    showBlocked();
-  }
-}
-function reloadCurrent() {
-  const frame = $("site-frame");
-  state.expectingLoad = true;
-  frame.src = state.pages[state.current].url;
-  frame.dataset.url = state.pages[state.current].url;
-}
-// Même site : interception des clics sur les liens, avant toute navigation
-function guardFrame(frame) {
-  let doc;
-  try { doc = frame.contentWindow.document; } catch { return false; }
-  if (!doc || doc.__apercuGuard) return true;
-  doc.__apercuGuard = true;
-  frame.contentWindow.addEventListener("click", (event) => {
-    const link = event.target.closest?.("a[href]");
-    if (!link) return;
-    const href = link.getAttribute("href") || "";
-    if (href.startsWith("#") || /^(mailto|tel):/i.test(href)) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    goTo(link.href);
-  }, true);
-  return true;
-}
-function onFrameLoad() {
-  const frame = $("site-frame");
-  if (state.expectingLoad) {
-    state.expectingLoad = false;
-    state.signalled = false;
-    guardFrame(frame);
-    linkScroll(frame);
-    return;
-  }
-  // Navigation non prévue dans le cadre
-  let url = null;
-  try { url = frame.contentWindow.location.href; } catch { /* autre site : adresse illisible */ }
-  if (url) {
-    const index = pageIndexOf(url);
-    if (index >= 0 && index !== state.current) {
-      state.current = index;
-      frame.dataset.url = state.pages[index].url;
-      openPage(index);
-      guardFrame(frame);
-      linkScroll(frame);
-      return;
-    }
-    if (index === state.current) { guardFrame(frame); linkScroll(frame); return; }
-  }
-  if (state.signalled) { state.signalled = false; return; }
-  showBlocked();
-  reloadCurrent();
-}
-// ---- Vue téléphone : même page que la vue ordinateur, navigation gardée de la même façon
-let mobileExpecting = false;
-function setMobile(url) {
-  const frame = $("site-frame-mobile");
-  if (frame.dataset.url === url) return;
-  mobileExpecting = true;
-  frame.src = url;
+function loadFrame(frame, url) {
+  if (frame.dataset.url && samePage(frame.dataset.url, url)) return;
   frame.dataset.url = url;
+  frame.src = url;
 }
-function onMobileLoad() {
-  const frame = $("site-frame-mobile");
-  if (mobileExpecting) {
-    mobileExpecting = false;
-    guardFrame(frame);
-    linkScroll(frame);
-    return;
-  }
-  let url = null;
-  try { url = frame.contentWindow.location.href; } catch { /* autre site */ }
-  const index = url ? pageIndexOf(url) : -1;
-  if (index >= 0 && index !== state.current) { openPage(index); return; }
-  if (index === state.current) { guardFrame(frame); linkScroll(frame); return; }
-  if (state.signalled) { state.signalled = false; return; }
-  showBlocked();
-  frame.dataset.url = "";
-  setMobile(state.pages[state.current].url);
+// Page atteinte dans une vue : l'autre vue la suit, et la page prévue correspondante devient la page en cours
+function followNavigation(frame, url) {
+  if (!url || url === "about:blank") return;
+  frame.dataset.url = url;
+  loadFrame(otherFrame(frame), url);
+  $("site-open").href = url;
+  const index = pageIndexOf(url);
+  if (index >= 0 && index !== state.current) showPage(index);
+}
+function onFrameLoad(event) {
+  const frame = event.currentTarget;
+  linkScroll(frame);
+  followNavigation(frame, frameUrl(frame));
 }
 
 // ---- Défilement synchronisé : faire défiler une vue fait défiler l'autre à la même proportion
@@ -154,18 +82,19 @@ function linkScroll(frame) {
   win.addEventListener("scroll", () => followScroll(frame, scrollRatio(win)), { passive: true });
 }
 
-// Autre site équipé d'apercu.js : il demande la permission avant de changer de page, et signale son défilement
+// Autre site équipé d'apercu.js : il signale la page affichée et son défilement.
+// (« apercu-navigation » : ancienne version du script, qui retenait les clics : la page demandée est ouverte.)
 window.addEventListener("message", (event) => {
   const frame = frames().find((entry) => entry.contentWindow === event.source);
   if (!frame) return;
-  if (event.data?.type === "apercu-scroll") {
-    followScroll(frame, Number(event.data.ratio) || 0);
-    return;
+  const url = String(event.data?.url || "");
+  if (event.data?.type === "apercu-scroll") followScroll(frame, Number(event.data.ratio) || 0);
+  else if (event.data?.type === "apercu-location") followNavigation(frame, url);
+  else if (event.data?.type === "apercu-navigation" && url) {
+    frame.dataset.url = "";
+    loadFrame(frame, url);
+    followNavigation(frame, url);
   }
-  if (event.data?.type !== "apercu-navigation") return;
-  state.signalled = true;
-  setTimeout(() => { state.signalled = false; }, 1500);
-  goTo(String(event.data.url || ""));
 });
 const draftKey = () => `suivi-site-${state.galleryId}`;
 
@@ -206,18 +135,18 @@ function renderPages() {
   $("site-send").disabled = count < state.pages.length || state.roundsLeft <= 0;
 }
 
+// Bouton d'une page prévue : les deux vues l'affichent
 function openPage(index) {
+  const page = state.pages[index];
+  loadFrame($("site-frame"), page.url);
+  loadFrame($("site-frame-mobile"), page.url);
+  $("site-open").href = page.url;
+  showPage(index);
+}
+// Commentaire, « Ça me convient » et boutons de la page prévue en cours
+function showPage(index) {
   state.current = index;
   const page = state.pages[index];
-  const frame = $("site-frame");
-  if (frame.dataset.url !== page.url) {
-    state.expectingLoad = true;
-    frame.src = page.url;
-    frame.dataset.url = page.url;
-  }
-  setMobile(page.url);
-  $("site-blocked").hidden = true;
-  $("site-open").href = page.url;
   $("site-comment-label").textContent = `Votre commentaire sur la page « ${page.name} »`;
   $("site-comment").value = state.answers[index].comment;
   $("site-approve").checked = state.answers[index].approved;
@@ -286,7 +215,6 @@ async function start() {
 }
 
 $("site-frame").addEventListener("load", onFrameLoad);
-$("site-blocked-close").addEventListener("click", () => { $("site-blocked").hidden = true; });
 
 $("site-comment").addEventListener("input", (event) => {
   state.answers[state.current].comment = event.target.value;
@@ -363,7 +291,7 @@ $("site-phone-toggle").addEventListener("click", (event) => {
 });
 new ResizeObserver(fitFrames).observe($("site-stage").parentElement);
 window.addEventListener("resize", fitFrames);
-$("site-frame-mobile").addEventListener("load", onMobileLoad);
+$("site-frame-mobile").addEventListener("load", onFrameLoad);
 
 $("site-send").addEventListener("click", async () => {
   const button = $("site-send");
