@@ -17,6 +17,7 @@ type Gallery = {
   delivery: "photos" | "video" | "web" | "social" | "identite";
   video_links: Array<{ label: string; url: string; multiple?: boolean }>;
   web_pages: Array<{ name: string; url: string }>;
+  web_intro: string;
   feedback_rounds: number;
   social_folders: Array<{ label: string; url: string; description: string }>;
   tutorial_path: string | null;
@@ -34,7 +35,7 @@ Deno.serve(async (request) => {
     const galleryId = await readGallerySession(request);
     const queryId = encodeURIComponent(galleryId);
     const galleries = await databaseRequest(
-      `galleries?select=id,name,type,tariff,status,expires_at,delivery,video_links,web_pages,feedback_rounds,social_folders,tutorial_path&id=eq.${queryId}&limit=1`
+      `galleries?select=id,name,type,tariff,status,expires_at,delivery,video_links,web_pages,web_intro,feedback_rounds,social_folders,tutorial_path&id=eq.${queryId}&limit=1`
     ) as Gallery[];
     const gallery = galleries[0];
     if (
@@ -53,6 +54,7 @@ Deno.serve(async (request) => {
       return jsonResponse(request, 200, {
         gallery: { id: gallery.id, name: gallery.name, delivery: "web", expiresAt: gallery.expires_at },
         pages: gallery.web_pages ?? [],
+        intro: gallery.web_intro ?? "",
         roundsIncluded: gallery.feedback_rounds,
         feedback
       });

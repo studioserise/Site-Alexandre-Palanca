@@ -16,13 +16,13 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Suivi de votre site — Alexandre Palanca</title>
   <link rel="stylesheet" href="galeries.css?v=espace2">
-  <link rel="stylesheet" href="espace-client.css?v=ecran">
+  <link rel="stylesheet" href="espace-client.css?v=duo1">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="site-nav.css?v=deroulant3">
   <link rel="stylesheet" href="cursor.css?v=7">
   <script src="site-nav.js?v=footer4" defer></script>
   <script src="cursor.js?v=3" defer></script>
-  <script type="module" src="suivi-site.js?v=ecran"></script>
+  <script type="module" src="suivi-site.js?v=duo1"></script>
 </head>
 <body>
   <header class="site-nav is-visible" id="site-nav">
@@ -51,22 +51,26 @@
       <p class="client-space-intro" id="site-intro"></p>
       <p class="client-round" id="site-round" hidden></p>
     </div>
+    <div class="site-intro-note" id="site-note" hidden></div>
     <p class="gallery-error" id="site-error" role="alert" hidden></p>
 
     <section id="site-review" hidden>
       <nav class="site-pages" id="site-pages" aria-label="Pages du site"></nav>
       <div class="site-toolbar">
-        <div class="site-device" role="group" aria-label="Taille d'écran">
-          <button type="button" data-device="desktop" aria-pressed="true">Ordinateur</button>
-          <button type="button" data-device="mobile" aria-pressed="false">Téléphone</button>
-        </div>
+        <button class="site-phone-toggle" id="site-phone-toggle" type="button" aria-pressed="true">Masquer la version téléphone</button>
         <a class="site-open" id="site-open" href="#" target="_blank" rel="noopener noreferrer">Ouvrir dans un nouvel onglet ↗︎</a>
       </div>
-      <div class="site-frame-wrap" id="site-frame-wrap">
-        <iframe class="site-frame" id="site-frame" title="Aperçu du site" referrerpolicy="no-referrer" loading="lazy"></iframe>
-        <div class="site-blocked" id="site-blocked" role="alert" hidden>
-          <p><strong>Cette page n’a pas encore été créée ou est en cours de création.</strong><br>Pour changer de page, utilisez les boutons au-dessus du cadre.</p>
-          <button type="button" id="site-blocked-close" aria-label="Fermer le message">×</button>
+      <!-- Vue ordinateur (1440 × 900) et, en bas à droite, vue téléphone (390 × 844) qui défile en même temps -->
+      <div class="site-stage" id="site-stage">
+        <div class="site-frame-wrap" id="site-frame-wrap">
+          <iframe class="site-frame" id="site-frame" title="Aperçu du site sur ordinateur" referrerpolicy="no-referrer" loading="lazy"></iframe>
+          <div class="site-blocked" id="site-blocked" role="alert" hidden>
+            <p><strong>Cette page n’a pas encore été créée ou est en cours de création.</strong><br>Pour changer de page, utilisez les boutons au-dessus du cadre.</p>
+            <button type="button" id="site-blocked-close" aria-label="Fermer le message">×</button>
+          </div>
+        </div>
+        <div class="site-phone" id="site-phone">
+          <iframe class="site-frame site-frame-mobile" id="site-frame-mobile" title="Aperçu du site sur téléphone" referrerpolicy="no-referrer" loading="lazy"></iframe>
         </div>
       </div>
       <p class="site-note site-frame-help">La page reste blanche ? Certains sites refusent d’être affichés dans un cadre : utilisez « Ouvrir dans un nouvel onglet » ci-dessus, puis revenez ici pour laisser votre commentaire.</p>

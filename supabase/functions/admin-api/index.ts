@@ -128,6 +128,13 @@ async function createSignedUpload(bucket: string, path: string) {
 
 
 // Pages du site en cours (suivi de site web) : 1 à 30 pages { nom, adresse https }
+// Suivi de site : texte d'introduction (facultatif, 4 000 caractères au plus)
+function parseWebIntro(value: unknown) {
+  if (value === undefined || value === null) return "";
+  if (typeof value !== "string" || value.length > 4000) throw new Error("Texte d'introduction invalide : 4 000 caractères au plus.");
+  return value.trim();
+}
+
 function parseWebPages(value: unknown) {
   if (!Array.isArray(value) || value.length < 1 || value.length > 30) {
     throw new Error("Pages invalides : ajoutez 1 à 30 pages.");
@@ -190,7 +197,7 @@ Deno.serve(async (request) => {
 
     if (request.method === "GET") {
       const [galleries, orders] = await Promise.all([
-        databaseRequest("galleries?select=id,name,type,tariff,status,expires_at,created_at,access_code_encrypted,delivery,video_links,web_pages,feedback_rounds,social_folders,tutorial_path&order=created_at.desc"),
+        databaseRequest("galleries?select=id,name,type,tariff,status,expires_at,created_at,access_code_encrypted,delivery,video_links,web_pages,web_intro,feedback_rounds,social_folders,tutorial_path&order=created_at.desc"),
         databaseRequest("gallery_orders?select=id,gallery_id,customer_email,status,currency,subtotal_cents,discount_bps,discount_cents,total_cents,created_at,paid_at,sent_at&order=created_at.desc")
       ]);
       const orderIds = (orders as Array<{ id: string }>).map((order) => order.id);
@@ -265,6 +272,7 @@ Deno.serve(async (request) => {
           delivery,
           video_links: videoLinks,
           web_pages: webPages,
+          web_intro: delivery === "web" ? parseWebIntro(body.webIntro) : "",
           social_folders: socialFolders,
           feedback_rounds: rounds,
           ...link
@@ -298,7 +306,7 @@ Deno.serve(async (request) => {
       }
       await databaseRequest(`galleries?id=eq.${encodeURIComponent(galleryId)}&delivery=eq.web`, {
         method: "PATCH",
-        body: JSON.stringify({ web_pages: parseWebPages(body.webPages), feedback_rounds: rounds })
+        body: JSON.stringify({ web_pages: parseWebPages(body.webPages), feedback_rounds: rounds, web_intro: parseWebIntro(body.webIntro) })
       });
       return jsonResponse(request, 200, { ok: true });
     }

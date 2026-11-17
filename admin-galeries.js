@@ -292,6 +292,7 @@ function renderWebFollowUp(gallery, feedback) {
     list.append(item);
   }
   box.append(list);
+  if (gallery.web_intro) box.append(makeText("p", "gallery-admin-note admin-web-intro-current", gallery.web_intro));
   const rounds = feedback.filter((entry) => entry.gallery_id === gallery.id);
   box.append(makeText("small", "", `Séries de retours : ${rounds.length} envoyée${rounds.length > 1 ? "s" : ""} sur ${gallery.feedback_rounds} prévue${gallery.feedback_rounds > 1 ? "s" : ""}.`));
   for (const round of rounds) {
@@ -327,15 +328,22 @@ function renderWebFollowUp(gallery, feedback) {
   roundsInput.value = String(gallery.feedback_rounds);
   const roundsLabel = makeText("label", "gallery-admin-label", "Séries de modifications prévues");
   roundsLabel.append(roundsInput);
+  const intro = document.createElement("textarea");
+  intro.className = "gallery-admin-input admin-web-intro";
+  intro.rows = 5; intro.maxLength = 4000;
+  intro.placeholder = "Présentez votre travail, ce qui a changé, ce que le client doit regarder…";
+  intro.value = gallery.web_intro ?? "";
+  const introLabel = makeText("label", "gallery-admin-label", "Texte d’introduction pour le client (facultatif)");
+  introLabel.append(intro);
   const save = makeText("button", "gallery-primary-button", "Enregistrer");
   save.type = "submit";
-  form.append(rows, add, roundsLabel, save);
+  form.append(rows, add, introLabel, roundsLabel, save);
   edit.addEventListener("click", () => { form.hidden = !form.hidden; });
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     save.disabled = true;
     try {
-      await callAdmin({ action: "set-web-pages", galleryId: gallery.id, webPages: readLinkRows(rows, WEB_FIELDS), feedbackRounds: Number(roundsInput.value) });
+      await callAdmin({ action: "set-web-pages", galleryId: gallery.id, webPages: readLinkRows(rows, WEB_FIELDS), feedbackRounds: Number(roundsInput.value), webIntro: intro.value });
       await loadDashboard();
       setMessage(`Suivi de « ${gallery.name} » enregistré.`, false);
     } catch (error) {
@@ -691,6 +699,7 @@ document.getElementById("admin-create-gallery-form").addEventListener("submit", 
       videoLinks: deliverySelect.value === "video" ? readVideoRows(videoRows) : undefined,
       webPages: deliverySelect.value === "web" ? readLinkRows(webRows, WEB_FIELDS) : undefined,
       feedbackRounds: deliverySelect.value === "web" ? Number(document.getElementById("admin-web-rounds").value) : undefined,
+      webIntro: deliverySelect.value === "web" ? document.getElementById("admin-web-intro").value : undefined,
       socialFolders: hasFolders(deliverySelect.value) ? readLinkRows(socialRows, SOCIAL_FIELDS) : undefined,
       code
     });
