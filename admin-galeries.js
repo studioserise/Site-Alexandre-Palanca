@@ -442,7 +442,33 @@ function randomCode() {
 }
 
 let lastFeedback = [];
-function renderGalleries(galleries) {
+// Statistiques de la galerie (mêmes chiffres que le centre de notifications de l'application)
+function plural(count, singular, pluralForm = `${singular}s`) {
+  return `${count} ${count > 1 ? pluralForm : singular}`;
+}
+
+function renderGalleryStats(gallery, orders) {
+  const views = Number(gallery.view_count) || 0;
+  const downloads = Number(gallery.download_count) || 0;
+  const parts = [plural(views, "ouverture")];
+  if (gallery.delivery === "video") parts.push(plural(downloads, "clic") + " sur « Télécharger »");
+  else if (hasFolders(gallery.delivery)) parts.push(plural(downloads, "téléchargement") + " de dossiers");
+  else if (gallery.delivery !== "web") {
+    parts.push(`${plural(downloads, "photo")} téléchargée${downloads > 1 ? "s" : ""}`);
+    const paid = orders.filter((order) => order.gallery_id === gallery.id && order.paid_at);
+    if (paid.length) {
+      const cents = paid.reduce((sum, order) => sum + (Number(order.total_cents) || 0), 0);
+      const amount = (cents / 100).toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
+      parts.push(`${plural(paid.length, "commande payée", "commandes payées")} (${amount})`);
+    }
+  }
+  parts.push(gallery.last_viewed_at
+    ? `dernière ouverture le ${new Date(gallery.last_viewed_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}`
+    : "pas encore ouverte par le client");
+  return makeText("small", "gallery-admin-stats", parts.join(" · "));
+}
+
+function renderGalleries(galleries, orders = []) {
   galleryList.replaceChildren();
   const openGalleries = galleries.filter((gallery) =>
     gallery.status === "open" && Date.parse(gallery.expires_at) > Date.now()
@@ -489,6 +515,7 @@ function renderGalleries(galleries) {
       : gallery.delivery === "video"
       ? `Livraison vidéo · ${gallery.video_links?.length ?? 0} lien${(gallery.video_links?.length ?? 0) > 1 ? "s" : ""} · ferme le ${new Date(gallery.expires_at).toLocaleDateString("fr-FR")}`
       : `${gallery.type === "event" ? "Événement partagé" : "Individuelle"} · ${tariffLabel(gallery.tariff)} · ferme le ${new Date(gallery.expires_at).toLocaleDateString("fr-FR")}`));
+    record.append(renderGalleryStats(gallery, orders));
     record.append(renderAccessCode(gallery));
     if (gallery.delivery === "video") record.append(renderVideoLinks(gallery));
     if (gallery.delivery === "web") record.append(renderWebFollowUp(gallery, lastFeedback));
@@ -607,7 +634,7 @@ async function loadDashboard() {
   const data = await callAdmin();
   const galleries = data.galleries || [];
   lastFeedback = data.feedback || [];
-  renderGalleries(galleries);
+  renderGalleries(galleries, data.orders || []);
   renderOrders(data.orders || [], data.orderPhotos || [], galleries);
   loginForm.hidden = true;
   dashboard.hidden = false;

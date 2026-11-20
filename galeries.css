@@ -805,6 +805,11 @@ button {
   color: #e6aaa2;
 }
 
+.gallery-admin-stats {
+  display: block;
+  color: #c6d6c1;
+}
+
 @media (max-width: 900px) {
   .gallery-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

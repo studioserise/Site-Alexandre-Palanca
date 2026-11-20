@@ -197,7 +197,7 @@ Deno.serve(async (request) => {
 
     if (request.method === "GET") {
       const [galleries, orders] = await Promise.all([
-        databaseRequest("galleries?select=id,name,type,tariff,status,expires_at,created_at,access_code_encrypted,delivery,video_links,web_pages,web_intro,feedback_rounds,social_folders,tutorial_path&order=created_at.desc"),
+        databaseRequest("galleries?select=id,name,type,tariff,status,expires_at,created_at,access_code_encrypted,delivery,video_links,web_pages,web_intro,feedback_rounds,social_folders,tutorial_path,view_count,download_count,last_viewed_at&order=created_at.desc"),
         databaseRequest("gallery_orders?select=id,gallery_id,customer_email,status,currency,subtotal_cents,discount_bps,discount_cents,total_cents,created_at,paid_at,sent_at&order=created_at.desc")
       ]);
       const orderIds = (orders as Array<{ id: string }>).map((order) => order.id);
