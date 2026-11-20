@@ -51,3 +51,6 @@ verify_jwt = false
 
 [functions.calendar]
 verify_jwt = false
+
+[functions.email-events]
+verify_jwt = false

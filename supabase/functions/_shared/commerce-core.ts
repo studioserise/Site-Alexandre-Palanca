@@ -1231,11 +1231,25 @@ export async function sendDocument(body: Row) {
       text: `${text}\n\n${signature}${buttonUrl ? `\n\n${buttonLabel} : ${buttonUrl}` : ""}`,
       html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
         <p>${escapeHtml(text).replace(/\n/g, "<br>")}</p><p>${escapeHtml(signature)}</p>${button}</div>`,
-      attachments: [{ filename: fileName, content: toBase64(bytes) }]
+      attachments: [{ filename: fileName, content: toBase64(bytes) }],
+      // Repris par le webhook Resend (email-events) pour prévenir le prestataire de la livraison
+      tags: [
+        { name: "doc_kind", value: isQuote ? "quote" : "invoice" },
+        { name: "doc_id", value: String(record.id) }
+      ]
     })
   });
   if (!response.ok) {
+    const detail = await response.text().catch(() => "");
     console.error("Resend rejected a commerce document", response.status);
+    await notifyDelivery({
+      to: [issuerReplyTo(settings)],
+      ok: false,
+      label: `${isQuote ? "Le devis" : "La facture"} ${record.number}`,
+      client: String(snapshot.name ?? ""),
+      recipient: to,
+      reason: `Envoi refusé par le service d'e-mail (code ${response.status}). ${detail.slice(0, 300)}`
+    });
     throw new UserError("L'e-mail n'a pas pu être envoyé.", 502);
   }
   return { sent: true };
@@ -1282,11 +1296,25 @@ async function sendCombined(record: Row, pair: { alex: Row; elisa: Row; complete
       text: `${text}\n\n${signature}\n\nRépondre à la proposition : ${responseUrl}`,
       html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222">
         <p>${escapeHtml(text).replace(/\n/g, "<br>")}</p><p>${escapeHtml(signature)}</p>${button}</div>`,
-      attachments: [{ filename: combinedFileName(pair), content: toBase64(bytes) }]
+      attachments: [{ filename: combinedFileName(pair), content: toBase64(bytes) }],
+      tags: [
+        { name: "doc_kind", value: "combined" },
+        { name: "doc_id", value: String(pair.alex.id) },
+        { name: "doc_id_2", value: String(pair.elisa.id) }
+      ]
     })
   });
   if (!response.ok) {
+    const detail = await response.text().catch(() => "");
     console.error("Resend rejected a combined proposal", response.status);
+    await notifyDelivery({
+      to: replyTo,
+      ok: false,
+      label: `La proposition commune ${pair.alex.number} + ${pair.elisa.number}`,
+      client: String(snapshot.name ?? ""),
+      recipient: to,
+      reason: `Envoi refusé par le service d'e-mail (code ${response.status}). ${detail.slice(0, 300)}`
+    });
     throw new UserError("L'e-mail n'a pas pu être envoyé.", 502);
   }
   const now = new Date().toISOString();
@@ -1295,6 +1323,49 @@ async function sendCombined(record: Row, pair: { alex: Row; elisa: Row; complete
     patchOne("quotes", pair.elisa.id, { combined_sent_at: now })
   ]);
   return { sent: true, combined: true };
+}
+
+// ---------------------------------------------------------------- suivi de livraison
+
+// E-mail de suivi au prestataire concerné : arrivé dans la boîte du client, ou problème.
+export async function notifyDelivery(info: {
+  to: string[];
+  ok: boolean;
+  label: string;
+  client: string;
+  recipient: string;
+  reason?: string;
+  delayed?: boolean;
+}) {
+  const to = [...new Set(info.to.filter(Boolean))];
+  if (!to.length) return;
+  const who = info.client ? `${info.client} (${info.recipient})` : info.recipient;
+  const subject = info.ok
+    ? `✅ ${info.label} est bien arrivé${info.label.startsWith("La ") ? "e" : ""} chez ${info.client || info.recipient}`
+    : info.delayed
+      ? `⏳ Livraison retardée — ${info.label} — ${info.client || info.recipient}`
+      : `⚠️ Problème d'envoi — ${info.label} — ${info.client || info.recipient}`;
+  const text = info.ok
+    ? `${info.label} a bien été délivré${info.label.startsWith("La ") ? "e" : ""} dans la boîte mail de ${who}.`
+    : info.delayed
+      ? `${info.label} n'a pas encore pu être remis${info.label.startsWith("La ") ? "e" : ""} à ${who} : le serveur du destinataire retarde la livraison. Le service d'e-mail réessaie automatiquement ; vous recevrez un nouveau message en cas de réussite ou d'échec définitif.${info.reason ? `\n\nDétail : ${info.reason}` : ""}`
+      : `${info.label} n'a PAS pu être remis${info.label.startsWith("La ") ? "e" : ""} à ${who}.${info.reason ? `\n\nRaison : ${info.reason}` : ""}\n\nVérifiez l'adresse e-mail du client dans la gestion commerciale puis renvoyez le document, ou contactez le client par un autre moyen.`;
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + requiredEnv("RESEND_API_KEY"), "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: requiredEnv("ORDER_EMAIL_FROM"),
+        to,
+        subject,
+        text,
+        html: `<p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6">${escapeHtml(text).replace(/\n/g, "<br>")}</p>`
+      })
+    });
+    if (!response.ok) console.error("Resend rejected a delivery notification", response.status);
+  } catch (error) {
+    console.error("Delivery notification failed", error);
+  }
 }
 
 // ---------------------------------------------------------------- listes
