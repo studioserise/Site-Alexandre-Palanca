@@ -212,15 +212,55 @@ export async function candidates(prefs: Prefs, now = Date.now()): Promise<Candid
   }
 
   // Système : tâche automatique en erreur (nettoyage, rappels de devis, envoi des notifications…)
-  const since = new Date(now - 30 * 60_000).toISOString();
-  const errors = await databaseRequest("rpc/recent_http_errors", { method: "POST", body: JSON.stringify({ p_since: since }) }).catch(() => []) as Row[];
+  // Une coupure passagère côté Supabase (502/503/504) qui s'est réglée d'elle-même au passage
+  // suivant n'est pas signalée : on attend 12 min pour voir si la tâche se rétablit.
+  const since = new Date(now - 45 * 60_000).toISOString();
+  const errors = await databaseRequest("rpc/recent_task_errors", { method: "POST", body: JSON.stringify({ p_since: since }) }).catch(() => []) as Row[];
   for (const err of errors ?? []) {
+    const transient = isTransient(err);
+    const age = now - Date.parse(err.created);
+    if (transient && (err.recovered || age < 12 * 60_000)) continue;
+    const task = TASKS[err.jobname] ?? { label: err.jobname ? `Tâche « ${err.jobname} »` : "Tâche automatique inconnue", fn: "" };
+    const when = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(err.created));
+    const after = err.recovered ? "Elle refonctionne depuis." : "Elle n'a pas réussi depuis.";
+    const where = task.fn ? ` Détails : Supabase › Edge Functions › ${task.fn} › Logs.` : "";
     out.push({
-      key: `systeme:${err.id}`, category: "systeme", urgent: true,
-      message: { title: "Problème technique à vérifier", body: `Une tâche automatique du site a échoué (${err.status_code ?? "sans réponse"}${err.error_msg ? ` : ${String(err.error_msg).slice(0, 80)}` : ""}).`, url: "/app/", tag: "systeme" }
+      key: `systeme:${err.id}`, category: "systeme", urgent: !err.recovered,
+      message: {
+        title: `Problème technique : ${task.label}`,
+        body: `Échec le ${when} — ${explainError(err)} ${after}${where}`,
+        url: "/app/", tag: `systeme-${err.id}`
+      }
     });
   }
   return out;
+}
+
+// Tâches planifiées (pg_cron) : nom lisible et fonction à consulter dans Supabase
+const TASKS: Record<string, { label: string; fn: string }> = {
+  "notifications-push": { label: "envoi des notifications de l'appli (toutes les 5 min)", fn: "push-dispatch" },
+  "rappels-devis": { label: "rappels de devis (toutes les heures)", fn: "quote-reminders" },
+  "nettoyage-automatique": { label: "nettoyage automatique (chaque nuit)", fn: "cleanup" }
+};
+
+function isTransient(err: Row) {
+  return [502, 503, 504].includes(Number(err.status_code)) && !/BOOT_ERROR|WORKER_LIMIT/i.test(String(err.content ?? ""));
+}
+
+// Explication en clair du code d'erreur
+function explainError(err: Row) {
+  const code = Number(err.status_code) || 0;
+  const content = String(err.content ?? "");
+  if (err.timed_out) return "la tâche n'a pas répondu en 60 s (trop longue ou bloquée).";
+  if (!code) return `aucune réponse (${String(err.error_msg ?? "connexion impossible").slice(0, 80)}).`;
+  if (/BOOT_ERROR/i.test(content)) return `erreur ${code} : la fonction n'a pas pu démarrer (souvent une erreur dans le dernier déploiement).`;
+  if (/WORKER_LIMIT/i.test(content) || code === 546) return `erreur ${code} : la fonction a dépassé la mémoire ou le temps de calcul autorisés.`;
+  if (code === 401 || code === 403) return `erreur ${code} : accès refusé (le secret d'appel cleanup_secret ne correspond plus).`;
+  if (code === 404) return `erreur ${code} : fonction introuvable (pas déployée ?).`;
+  if (code === 429) return `erreur ${code} : trop d'appels, Supabase a limité la fonction.`;
+  if (code >= 500 && code < 600 && code !== 500) return `erreur ${code} : les serveurs Supabase n'ont pas pu joindre la fonction (souci passager chez Supabase).`;
+  const detail = content.replace(/\s+/g, " ").trim().slice(0, 100);
+  return `erreur ${code}${code === 500 ? " : la fonction a planté" : ""}${detail ? ` (${detail})` : ""}.`;
 }
 
 // Exécution planifiée : pour chaque administrateur abonné, envoie ce qui n'a pas encore été envoyé
