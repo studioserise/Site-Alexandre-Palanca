@@ -34,6 +34,8 @@ export type PdfDocumentData = {
   sections: Array<{ heading: string; text: string; small?: boolean }>;
   // Bloc de signatures (devis) : deux cadres côte à côte, « Le client » et « Le prestataire »
   signatures?: { client: string; issuer: string };
+  // Factures : encadré « Règlement par virement (RIB) » en gros, juste sous les totaux
+  bank?: { holder: string; iban: string; bic?: string; reference?: string };
   footer: string;
   logo?: Uint8Array | null;
 };
@@ -277,6 +279,32 @@ export async function renderDocumentPdf(data: PdfDocumentData) {
     y -= 15;
   }
   y -= 12;
+
+  // RIB en gros dans un encadré (factures), pour que le client le retrouve d'un coup d'œil.
+  if (data.bank?.iban) {
+    const rows: Array<{ label: string; value: string; size: number; font: PDFFont }> = [
+      { label: "Titulaire", value: data.bank.holder, size: 11, font: regular },
+      { label: "IBAN", value: data.bank.iban, size: 14, font: bold },
+      ...(data.bank.bic ? [{ label: "BIC", value: data.bank.bic, size: 12, font: bold }] : []),
+      ...(data.bank.reference ? [{ label: "Référence à indiquer", value: data.bank.reference, size: 11, font: bold }] : [])
+    ];
+    const lineHeights = rows.map((row) => row.size + 8);
+    const boxHeight = 30 + lineHeights.reduce((sum, h) => sum + h, 0) + 10;
+    const boxWidth = PAGE_WIDTH - 2 * MARGIN;
+    ensure(boxHeight + 10);
+    page.drawRectangle({
+      x: MARGIN, y: y - boxHeight, width: boxWidth, height: boxHeight,
+      color: rgb(0.965, 0.965, 0.965), borderColor: BLACK, borderWidth: 1
+    });
+    text("Règlement par virement — RIB", MARGIN + 14, y - 20, { size: 12, font: bold });
+    let rowY = y - 30;
+    rows.forEach((row, index) => {
+      rowY -= lineHeights[index];
+      text(`${row.label} :`, MARGIN + 14, rowY + 2, { size: 9.5, color: GREY });
+      text(row.value, MARGIN + 140, rowY, { size: row.size, font: row.font });
+    });
+    y -= boxHeight + 16;
+  }
 
   // Sections de conditions
   let afterSmall = false;

@@ -1,6 +1,6 @@
 import { databaseRequest, sha256 } from "../_shared/http.ts";
 import { signQuotePdf } from "../_shared/commerce-pdf.ts";
-import { getSettings, partnerOf, invoiceFromQuote, issueInvoice, issuerFrom, issuerName, issuerReplyTo, longDateFr, serviceSummary } from "../_shared/commerce-core.ts";
+import { getSettings, partnerOf, invoiceFromQuote, issueInvoice, issuerFrom, issuerName, issuerReplyTo, longDateFr, ribText, serviceSummary } from "../_shared/commerce-core.ts";
 
 const BUCKET = "commerce-documents";
 
@@ -270,7 +270,11 @@ async function sendClientConfirmation(
     "",
     ...(deposit
       ? [
-        `L'acompte confirme la réservation de votre date. Il est à régler au plus tard le ${longDateFr(deposit.due_date)} (72 h avant la prestation), par carte bancaire ou par virement, grâce au bouton ci-dessous.`,
+        `L'acompte confirme la réservation de votre date. Il est à régler au plus tard le ${longDateFr(deposit.due_date)} (72 h avant la prestation). Pour le régler, vous pouvez :`,
+        "",
+        ...(ribText(issuerSettings, deposit.number)
+          ? ["— faire un virement par RIB :", ...ribText(issuerSettings, deposit.number).split("\n"), "", "— ou appuyer sur le bouton « Régler l'acompte » ci-dessous, prévu pour payer par carte ou par virement."]
+          : ["— appuyer sur le bouton « Régler l'acompte » ci-dessous, prévu pour payer par carte ou par virement."]),
         ""
       ]
       : []),

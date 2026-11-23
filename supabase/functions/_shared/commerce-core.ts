@@ -560,9 +560,23 @@ export async function invoicePdf(invoice: Row, settings: Row) {
         text: "En cas de retard de paiement, des pénalités calculées à trois fois le taux d'intérêt légal sont exigibles, ainsi qu'une indemnité forfaitaire de 40 € pour frais de recouvrement (professionnels). Pas d'escompte pour paiement anticipé."
       }
     ],
+    bank: invoice.amount_due_cents > 0 && settings.iban
+      ? { holder: issuerName(settings), iban: settings.iban, bic: settings.bic || undefined, reference: invoice.number }
+      : undefined,
     footer: footerText(settings),
     logo: await loadLogo()
   });
+}
+
+// RIB repris dans le texte des e-mails de facture (vide si aucun IBAN n'est renseigné).
+export function ribText(settings: Row, reference: string) {
+  if (!settings.iban) return "";
+  return [
+    `Titulaire : ${issuerName(settings)}`,
+    `IBAN : ${settings.iban}`,
+    settings.bic ? `BIC : ${settings.bic}` : "",
+    reference ? `Référence à indiquer : ${reference}` : ""
+  ].filter(Boolean).join("\n");
 }
 
 export async function storageRequest(path: string, init: RequestInit) {
@@ -1207,9 +1221,16 @@ export async function sendDocument(body: Row) {
   const validity = isQuote && record.valid_until
     ? `, valable jusqu'au ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${record.valid_until}T12:00:00Z`))}`
     : "";
-  const text = message || (isQuote
-    ? `${hello}\n\nMerci pour votre confiance. Vous trouverez ci-joint le devis ${record.number} correspondant à votre projet${validity}.\n\nPour l'accepter ou me faire part de vos remarques, il vous suffit de cliquer sur le bouton « Répondre à la proposition » ci-dessous.\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`
-    : `${hello}\n\nVous trouverez ci-joint votre facture ${record.number}.${payUrl ? "\n\nPour la régler par carte ou par virement, il vous suffit de cliquer sur le bouton « Régler la facture » ci-dessous." : ""}\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`);
+  // Facture à régler : le RIB est rappelé dans le message (aussi sous un message personnalisé).
+  const rib = !isQuote && invoiceRemaining(record) > 0 ? ribText(settings, record.number) : "";
+  const howToPay = rib
+    ? `Pour la régler, vous pouvez :\n\n— faire un virement par RIB :\n${rib}\n\n${payUrl ? "— ou appuyer sur le bouton « Régler la facture » ci-dessous, prévu pour payer par carte ou par virement." : ""}`.trim()
+    : payUrl ? "Pour la régler par carte ou par virement, il vous suffit de cliquer sur le bouton « Régler la facture » ci-dessous." : "";
+  const text = message
+    ? (rib && !message.includes(String(settings.iban)) ? `${message}\n\n${howToPay}` : message)
+    : isQuote
+      ? `${hello}\n\nMerci pour votre confiance. Vous trouverez ci-joint le devis ${record.number} correspondant à votre projet${validity}.\n\nPour l'accepter ou me faire part de vos remarques, il vous suffit de cliquer sur le bouton « Répondre à la proposition » ci-dessous.\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`
+      : `${hello}\n\nVous trouverez ci-joint votre facture ${record.number}.${howToPay ? `\n\n${howToPay}` : ""}\n\nJe reste à votre disposition pour toute question.\n\nBien cordialement,`;
   const buttonUrl = responseUrl || payUrl;
   const buttonLabel = responseUrl ? "Répondre à la proposition" : "Régler la facture";
   const button = buttonUrl
