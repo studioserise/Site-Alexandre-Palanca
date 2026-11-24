@@ -385,7 +385,8 @@ async function settings() {
     ${area("vat_mention", "Mention TVA")}${area("legal_footer", "Mentions légales (pied de page)")}
     <h3>Valeurs par défaut</h3>
     <div class="com-row3 com-row">${text("default_validity_days", "Validité des devis (jours)")}${text("default_deposit_bps", "Acompte (en 1/100 %, 3000 = 30 %)")}${text("invoice_payment_days", "Délai de paiement (jours)")}</div>
-    ${area("default_payment_terms", "Modalités de paiement")}${area("default_cancellation_terms", s.cancellation_heading || "Conditions d'annulation")}
+    ${area("default_payment_terms", "Modalités de paiement — avec acompte (devis)")}${area("default_payment_terms_no_deposit", "Modalités de paiement — sans acompte (devis)")}
+    <p class="com-hint">Sur un devis, le texte change selon la case « Demander un acompte » ; le pourcentage (et celui du solde) suit celui choisi. Sur une facture créée à la main, les modalités sont rédigées automatiquement avec les montants et l'échéance.</p>${area("default_cancellation_terms", s.cancellation_heading || "Conditions d'annulation")}
     ${area("default_delivery_terms", s.delivery_heading || "Conditions de livraison")}${area("default_usage_terms", s.usage_heading || "Conditions d'utilisation")}
     <div class="com-actions"><button class="gallery-primary-button" id="set-save" type="button">Enregistrer</button></div></div></div>`;
   bindFields(view, s);
@@ -424,6 +425,57 @@ function totalsOf(items) {
   const breakdown = [...byRate].map(([rate, base]) => { const v = Math.round(base * rate / 10000); vat += v; return { rate, base, vat: v }; });
   return { ht, vat, ttc: ht + vat, breakdown };
 }
+// ---- Modalités de paiement selon le choix d'acompte
+// Le texte proposé suit le choix (avec / sans acompte, pourcentage, montants) tant qu'il n'a pas été retouché à la main.
+const pctOf = () => parseFloat(String(draft.depositPct).replace(",", ".")) || 0;
+const pctText = (value) => String(Math.round(value * 100) / 100).replace(".", ",");
+const escapeRe = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+function quoteAutoTerms() {
+  const s = appSettings;
+  if (!draft.depositEnabled) return s.default_payment_terms_no_deposit || "";
+  const text = s.default_payment_terms || "";
+  const base = (s.default_deposit_bps ?? 3000) / 100;
+  const pct = pctOf();
+  if (!pct || pct === base) return text;
+  // « 30 % » → nouveau pourcentage, « 70 % » (le solde) → son complément
+  return text
+    .replace(new RegExp(`(^|[^\\d,])${escapeRe(pctText(base))}(\\s?%)`, "g"), `$1\u0000A$2`)
+    .replace(new RegExp(`(^|[^\\d,])${escapeRe(pctText(100 - base))}(\\s?%)`, "g"), `$1\u0000B$2`)
+    .replaceAll("\u0000A", pctText(pct)).replaceAll("\u0000B", pctText(100 - pct));
+}
+
+function invoiceAutoTerms() {
+  const ttc = totalsOf(draft.items).ttc;
+  const how = `par virement bancaire${appSettings.iban ? " (RIB ci-dessus)" : ""}${appSettings.card_payments ? " ou par carte bancaire" : ""}`;
+  const due = draft.dueDate ? `au plus tard le ${dateFr(draft.dueDate)}` : "à l'échéance";
+  if (!draft.depositEnabled) return `La totalité (${money(ttc)}) est à régler ${due}, ${how}.`;
+  const pct = pctOf();
+  const dep = Math.round(ttc * pct / 100);
+  return `Un acompte de ${pctText(pct)} % (${money(dep)}) est à régler à réception de la facture. Le solde de ${pctText(100 - pct)} % (${money(ttc - dep)}) est à régler ${due}. Règlement ${how}.`;
+}
+
+// force : remplace même un texte retouché (après confirmation, quand on change le choix d'acompte)
+function syncTerms(compute, root, force = false) {
+  const next = compute();
+  if (force || draft.paymentTerms === draft.autoTerms) {
+    draft.paymentTerms = next;
+    const el = root?.querySelector('[data-k="paymentTerms"]');
+    if (el && el.value !== next) el.value = next;
+  }
+  draft.autoTerms = next;
+}
+
+function onDepositToggle(checked, compute, root, refresh) {
+  draft.depositEnabled = checked;
+  const edited = draft.paymentTerms !== draft.autoTerms;
+  const force = edited && confirm(`Remplacer les modalités de paiement par le texte prévu ${checked ? "avec" : "sans"} acompte ? Les modifications faites dans le texte seront perdues.`);
+  syncTerms(compute, root, force);
+  const pctInput = root.querySelector('[data-k="depositPct"]');
+  if (pctInput) pctInput.disabled = !checked;
+  refresh?.();
+}
+
 function depositOf(ttc) {
   if (isInvoiceDraft()) return 0;
   return draft.depositEnabled ? Math.round(ttc * (parseFloat(String(draft.depositPct).replace(",", ".")) || 0) / 100) : 0;
@@ -466,6 +518,8 @@ async function quoteEditor(id, presetClient, preset = {}) {
     if (bundleTerms.delivery) draft.deliveryTerms = bundleTerms.delivery;
     if (bundleTerms.usage) draft.usageTerms = bundleTerms.usage;
   }
+  if (!id) draft.paymentTerms = quoteAutoTerms();
+  draft.autoTerms = draft.paymentTerms;
   if (id) {
     const data = existing;
     const q = data.quote;
@@ -481,6 +535,7 @@ async function quoteEditor(id, presetClient, preset = {}) {
       items: q.items.map((i) => ({ serviceId: i.service_id, title: i.title, description: i.description, quantity: String(i.quantity), unit: i.unit, price: toEuros(i.unit_price_cents), vat: String(i.vat_rate_bps / 100), saveToCatalog: false }))
     });
     if (q.client_id && !draft.client.id) draft.client.id = q.client_id;
+    draft.autoTerms = quoteAutoTerms();
   }
   step = 1;
   renderEditor();
@@ -639,13 +694,14 @@ function stepTerms(body, refresh) {
     <div class="com-row">${field("Valable jusqu'au", input("validUntil", draft.validUntil, 'type="date"'))}${field("Précisions sur la réalisation", input("servicePeriod", draft.servicePeriod, 'placeholder="Durée, plusieurs dates…"'))}</div>
     ${field("Description du projet", textarea("projectDescription", draft.projectDescription))}
     ${field("Conditions particulières", textarea("specialConditions", draft.specialConditions))}
-    <div class="com-row"><label class="com-check"><input type="checkbox" id="dep-on" ${draft.depositEnabled ? "checked" : ""}> Demander un acompte</label>${field("Acompte (%)", input("depositPct", draft.depositPct, 'inputmode="decimal"'))}</div>
-    ${field("Modalités de paiement", textarea("paymentTerms", draft.paymentTerms))}${field(appSettings.cancellation_heading || "Conditions d'annulation", textarea("cancellationTerms", draft.cancellationTerms))}
+    <div class="com-row"><label class="com-check"><input type="checkbox" id="dep-on" ${draft.depositEnabled ? "checked" : ""}> Demander un acompte</label>${field("Acompte (%)", input("depositPct", draft.depositPct, `inputmode="decimal"${draft.depositEnabled ? "" : " disabled"}`))}</div>
+    ${field("Modalités de paiement (s'adaptent au choix d'acompte)", textarea("paymentTerms", draft.paymentTerms))}${field(appSettings.cancellation_heading || "Conditions d'annulation", textarea("cancellationTerms", draft.cancellationTerms))}
     ${field(appSettings.delivery_heading || "Livraison", textarea("deliveryTerms", draft.deliveryTerms))}${field(appSettings.usage_heading || "Utilisation des images", textarea("usageTerms", draft.usageTerms))}`;
-  bindFields(body, draft, refresh);
+  syncTerms(quoteAutoTerms, body);
+  bindFields(body, draft, () => { syncTerms(quoteAutoTerms, body); refresh?.(); });
   const partner = document.getElementById("partner-on");
   if (partner) partner.onchange = (e) => { draft.partnerRequested = e.target.checked; };
-  document.getElementById("dep-on").onchange = (e) => { draft.depositEnabled = e.target.checked; refresh(); };
+  document.getElementById("dep-on").onchange = (e) => onDepositToggle(e.target.checked, quoteAutoTerms, body, refresh);
 }
 
 function stepReview(body) {
@@ -804,8 +860,8 @@ async function invoiceEditor(id, preset = {}) {
   draft = {
     mode: "invoice", id: null, issuer, client: { ...EMPTY_CLIENT }, items: [],
     dueDate: new Date(Date.now() + (s.invoice_payment_days ?? 30) * 86400000).toISOString().slice(0, 10),
-    servicePeriod: "", notes: "", paymentTerms: s.default_payment_terms || "",
-    depositEnabled: false
+    servicePeriod: "", notes: "", paymentTerms: "", autoTerms: "",
+    depositEnabled: false, depositPct: String((s.default_deposit_bps ?? 3000) / 100)
   };
   if (existing) {
     const i = existing.invoice;
@@ -813,10 +869,12 @@ async function invoiceEditor(id, preset = {}) {
     Object.assign(draft, {
       id: i.id,
       client: clientFromRow({ id: i.client_id, ...snap, postal_code: snap.postalCode ?? snap.postal_code, vat_number: snap.vatNumber ?? snap.vat_number }),
-      dueDate: i.due_date || draft.dueDate, servicePeriod: i.service_period || "", notes: i.notes || "", paymentTerms: i.payment_terms || draft.paymentTerms,
+      dueDate: i.due_date || draft.dueDate, servicePeriod: i.service_period || "", notes: i.notes || "", paymentTerms: i.payment_terms || "",
+      depositEnabled: i.deposit_bps > 0, depositPct: i.deposit_bps > 0 ? String(i.deposit_bps / 100) : draft.depositPct,
       items: i.items.map((it) => ({ serviceId: it.service_id, title: it.title, description: it.description, quantity: String(it.quantity), unit: it.unit, price: toEuros(it.unit_price_cents), vat: String(it.vat_rate_bps / 100), saveToCatalog: false }))
     });
     if (i.client_id && !draft.client.id) draft.client.id = i.client_id;
+    draft.autoTerms = draft.paymentTerms ? invoiceAutoTerms() : "";
   }
   step = 1;
   renderEditor();
@@ -832,28 +890,35 @@ function invoicePreviewHtml(t, c) {
     </tbody></table>
     <div class="r">Total HT : ${money(t.ht)}</div>${t.breakdown.map((b) => `<div class="r">TVA ${b.rate / 100} % : ${money(b.vat)}</div>`).join("")}
     <div class="r pv-total">Total TTC : ${money(t.ttc)}</div>
+    ${draft.depositEnabled && pctOf() ? `<div class="r">Acompte à réception (${pctText(pctOf())} %) : ${money(Math.round(t.ttc * pctOf() / 100))}</div><div class="r">Solde à l'échéance : ${money(t.ttc - Math.round(t.ttc * pctOf() / 100))}</div>` : ""}
     ${draft.notes ? `<div class="pv-note">${esc(draft.notes)}</div>` : ""}`;
 }
 
 function stepInvoiceTerms(body, refresh) {
   body.innerHTML = `<div class="com-row">${field("Échéance de paiement", input("dueDate", draft.dueDate, 'type="date"'))}${field("Date ou période de réalisation", input("servicePeriod", draft.servicePeriod, 'placeholder="Ex. séance du 12 novembre 2026"'))}</div>
-    ${field("Modalités de paiement", textarea("paymentTerms", draft.paymentTerms))}
+    <div class="com-row"><label class="com-check"><input type="checkbox" id="inv-dep-on" ${draft.depositEnabled ? "checked" : ""}> Demander un acompte à réception</label>${field("Acompte (%)", input("depositPct", draft.depositPct, `inputmode="decimal"${draft.depositEnabled ? "" : " disabled"}`))}</div>
+    ${field("Modalités de paiement (s'adaptent au choix d'acompte)", textarea("paymentTerms", draft.paymentTerms))}
     ${field("Notes (facultatif)", textarea("notes", draft.notes))}`;
-  bindFields(body, draft, refresh);
+  syncTerms(invoiceAutoTerms, body);
+  bindFields(body, draft, () => { syncTerms(invoiceAutoTerms, body); refresh?.(); });
+  document.getElementById("inv-dep-on").onchange = (e) => onDepositToggle(e.target.checked, invoiceAutoTerms, body, refresh);
 }
 
 function stepInvoiceReview(body) {
   const t = totalsOf(draft.items);
   body.innerHTML = `<div class="com-detail"><dl><dt>Client</dt><dd>${esc(draft.client.name)}</dd><dt>Prestations</dt><dd>${draft.items.length}</dd>
-    <dt>Total HT</dt><dd>${money(t.ht)}</dd><dt>Total TTC</dt><dd>${money(t.ttc)}</dd><dt>Échéance</dt><dd>${dateFr(draft.dueDate)}</dd></dl>
+    <dt>Total HT</dt><dd>${money(t.ht)}</dd><dt>Total TTC</dt><dd>${money(t.ttc)}</dd><dt>Acompte</dt><dd>${draft.depositEnabled && pctOf() ? `${pctText(pctOf())} % à réception (${money(Math.round(t.ttc * pctOf() / 100))})` : "Aucun"}</dd><dt>Échéance</dt><dd>${dateFr(draft.dueDate)}</dd></dl>
     <p>L'émission attribue le numéro définitif et génère le PDF. Une facture émise ne peut plus être modifiée (elle se corrige par un avoir).</p></div>
     <div class="com-actions"><button class="gallery-quiet-button" id="save-draft" type="button">Enregistrer le brouillon</button>
     <button class="gallery-primary-button" id="validate" type="button">Émettre la facture et générer le PDF</button>
     ${draft.id ? '<button class="gallery-quiet-button" id="del-draft" type="button">Supprimer le brouillon</button>' : ""}</div>`;
   const persist = async () => {
+    syncTerms(invoiceAutoTerms, null); // montants à jour si les prestations ont changé
+    const depositOn = draft.depositEnabled && pctOf() > 0 && pctOf() < 100;
     const data = await run(() => api("save-invoice", {
       invoiceId: draft.id || undefined, issuer: draft.issuer, client: draft.client, items: draft.items.map(itemPayload),
-      dueDate: draft.dueDate || null, servicePeriod: draft.servicePeriod, notes: draft.notes, paymentTerms: draft.paymentTerms
+      dueDate: draft.dueDate || null, servicePeriod: draft.servicePeriod, notes: draft.notes, paymentTerms: draft.paymentTerms,
+      depositEnabled: depositOn, depositBps: depositOn ? Math.round(pctOf() * 100) : 0
     }));
     if (data) draft.id = data.invoice.id;
     return data;

@@ -536,6 +536,13 @@ export async function invoicePdf(invoice: Row, settings: Row) {
     extra.push({ label: "Acomptes déjà facturés", cents: -invoice.deposits_deducted_cents });
   }
   extra.push({ label: "Net à payer", cents: invoice.amount_due_cents, strong: true });
+  // Facture créée à la main avec acompte : part à régler à réception, puis solde
+  const depositBps = invoice.kind === "invoice" && !invoice.quote_id ? Number(invoice.deposit_bps) || 0 : 0;
+  if (depositBps > 0 && invoice.amount_due_cents > 0) {
+    const depositCents = Math.round(invoice.amount_due_cents * depositBps / 10000);
+    extra.push({ label: `Acompte à régler à réception (${formatRate(depositBps)})`, cents: depositCents });
+    extra.push({ label: "Solde à régler à l'échéance", cents: invoice.amount_due_cents - depositCents });
+  }
   return await renderDocumentPdf({
     title: invoice.kind === "deposit" ? "Facture d'acompte" : "Facture",
     number: invoice.number,
@@ -825,6 +832,8 @@ export async function writeInvoice(body: Row) {
     service_period: str(body.servicePeriod, "Période de réalisation", 300),
     notes: str(body.notes, "Notes", 4000),
     payment_terms: str(body.paymentTerms, "Modalités de paiement", 4000) || settings.default_payment_terms,
+    // Acompte demandé à réception (factures créées à la main) : 0 = pas d'acompte
+    deposit_bps: body.depositEnabled === true ? integer(body.depositBps, "Acompte", 1, 9999) : 0,
     ...fields
   };
   let invoice: Row;
@@ -1497,6 +1506,7 @@ export function settingsFields(s: Row) {
     vat_mention: str(s.vat_mention, "Mention TVA", 500),
     legal_footer: str(s.legal_footer, "Mentions légales", 1000),
     default_payment_terms: str(s.default_payment_terms, "Modalités de paiement", 4000),
+    default_payment_terms_no_deposit: str(s.default_payment_terms_no_deposit, "Modalités de paiement sans acompte", 4000),
     default_cancellation_terms: str(s.default_cancellation_terms, "Conditions d'annulation", 4000),
     default_delivery_terms: str(s.default_delivery_terms, "Conditions de livraison", 4000),
     default_usage_terms: str(s.default_usage_terms, "Conditions d'utilisation", 4000),
