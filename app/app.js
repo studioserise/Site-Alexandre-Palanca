@@ -1093,8 +1093,7 @@ async function notificationsSheet() {
       <label class="app-field"><span>Prévenir avant une échéance</span><select name="taskLead">${[[2, "2 heures avant"], [6, "6 heures avant"], [24, "24 heures avant"], [48, "48 heures avant"]].map(([v, l]) => `<option value="${v}" ${p.taskLead === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
       ${sw("espace", "Espace client", p.categories.espace)}
       ${sw("admin", "Administration", p.categories.admin, "Demandes, devis, factures, virements")}
-      ${sw("systeme", "Alertes système", p.categories.systeme)}
-      ${sw("quiet", "Silence la nuit (22 h – 7 h)", p.quiet, "Sauf alertes système ; le reste arrive le matin")}
+      ${sw("quiet", "Silence la nuit (22 h – 7 h)", p.quiet, "Les notifications arrivent le matin")}
       <div class="app-actions"><button class="app-button" type="submit">Enregistrer les préférences</button></div>
     </form>
     ${active ? `<div class="app-actions">
@@ -1124,7 +1123,7 @@ async function notificationsSheet() {
     const prefs = {
       enabled: f.enabled.checked, planningLead: Number(f.planningLead.value), planningMorning: f.planningMorning.checked,
       taskLead: Number(f.taskLead.value), quiet: f.quiet.checked,
-      categories: { planning: f.planning.checked, taches: f.taches.checked, espace: f.espace.checked, admin: f.admin.checked, systeme: f.systeme.checked }
+      categories: { planning: f.planning.checked, taches: f.taches.checked, espace: f.espace.checked, admin: f.admin.checked }
     };
     const done = await guarded(event.currentTarget.querySelector("[type=submit]"), async () => { needOnline(); return await pushCall("save-prefs", { prefs }); });
     if (done) toast("Préférences enregistrées.");
