@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="cursor.css?v=7">
   <link rel="stylesheet" href="section-marker.css?v=bord">
   <link rel="stylesheet" href="contact.css?v=5">
-  <link rel="stylesheet" href="reseaux.css?v=8">
+  <link rel="stylesheet" href="reseaux.css?v=11">
   <script src="i18n.js?v=footer-cd" defer></script>
   <script src="site-nav.js?v=footer4" defer></script>
   <script src="redesign.js?v=29" defer></script>
@@ -110,13 +110,7 @@
           <div class="rs-phone rs-phone--sm">
             <div class="rs-phone-screen rs-profile">
               <div class="rs-profile-head"><span class="rs-avatar"></span><div><strong>votre.marque</strong><small>124 publications</small></div></div>
-              <div class="rs-profile-grid" data-temp="grille de photos">
-                <img src="images/portraits/personnel-01-400.webp" alt="" loading="lazy"><img src="images/Lieux-et-marques/letm-01-300.webp" alt="" loading="lazy"><img src="images/portraits/personnel-02-400.webp" alt="" loading="lazy">
-                <img src="images/evenementiel/concert-01-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-11-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-02-400.webp" alt="" loading="lazy">
-                <img src="images/portraits/personnel-12-400.webp" alt="" loading="lazy"><img src="images/evenementiel/cabaret-11-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-21-400.webp" alt="" loading="lazy">
-                <img src="images/evenementiel/concert-11-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-13-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-03-400.webp" alt="" loading="lazy">
-                <img src="images/portraits/personnel-22-400.webp" alt="" loading="lazy"><img src="images/evenementiel/cabaret-21-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-23-400.webp" alt="" loading="lazy">
-              </div>
+              <img class="rs-profile-feed" src="images/contenus-reseaux/grille-reseaux.webp" alt="Grille de publications Instagram d’un restaurant : plats, salle, chef et équipe" loading="lazy" width="980" height="1890">
             </div>
           </div>
           <div class="rs-format-copy"><span class="rs-index">02</span><h3>Photographies</h3><p>Des images travaillées pour valoriser une activité et construire un univers visuel cohérent.</p></div>
@@ -170,31 +164,33 @@
       <p class="studio-eyebrow studio-eyebrow--note">Tarifs indicatifs, à préciser selon le volume de contenus, le temps de production et les livrables.</p>
     </section>
 
-    <!-- 04 · LA MÉTHODE -->
-    <section class="rs-section rs-method" aria-labelledby="rs-method-title">
-      <div class="rs-method-head" data-rs-reveal>
+    <!-- 04 · LA MÉTHODE (étapes à gauche, atouts + demande de devis à droite) -->
+    <section class="rs-section rs-process" aria-labelledby="rs-method-title">
+      <div class="rs-process-head" data-rs-reveal>
         <p class="studio-eyebrow">La méthode</p>
         <h2 id="rs-method-title">De l’idée à la création.</h2>
-        <p>Chaque production commence par un échange pour comprendre votre activité et imaginer les contenus les plus pertinents.</p>
       </div>
-      <ol class="rs-steps">
-        <li class="rs-step" data-rs-reveal>
-          <figure class="rs-zoom" data-temp="coulisses : Alexandre avec son appareil"><img src="images/photo-alexandre.webp" alt="Alexandre avec son appareil photo" loading="lazy"></figure>
-          <div><span class="rs-index">01</span><h3>Échange &amp; définition des besoins</h3><p>Comprendre votre activité, vos objectifs et votre identité visuelle.</p></div>
-        </li>
-        <li class="rs-step rs-step--reverse" data-rs-reveal>
-          <figure class="rs-zoom" data-temp="coulisses : préparation d'un tournage"><img src="images/video/captation-affiche-800.webp" alt="Préparation d’un tournage" loading="lazy"></figure>
-          <div><span class="rs-index">02</span><h3>Conception &amp; préparation</h3><p>Imaginer les contenus, définir les formats et organiser la séance.</p></div>
-        </li>
-        <li class="rs-step" data-rs-reveal>
-          <figure class="rs-zoom" data-temp="coulisses : prise de vue dans un établissement"><img src="images/Lieux-et-marques/hero-lieux-et-marques-poster.webp" alt="Prise de vue dans un établissement" loading="lazy"></figure>
-          <div><span class="rs-index">03</span><h3>Production sur place</h3><p>Réaliser les prises de vues photographiques et vidéo, en mettant en valeur votre univers.</p></div>
-        </li>
-        <li class="rs-step rs-step--reverse" data-rs-reveal>
-          <figure class="rs-zoom" data-temp="coulisses : travail sur les détails"><img src="images/portraits/professionnel-11-800.webp" alt="Travail sur les détails" loading="lazy"></figure>
-          <div><span class="rs-index">04</span><h3>Postproduction &amp; création</h3><p>Sélection, retouche, montage et déclinaison des contenus.</p></div>
-        </li>
-      </ol>
+      <div class="rs-process-grid">
+        <div class="rs-process-col" data-rs-reveal>
+          <p class="rs-process-label">Comment ça se passe</p>
+          <ol class="rs-process-steps">
+          <li><span class="rs-process-num" aria-hidden="true">1</span><div><h3>On échange</h3><p>Votre activité, vos objectifs, vos réseaux. Gratuit et sans engagement.</p></div></li>
+          <li><span class="rs-process-num" aria-hidden="true">2</span><div><h3>On prépare</h3><p>Les idées de contenus, les formats et le déroulé de la séance.</p></div></li>
+          <li><span class="rs-process-num" aria-hidden="true">3</span><div><h3>On tourne</h3><p>Photos et vidéos sur place, au cœur de votre univers.</p></div></li>
+          <li><span class="rs-process-num" aria-hidden="true">4</span><div><h3>On livre</h3><p>Contenus retouchés, montés et prêts à publier.</p></div></li>
+          </ol>
+        </div>
+        <div class="rs-process-col rs-process-col--perks" data-rs-reveal>
+          <p class="rs-process-label">Pourquoi passer par nous</p>
+          <ul class="rs-process-perks">
+          <li><h3>Deux regards, un seul projet</h3><p>Alex aux prises de vues, Elisa à la création : un suivi à deux, de la séance à la livraison.</p></li>
+          <li><h3>Photo et vidéo en une séance</h3><p>Photos, Reels et stories réalisés sur place, au cours de la même venue.</p></li>
+          <li><h3>Fidèle à votre identité</h3><p>Cadrages, couleurs et mise en forme alignés sur votre image.</p></li>
+          <li><h3>Pensé pour chaque réseau</h3><p>Des formats adaptés au feed, aux stories et aux Reels.</p></li>
+          </ul>
+          <a class="studio-button rs-process-button" href="#demande-contenus">Demander un devis <span aria-hidden="true">↓︎</span></a>
+        </div>
+      </div>
     </section>
 
     <!-- 05 · FORMULAIRE (même bloc que la page Photo & vidéo) -->
@@ -249,13 +245,7 @@
             <div class="rs-phone">
               <div class="rs-phone-screen rs-profile">
                 <div class="rs-profile-head"><span class="rs-avatar"></span><div><strong>votre.marque</strong><small>Grille de publications</small></div></div>
-                <div class="rs-profile-grid" data-temp="grille de publications">
-                  <img src="images/Lieux-et-marques/letm-01-300.webp" alt="" loading="lazy"><img src="images/portraits/personnel-22-400.webp" alt="" loading="lazy"><img src="images/evenementiel/concert-12-400.webp" alt="" loading="lazy">
-                  <img src="images/portraits/personnel-03-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-01-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-23-400.webp" alt="" loading="lazy">
-                  <img src="images/evenementiel/concert-02-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-11-400.webp" alt="" loading="lazy"><img src="images/evenementiel/cabaret-12-400.webp" alt="" loading="lazy">
-                  <img src="images/portraits/personnel-01-400.webp" alt="" loading="lazy"><img src="images/evenementiel/sport-competition-01-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-12-400.webp" alt="" loading="lazy">
-                  <img src="images/evenementiel/concert-31-400.webp" alt="" loading="lazy"><img src="images/portraits/personnel-21-400.webp" alt="" loading="lazy"><img src="images/evenementiel/festival-02-400.webp" alt="" loading="lazy">
-                </div>
+                <img class="rs-profile-feed" src="images/contenus-reseaux/grille-reseaux.webp" alt="Grille de publications Instagram d’un restaurant : plats, salle, chef et équipe" loading="lazy" width="980" height="1890">
               </div>
             </div>
           </div>

@@ -399,7 +399,7 @@ html[data-theme="light"] .iv-fv--event .iv-fv-poster { box-shadow: 0 16px 34px r
 /* Espacements resserrés : formats -> formules -> méthode */
 .iv-page .iv-formats { padding-bottom: clamp(24px, 3.5vw, 52px); }
 .iv-page .rs-offers { padding-top: clamp(24px, 3.5vw, 52px); padding-bottom: clamp(20px, 3vw, 44px); }
-.iv-page .rs-method { padding-top: clamp(28px, 4vw, 60px); }
+.iv-page .rs-process { padding-top: clamp(28px, 4vw, 60px); }
 
 /* ---------------------------------------------------------------- flottement doux des visuels (sections 1 et 2)
    Propriétés « translate » et « rotate » séparées : elles s'ajoutent aux inclinaisons, positions et parallaxe existantes. */

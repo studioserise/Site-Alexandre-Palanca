@@ -280,3 +280,24 @@ html[data-theme="light"] .rs-mock-dots button { background: rgba(23, 23, 21, 0.2
 .rs-section { padding-top: clamp(36px, 4.4vw, 64px); padding-bottom: clamp(36px, 4.4vw, 64px); }
 .rs-hero { padding-bottom: clamp(36px, 4.4vw, 64px); }
 @media (max-width: 640px) { .rs-section { padding-top: 32px; padding-bottom: 32px; } }
+
+/* ---------------------------------------------------------------- la méthode : étapes (gauche) + atouts et devis (droite) */
+.rs-process-head { max-width: 760px; }
+.rs-process-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 80px); align-items: start; margin-top: clamp(36px, 5vw, 60px); }
+.rs-process-label { margin: 0 0 18px; color: var(--studio-muted); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; }
+.rs-process-steps, .rs-process-perks { margin: 0; padding: 0; list-style: none; }
+.rs-process-steps li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 18px; align-items: baseline; padding: 22px 0; border-top: 1px solid var(--studio-line); }
+.rs-process-steps li:last-child { border-bottom: 1px solid var(--studio-line); }
+.rs-process-num { color: var(--studio-muted); font-family: "Intro Rust", sans-serif; font-size: clamp(2.2rem, 3.2vw, 2.9rem); line-height: 1; }
+.rs-process-col h3 { margin: 0; font-size: 1.15rem; font-weight: 500; letter-spacing: -0.01em; }
+.rs-process-col p:not(.rs-process-label) { margin: 6px 0 0; color: #cbc8c2; font-size: 0.92rem; line-height: 1.6; }
+.rs-process-perks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.rs-process-perks li { padding: clamp(20px, 2.2vw, 26px); border: 1px solid var(--studio-line); border-radius: 14px; background: rgba(245, 243, 239, 0.03); }
+.rs-process-button { margin-top: 28px; }
+@media (max-width: 900px) { .rs-process-grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .rs-process-perks { grid-template-columns: 1fr; } .rs-process-steps li { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; } }
+html[data-theme="light"] .rs-process-perks li { background: rgba(23, 23, 21, 0.03); }
+html[data-theme="light"] .rs-process-col p:not(.rs-process-label) { color: #494740; }
+
+/* grille Instagram : une seule image, bord à bord avec l'écran du mockup */
+.rs-profile-feed { display: block; width: 100%; height: auto; }
