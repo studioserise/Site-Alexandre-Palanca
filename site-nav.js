@@ -266,12 +266,6 @@ if (!document.querySelector(".site-footer")) {
         <p class="site-footer-eyebrow">Un projet à imaginer ?</p>
         <h2>Parlons de votre prochaine histoire.</h2>
         ${footerContacts()}
-        <div class="site-footer-actions">
-          <a href="photo-video.html#demande-devis">Photo &amp; vidéo <span aria-hidden="true">↗︎</span></a>
-          <a href="sites-internet.html#demande-projet">Sites internet <span aria-hidden="true">↗︎</span></a>
-          <a href="identite-visuelle.html#demande-identite">Identité visuelle <span aria-hidden="true">↗︎</span></a>
-          <a href="reseaux.html#demande-contenus">Contenus réseaux <span aria-hidden="true">↗︎</span></a>
-        </div>
       </div>
       <div class="site-footer-card-wrap">
       <div class="site-footer-card" tabindex="0" aria-label="Carte de visite Alexandre et Elisa">
@@ -287,6 +281,12 @@ if (!document.querySelector(".site-footer")) {
         </div>
       </div>
       <p class="site-footer-card-hint">Maintenez le clic et faites glisser pour tourner la carte</p>
+      </div>
+      <div class="site-footer-actions">
+        <a href="photo-video.html#demande-devis">Photo &amp; vidéo <span aria-hidden="true">↗︎</span></a>
+        <a href="sites-internet.html#demande-projet">Sites internet <span aria-hidden="true">↗︎</span></a>
+        <a href="identite-visuelle.html#demande-identite">Identité visuelle <span aria-hidden="true">↗︎</span></a>
+        <a href="reseaux.html#demande-contenus">Contenus réseaux <span aria-hidden="true">↗︎</span></a>
       </div>
       <div class="site-footer-legal">
         <span>© ${new Date().getFullYear()} Alex &amp; Elisa</span>

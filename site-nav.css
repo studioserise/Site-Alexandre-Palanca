@@ -540,3 +540,6 @@ html[data-theme="light"] .site-nav-group-toggle { color: #171715; }
   .site-nav-sub { background: rgba(8, 8, 8, 0.38); }
   html[data-theme="light"] .site-nav-sub { background: rgba(241, 238, 232, 0.4); }
 }
+
+/* Pied de page : les 4 boutons des prestations sur une ligne, centrés sur toute la largeur */
+.site-footer-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; grid-column: 1 / -1; }

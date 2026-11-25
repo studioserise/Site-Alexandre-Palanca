@@ -549,6 +549,11 @@ html[data-theme="light"] .home-offer-copy > p { color: #494740; }
 .home-offer-card .redesign-hero-image::before { position: absolute; inset: auto 0 0; z-index: 1; height: 38%; background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent); content: ""; pointer-events: none; }
 /* Accueil : images des prestations en noir et blanc (recto et dos) */
 .home-offer-card .redesign-hero-image img, .home-offer-card .flip-card-face--back::before { filter: grayscale(1); }
+/* cadrage des images de l'accueil : collée en haut (photo, grille de publications), logo au centre (identité visuelle) */
+.home-offer-card img.home-offer-img--top { object-position: center top; }
+.home-offer-card .home-offer-img--top::before { background-position: center top; }
+.home-offer-card img.home-offer-img--logo { object-position: center 44%; }
+.home-offer-card .home-offer-img--logo::before { background-position: center 44%; }
 .home-offer-card .flip-card-face--back .studio-eyebrow { margin-bottom: 16px; }
 
 /* Pied de page : un bouton par prestation (4) — sur deux lignes si la place manque, grille 2 × 2 sur téléphone */
@@ -560,3 +565,12 @@ html[data-theme="light"] .home-offer-copy > p { color: #494740; }
 /* Grille régulière 2 × 2 à toutes les tailles d'écran */
 .site-footer-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: min(100%, 440px); }
 .site-footer-actions a { justify-content: space-between; }
+
+/* Pied de page : les 4 boutons des prestations sur une seule ligne, centrés sur toute la largeur
+   (sous le texte et sous la carte de visite) ; grille 2 × 2 centrée sur téléphone */
+.site-footer-actions { display: flex; flex-wrap: nowrap; justify-content: center; gap: 12px; grid-column: 1 / -1; justify-self: center; width: auto; margin: clamp(20px, 3vw, 36px) 0 0; }
+.site-footer-actions a { justify-content: center; white-space: nowrap; }
+@media (max-width: 700px) {
+  .site-footer-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: min(100%, 440px); }
+  .site-footer-actions a { justify-content: space-between; }
+}
